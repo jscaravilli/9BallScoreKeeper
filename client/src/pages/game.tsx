@@ -525,21 +525,16 @@ export default function Game() {
       previousBallStates
     });
     
-    // Improved rack undo detection: Check if 9-ball is currently scored and we have rack completion flag
-    // OR if this specific undo will change 9-ball from scored to active
+    // Simple and reliable rack undo detection: ANY time user tries to undo while 9-ball is scored
     const nineBallCurrentlyScored = nineBallCurrent?.state === 'scored';
-    const nineBallWillBecomeActive = nineBallPrevious?.state === 'active';
-    const willUnscoreNineBall = nineBallCurrentlyScored && nineBallWillBecomeActive;
     
-    // Show confirmation if we have a completed rack and 9-ball is scored, OR if we're directly unscoring the 9-ball
-    const shouldShowRackUndo = (rackCompleted && nineBallCurrentlyScored) || willUnscoreNineBall;
+    // Show confirmation if 9-ball is currently scored - this covers all scenarios
+    const shouldShowRackUndo = nineBallCurrentlyScored;
     
     console.log('Rack undo check:', {
       nineBallCurrent: nineBallCurrent?.state,
       nineBallPrevious: nineBallPrevious?.state,
-      rackCompleted,
       nineBallCurrentlyScored,
-      willUnscoreNineBall,
       shouldShowRackUndo
     });
     
