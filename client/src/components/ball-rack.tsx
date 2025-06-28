@@ -29,10 +29,7 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
     };
   };
 
-  const isNineBallUndoable = (): boolean => {
-    const currentNineBall = ballStates.find(b => b.number === 9);
-    return currentNineBall?.state === 'scored' && turnHistory.length > 0;
-  };
+
 
   const getBallGradient = (ballNumber: number) => {
     const gradients = {
@@ -50,26 +47,8 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
   };
 
   const renderBallContent = (ballNumber: number, state: BallInfo['state']) => {
-    // Handle undone state (shows checkmark with orange indicator for 9-ball only)
-    if (state === 'undone') {
-      return (
-        <div className="relative">
-          <Check className="h-6 w-6 text-green-600" />
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full animate-pulse" />
-        </div>
-      );
-    }
-    
-    // Handle scored state - show blue pulse only for 9-ball when undoable
+    // Handle scored state - simple green checkmark for all balls
     if (state === 'scored') {
-      if (ballNumber === 9 && isNineBallUndoable()) {
-        return (
-          <div className="relative">
-            <Check className="h-6 w-6 text-green-600" />
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
-          </div>
-        );
-      }
       return <Check className="h-6 w-6 text-green-600" />;
     }
     
@@ -154,7 +133,7 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
   const getBallStyles = (ballNumber: number, state: BallInfo['state'], isLocked: boolean) => {
     const baseStyles = "w-16 h-16 rounded-full border shadow-lg flex items-center justify-center font-bold text-lg transition-all touch-target";
     
-    if (isLocked && state !== 'undone') {
+    if (isLocked) {
       return `${baseStyles} bg-gray-300 border-gray-400 opacity-40 cursor-not-allowed`;
     } else if (state === 'scored') {
       return `${baseStyles} bg-gray-300 border-green-600 opacity-60 text-gray-600 hover:shadow-xl active:scale-95`;

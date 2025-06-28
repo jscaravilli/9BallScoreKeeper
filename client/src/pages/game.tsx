@@ -213,33 +213,12 @@ export default function Game() {
   const handleBallTap = (ballNumber: number) => {
     if (!currentMatch || isProcessing || currentMatch.isComplete || matchWinner) return;
     
-    // Special handling for 9-ball undo
-    if (ballNumber === 9) {
+    // Special handling for 9-ball undo - simple two-state system
+    if (ballNumber === 9 && turnHistory.length > 0) {
       const currentNineBall = (currentMatch.ballStates as BallInfo[]).find((b: BallInfo) => b.number === 9);
       
-      // If 9-ball is currently scored and there's history, allow undo to "undone" state
-      if (currentNineBall?.state === 'scored' && turnHistory.length > 0) {
-        const ballStates = [...(currentMatch.ballStates as BallInfo[] || [])];
-        const nineBall = ballStates.find(b => b.number === 9);
-        if (nineBall) {
-          nineBall.state = 'undone' as any; // Special state for undone 9-ball
-          nineBall.scoredBy = undefined;
-        }
-        
-        // Update ball states but keep match state for now
-        localStorageAPI.updateBallStates(currentMatch.id, ballStates);
-        
-        // Clear any winner states
-        setGameWinner(null);
-        setShowGameWin(false);
-        setMatchWinner(null);
-        setShowMatchWin(false);
-        
-        return; // Exit early after handling 9-ball undo
-      }
-      
-      // If 9-ball is in undone state, make it active and restore previous state
-      if (currentNineBall?.state === 'undone' as any && turnHistory.length > 0) {
+      // If 9-ball is currently scored, make it active and restore previous state
+      if (currentNineBall?.state === 'scored') {
         const lastState = turnHistory[turnHistory.length - 1];
         
         // Restore previous match state completely
@@ -250,6 +229,12 @@ export default function Game() {
         
         // Remove the last state from history
         setTurnHistory(prev => prev.slice(0, -1));
+        
+        // Clear any winner states
+        setGameWinner(null);
+        setShowGameWin(false);
+        setMatchWinner(null);
+        setShowMatchWin(false);
         
         return; // Exit early after making 9-ball active
       }
