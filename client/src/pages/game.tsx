@@ -253,13 +253,27 @@ export default function Game() {
           setTurnHistory(prev => prev.slice(0, -1));
           
         } else {
-          // For regular 9-ball undo: restore previous state completely
-          setNineBallUndoInProgress(true);
+          // For regular 9-ball undo: just mark as active and deduct points
+          const ballStates = [...(currentMatch.ballStates as BallInfo[])];
+          const nineBallIndex = ballStates.findIndex(b => b.number === 9);
+          const scoringPlayer = currentNineBall.scoredBy;
+          ballStates[nineBallIndex] = { number: 9, state: 'active' };
           
-          // Restore previous match state completely
-          localStorageAPI.updateMatch(currentMatch.id, {
-            ...lastState,
-            ballStates: lastState.ballStates
+          // Deduct 2 points from the player who scored it
+          const currentScore = scoringPlayer === 1 ? currentMatch.player1Score : currentMatch.player2Score;
+          const newScore = Math.max(0, currentScore - 2);
+          
+          // Update match with new score and ball states
+          updateMatchMutation.mutate({
+            id: currentMatch.id,
+            updates: {
+              [scoringPlayer === 1 ? 'player1Score' : 'player2Score']: newScore,
+            }
+          });
+          
+          updateBallsMutation.mutate({
+            id: currentMatch.id,
+            ballStates,
           });
           
           // Remove the last state from history
@@ -270,11 +284,6 @@ export default function Game() {
           setShowGameWin(false);
           setMatchWinner(null);
           setShowMatchWin(false);
-          
-          // Hide the indicator after a short delay
-          setTimeout(() => {
-            setNineBallUndoInProgress(false);
-          }, 1000);
         }
         
         return; // Exit early after handling 9-ball undo
