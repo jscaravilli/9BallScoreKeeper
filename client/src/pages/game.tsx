@@ -126,9 +126,19 @@ export default function Game() {
       // Check if this scoring wins the match (reaches or exceeds handicap)
       const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
       
+      console.log('Scoring check:', {
+        currentPlayer: currentMatch.currentPlayer,
+        currentScore: currentMatch.currentPlayer === 1 ? currentMatch.player1Score : currentMatch.player2Score,
+        points,
+        newScore,
+        target: targetForCurrentPlayer,
+        willWin: newScore >= targetForCurrentPlayer
+      });
+      
       if (newScore >= targetForCurrentPlayer) {
         // Match won - player reached or exceeded handicap target
-        // Even if they needed 1 point but sunk the 9-ball (2 points), they win with full score
+        console.log('MATCH WON!', { newScore, target: targetForCurrentPlayer });
+        
         updateMatchMutation.mutate({
           id: currentMatch.id,
           updates: {
