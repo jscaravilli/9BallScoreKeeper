@@ -2,7 +2,8 @@ import type { Match, Game, BallInfo } from "@shared/schema";
 
 const STORAGE_KEYS = {
   CURRENT_MATCH: 'poolscorer_current_match',
-  MATCH_COUNTER: 'poolscorer_match_counter'
+  MATCH_COUNTER: 'poolscorer_match_counter',
+  MATCH_HISTORY: 'poolscorer_match_history'
 } as const;
 
 export class LocalStorageAPI {
@@ -72,6 +73,45 @@ export class LocalStorageAPI {
 
   clearCurrentMatch(): void {
     localStorage.removeItem(STORAGE_KEYS.CURRENT_MATCH);
+  }
+
+  // History management
+  getMatchHistory(): (Match & { completedAt: string })[] {
+    try {
+      const history = localStorage.getItem(STORAGE_KEYS.MATCH_HISTORY);
+      return history ? JSON.parse(history) : [];
+    } catch (error) {
+      console.error('Error getting match history:', error);
+      return [];
+    }
+  }
+
+  addToHistory(match: Match): void {
+    if (!match.isComplete) return;
+    
+    try {
+      const history = this.getMatchHistory();
+      const historyEntry = {
+        ...match,
+        completedAt: new Date().toISOString()
+      };
+      
+      // Add to beginning of array (newest first)
+      history.unshift(historyEntry);
+      
+      // Keep only last 50 matches to prevent localStorage bloat
+      if (history.length > 50) {
+        history.splice(50);
+      }
+      
+      localStorage.setItem(STORAGE_KEYS.MATCH_HISTORY, JSON.stringify(history));
+    } catch (error) {
+      console.error('Error adding to match history:', error);
+    }
+  }
+
+  clearHistory(): void {
+    localStorage.removeItem(STORAGE_KEYS.MATCH_HISTORY);
   }
 }
 

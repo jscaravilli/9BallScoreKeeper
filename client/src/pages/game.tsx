@@ -4,13 +4,14 @@ import { clientQueryFunctions, clientMutation, queryClient } from "@/lib/queryCl
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
-import { Menu, Users, History, Settings, Plus, RotateCcw, Info, X } from "lucide-react";
+import { Menu, Users, History, Settings, Plus, RotateCcw, Info, X, Trash2 } from "lucide-react";
 import PlayerSetupModal from "@/components/player-setup-modal";
 import GameWinModal from "@/components/game-win-modal";
 import MatchWinModal from "@/components/match-win-modal";
 import BallRack from "@/components/ball-rack";
 import PlayerScores from "@/components/player-scores";
 import { getPointsToWin } from "@/lib/apa-handicaps";
+import { localStorageAPI } from "@/lib/localStorage";
 import type { Match, BallInfo } from "@shared/schema";
 
 export default function Game() {
@@ -19,6 +20,7 @@ export default function Game() {
   const [showMatchWin, setShowMatchWin] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [gameWinner, setGameWinner] = useState<1 | 2 | null>(null);
   const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -170,6 +172,14 @@ export default function Game() {
         setShowMatchWin(true);
         
         try {
+          const completedMatch = {
+            ...currentMatch,
+            [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: newScore,
+            isComplete: true,
+            winnerId: currentMatch.currentPlayer,
+            ballStates: ballStates
+          };
+          
           updateMatchMutation.mutate({
             id: currentMatch.id,
             updates: {
@@ -185,7 +195,10 @@ export default function Game() {
             ballStates,
           });
           
-          console.log('Match win mutations sent');
+          // Save completed match to local history
+          localStorageAPI.addToHistory(completedMatch);
+          
+          console.log('Match win mutations sent and saved to history');
           return;
         } catch (error) {
           console.error('Error in match completion:', error);
@@ -569,6 +582,17 @@ export default function Game() {
               <button
                 onClick={() => {
                   setShowMenu(false);
+                  setShowHistory(true);
+                }}
+                className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                <History className="h-5 w-5 text-purple-600" />
+                <span className="font-medium">Match History</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  setShowMenu(false);
                   setShowPlayerSetup(true);
                 }}
                 className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
@@ -618,6 +642,91 @@ export default function Game() {
                 <h3 className="font-semibold text-green-800 mb-2">APA Handicap System:</h3>
                 <p className="text-green-700">Players race to their skill level target. Higher skill levels need more points to win the match.</p>
               </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* History Modal */}
+      <Dialog open={showHistory} onOpenChange={setShowHistory}>
+        <DialogContent className="max-w-lg mx-auto max-h-[80vh] overflow-hidden">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Match History</h2>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => {
+                    if (confirm('Clear all match history? This cannot be undone.')) {
+                      localStorageAPI.clearHistory();
+                      setShowHistory(false);
+                    }
+                  }}
+                  className="p-1 hover:bg-red-100 rounded text-red-600"
+                  title="Clear History"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+                <button 
+                  onClick={() => setShowHistory(false)}
+                  className="p-1 hover:bg-gray-100 rounded"
+                >
+                  <X className="h-5 w-5 text-gray-500" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="overflow-y-auto max-h-96">
+              {(() => {
+                const history = localStorageAPI.getMatchHistory();
+                
+                if (history.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-gray-500">
+                      <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p>No completed matches yet.</p>
+                      <p className="text-sm">Win your first match to see it here!</p>
+                    </div>
+                  );
+                }
+                
+                return (
+                  <div className="space-y-3">
+                    {history.map((match, index) => {
+                      const completedDate = new Date(match.completedAt);
+                      const winnerName = match.winnerId === 1 ? match.player1Name : match.player2Name;
+                      const player1Target = getPointsToWin(match.player1SkillLevel as any);
+                      const player2Target = getPointsToWin(match.player2SkillLevel as any);
+                      
+                      return (
+                        <div key={`${match.id}-${index}`} className="bg-gray-50 p-4 rounded-lg border">
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="font-semibold text-gray-800">
+                              🏆 {winnerName} Wins!
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {completedDate.toLocaleDateString()} {completedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className={`p-2 rounded ${match.winnerId === 1 ? 'bg-green-100' : 'bg-gray-100'}`}>
+                              <div className="font-medium">{match.player1Name}</div>
+                              <div className="text-xs text-gray-600">Skill Level {match.player1SkillLevel}</div>
+                              <div className="font-bold">{match.player1Score} / {player1Target}</div>
+                            </div>
+                            
+                            <div className={`p-2 rounded ${match.winnerId === 2 ? 'bg-green-100' : 'bg-gray-100'}`}>
+                              <div className="font-medium">{match.player2Name}</div>
+                              <div className="text-xs text-gray-600">Skill Level {match.player2SkillLevel}</div>
+                              <div className="font-bold">{match.player2Score} / {player2Target}</div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </DialogContent>
