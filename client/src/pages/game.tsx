@@ -110,6 +110,14 @@ export default function Game() {
       setIsProcessing(false);
     }, 300);
 
+    // Store current state for undo functionality BEFORE any changes
+    setPreviousTurnState({
+      ballStates: [...(currentMatch.ballStates as BallInfo[] || [])],
+      currentPlayer: currentMatch.currentPlayer,
+      player1Score: currentMatch.player1Score,
+      player2Score: currentMatch.player2Score,
+    });
+
     const ballStates = [...(currentMatch.ballStates as BallInfo[] || [])];
     const ballIndex = ballStates.findIndex(b => b.number === ballNumber);
     
@@ -154,14 +162,6 @@ export default function Game() {
           name: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
           finalScore1: currentMatch.currentPlayer === 1 ? newScore : currentMatch.player1Score,
           finalScore2: currentMatch.currentPlayer === 2 ? newScore : currentMatch.player2Score,
-        });
-        
-        // Save state before match completion for undo functionality
-        setPreviousTurnState({
-          ballStates: [...(currentMatch.ballStates as BallInfo[] || [])],
-          currentPlayer: currentMatch.currentPlayer,
-          player1Score: currentMatch.player1Score,
-          player2Score: currentMatch.player2Score,
         });
         
         try {
