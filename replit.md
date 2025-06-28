@@ -106,7 +106,12 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - Push-based deployment with `db:push` command
 
 ## Changelog
-- June 28, 2025. Initial setup
+- June 28, 2025: Initial setup
+- June 28, 2025: Complete match completion system implemented with winner banner and undo functionality
+- June 28, 2025: Fixed final point scoring logic to properly register scores before match completion
+- June 28, 2025: Enhanced PlayerScores component with override capability for immediate final score display
+- June 28, 2025: Resolved ball state timing issue - winning ball now correctly resets when undo is pressed
+- June 28, 2025: Implemented deep cloning for proper undo state management
 
 ## User Preferences
 
