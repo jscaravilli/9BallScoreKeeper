@@ -129,6 +129,7 @@ export default function Game() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showUndoRackConfirm, setShowUndoRackConfirm] = useState(false);
   const [showRackUndoneMessage, setShowRackUndoneMessage] = useState(false);
+  const [lastScoredNineBall, setLastScoredNineBall] = useState(false);
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
     name: string;
@@ -245,6 +246,11 @@ export default function Game() {
       // First tap - score the ball
       ball.state = 'scored';
       ball.scoredBy = currentMatch.currentPlayer as 1 | 2;
+      
+      // Track if we just scored the 9-ball (rack completion)
+      if (ballNumber === 9) {
+        setLastScoredNineBall(true);
+      }
       
       // Get handicap targets
       const player1Target = getPointsToWin(currentMatch.player1SkillLevel as any);
@@ -496,9 +502,12 @@ export default function Game() {
       previousBallStates
     });
     
-    // Check if we're about to undo a turn where the 9-ball was scored
-    // Previous state should have 9-ball NOT scored, current state should have it scored
-    const isUndoingRack = nineBallCurrent?.state === 'scored' && nineBallPrevious?.state === 'active';
+    // Check if we're about to undo the last turn that scored a 9-ball
+    console.log('Last scored nine ball:', lastScoredNineBall);
+    console.log('Current 9-ball state:', nineBallCurrent?.state);
+    console.log('Previous 9-ball state:', nineBallPrevious?.state);
+    
+    const isUndoingRack = lastScoredNineBall && nineBallCurrent?.state === 'scored' && nineBallPrevious?.state === 'active';
     
     console.log('Is undoing rack?', isUndoingRack);
     
@@ -519,6 +528,16 @@ export default function Game() {
     console.log('Executing undo...');
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
+    
+    // Log the undo event
+    const undoEvent: MatchEvent = {
+      type: 'turn_ended',
+      timestamp: new Date().toISOString(),
+      player: currentMatch.currentPlayer as 1 | 2,
+      playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+      details: 'Turn undone - reverted to previous state'
+    };
+    localStorageAPI.addMatchEvent(undoEvent);
     
     setUndoInProgress(true);
 
@@ -542,6 +561,7 @@ export default function Game() {
     setTurnHistory(prev => prev.slice(0, -1));
     setMatchWinner(null);
     setShowMatchWin(false);
+    setLastScoredNineBall(false); // Clear 9-ball tracking flag
     
     setTimeout(() => {
       setUndoInProgress(false);
@@ -550,7 +570,21 @@ export default function Game() {
 
   const confirmUndoRack = () => {
     setShowUndoRackConfirm(false);
+    
+    // Log the rack undo event
+    if (currentMatch) {
+      const rackUndoEvent: MatchEvent = {
+        type: 'turn_ended',
+        timestamp: new Date().toISOString(),
+        player: currentMatch.currentPlayer as 1 | 2,
+        playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+        details: 'Rack undone - 9-Ball scoring reversed'
+      };
+      localStorageAPI.addMatchEvent(rackUndoEvent);
+    }
+    
     executeUndo();
+    setLastScoredNineBall(false); // Clear the flag
     
     // Show temporary success message
     setShowRackUndoneMessage(true);
@@ -728,13 +762,7 @@ export default function Game() {
           </Button>
         )}
         
-        <Button
-          variant="outline"
-          className="w-full py-2 px-4 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 text-sm"
-          onClick={() => setShowUndoRackConfirm(true)}
-        >
-          Test Rack Modal
-        </Button>
+
       </section>
 
       {/* Modals */}
