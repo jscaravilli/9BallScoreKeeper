@@ -33,25 +33,25 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
     } else if (state === 'dead') {
       return <X className="h-6 w-6 text-red-500" />;
     } else if (ballNumber === 9) {
-      // Authentic 9-ball design based on real pool ball image
+      // Authentic 9-ball design matching the reference image exactly
       return (
         <div className="relative w-full h-full rounded-full overflow-hidden">
-          {/* White/light gray base ball */}
-          <div className="absolute inset-0 bg-gray-200 rounded-full"></div>
+          {/* Light gray base ball */}
+          <div className="absolute inset-0 bg-gray-300 rounded-full"></div>
           
-          {/* Wide yellow horizontal stripe that spans the full width */}
-          <div className="absolute top-1/2 left-0 right-0 transform -translate-y-1/2"
+          {/* Wide yellow horizontal band - takes up about 45% of the ball */}
+          <div className="absolute inset-x-0 bg-yellow-400"
                style={{ 
-                 height: '38%', // Takes up about 40% of the ball like in the real image
-                 background: 'linear-gradient(180deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%)',
-                 width: '100%'
+                 top: '27.5%',
+                 height: '45%',
+                 background: '#fcd34d'
                }}>
           </div>
           
-          {/* White circle for the number in the center of the yellow stripe */}
+          {/* White circle for the number positioned in center */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center border border-gray-300 shadow-sm">
-              <span className="font-bold text-lg text-black">9</span>
+            <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <span className="font-black text-base text-black">9</span>
             </div>
           </div>
         </div>
