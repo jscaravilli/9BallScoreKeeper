@@ -86,19 +86,24 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 2. Backend bundles server code with esbuild to `dist/index.js`
 3. Production serves static files from Express with fallback to React app
 
-### Deployment Configuration Issue
-- **Issue**: Static deployment expects `index.html` directly in `dist` but build outputs to `dist/public`
-- **Root Cause**: Build configuration outputs frontend to `dist/public` subdirectory
-- **Solutions Available**:
-  1. Use Autoscale deployment (recommended for full-stack apps)
-  2. Manual file restructuring after build (`cp -r dist/public/* dist/ && rm -rf dist/public`)
-  3. Use provided `prepare-deploy.js` script for automated restructuring
+### Deployment Configuration - RESOLVED
+- **Previous Issue**: Static deployment expected `index.html` directly in `dist` but build output went to `dist/public`
+- **Solution Implemented**: Created automated deployment preparation scripts
+- **Available Scripts**:
+  1. `prepare-static-deploy.js` - Node.js script that builds frontend and restructures files
+  2. `deploy-static.sh` - Shell script wrapper with deployment instructions
+- **Process**: Build outputs to `dist/public`, then files are moved to `dist` root for static deployment compatibility
+
+### Static Deployment Instructions
+1. **Prepare for deployment**: Run `./deploy-static.sh` or `node prepare-static-deploy.js`
+2. **Deploy settings**: Use "Static" deployment type with public directory set to `dist`
+3. **Verification**: Check that `index.html` exists in `dist/` directory after preparation
+4. **Result**: App will be deployed as a client-only application using localStorage for data persistence
 
 ### Environment Configuration
-- Database URL required via `DATABASE_URL` environment variable
+- Client-only application - no server environment variables needed
 - Development mode uses Vite middleware for hot reload
-- Production mode serves pre-built static assets
-- **Recommended**: Use Autoscale deployment type for proper full-stack support
+- Production uses static file serving with localStorage persistence
 
 ### Database Management
 - Drizzle migrations stored in `./migrations` directory
@@ -122,6 +127,9 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 28, 2025: Final production build ready for deployment with working API endpoints
 - June 28, 2025: Converted to client-only application using localStorage for match data persistence
 - June 28, 2025: Created static build system for deployment to any static hosting service
+- June 28, 2025: RESOLVED deployment issue - created automated scripts to restructure build output for static deployment
+- June 28, 2025: Fixed "index.html not found" error by moving files from dist/public to dist root directory
+- June 28, 2025: Added deployment preparation scripts (prepare-static-deploy.js and deploy-static.sh) for easy static deployment
 
 ## User Preferences
 
