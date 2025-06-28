@@ -19,6 +19,7 @@ export default function Game() {
   // Get current match
   const { data: currentMatch, isLoading } = useQuery<Match | null>({
     queryKey: ["/api/match/current"],
+    refetchInterval: 1000, // Refetch every second to ensure fresh data
   });
 
   // Create new match mutation

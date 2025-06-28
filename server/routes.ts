@@ -65,6 +65,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete all matches (for testing)
+  app.delete("/api/matches", async (req, res) => {
+    try {
+      // Clear all matches from storage
+      const storage_internal = storage as any;
+      storage_internal.matches.clear();
+      res.json({ message: "All matches cleared" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to clear matches" });
+    }
+  });
+
   // Get games for a match
   app.get("/api/match/:id/games", async (req, res) => {
     try {
