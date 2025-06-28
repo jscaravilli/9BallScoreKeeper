@@ -344,33 +344,14 @@ export default function Game() {
   };
 
   const confirmNewGame = () => {
-    if (!currentMatch) return;
-
-    const initialBallStates: BallInfo[] = Array.from({ length: 9 }, (_, i) => ({
-      number: (i + 1) as BallInfo['number'],
-      state: 'active' as const,
-    }));
-
-    updateMatchMutation.mutate({
-      id: currentMatch.id,
-      updates: {
-        currentGame: currentMatch.currentGame + 1,
-        currentPlayer: 1,
-        player1Score: 0,
-        player2Score: 0,
-        isComplete: false,
-        winnerId: null,
-      }
-    });
-
-    updateBallsMutation.mutate({
-      id: currentMatch.id,
-      ballStates: initialBallStates,
-    });
-
+    // Clear current match state and show player setup for new match
     setPreviousTurnState(null);
     setMatchWinner(null);
     setShowNewGameConfirm(false);
+    setShowPlayerSetup(true);
+    
+    // Invalidate current match query to clear the data
+    queryClient.setQueryData(["/api/match/current"], null);
   };
 
   const handleContinueMatch = () => {
