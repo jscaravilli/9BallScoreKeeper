@@ -1,53 +1,49 @@
-# Deployment Fix for 9-Ball Pool Score Tracker
+# Deployment Guide for 9-Ball Pool Scorer
 
-## Issue
-The deployment fails because it expects `index.html` directly in the `dist` directory, but the build process creates `dist/public/index.html`.
+## The Problem
+When deployed to production, the app gets stuck at "setting up your match" because the in-memory storage resets when the server restarts in production environments.
 
-## Solution: File Restructuring (Your Choice)
+## Quick Fix for Replit Deployment
 
-I've created multiple automated solutions for you:
+### Option 1: Use Autoscale Deployment (Recommended)
+1. Click the "Deploy" button in your Replit interface
+2. Choose **"Autoscale"** deployment type (not Static)
+3. This keeps the server running and maintains memory between requests
+4. Your app will get a permanent URL like `yourapp.replit.app`
 
-### Method 1: Simple Shell Script (Recommended)
-```bash
-./deploy-fix.sh
-```
+### Option 2: Add Simple Persistence
+If you want to use Static deployment, you'll need to add database persistence:
 
-This script:
-- Builds your application
-- Moves all files from `dist/public` to `dist`
-- Removes the empty `public` directory
-- Prepares everything for static deployment
+1. Set up a Neon PostgreSQL database (free tier available)
+2. Add the `DATABASE_URL` environment variable to your deployment
+3. The app will automatically use database storage instead of memory
 
-### Method 2: Node.js Script with Build Integration
-```bash
-node fix-deployment.js
-```
+## Other Hosting Options
 
-This script:
-- Automatically runs the build process
-- Restructures the files
-- Provides detailed progress feedback
+### Vercel (Free Tier)
+- Good for static sites, but requires database for full functionality
+- Automatic deployments from GitHub
+- Custom domains available
 
-### Method 3: Manual Commands
-If you prefer manual control:
-```bash
-npm run build
-mv dist/public/* dist/
-rmdir dist/public
-```
+### Netlify (Free Tier) 
+- Similar to Vercel
+- Great for static hosting
+- Requires external database for match persistence
 
-### Option 3: Change Deployment Type
-Since this is a full-stack application with both frontend and backend:
+### Your Own Server
+- Rent a VPS (Digital Ocean, Linode, AWS)
+- Install Node.js and PostgreSQL
+- Full control over the environment
+- Requires server management skills
 
-1. Change the deployment type from "Static" to "Autoscale"
-2. This will properly handle the Express server and static file serving
-3. Use the existing build and start commands
+## Current App Status
+- ✅ Fully functional in development
+- ✅ All features working (scoring, undo, match completion)
+- ⚠️ Production deployment needs Autoscale or database
+- ✅ Mobile-responsive design
+- ✅ APA handicap system implemented
 
-## Recommended Approach
-Use **Option 3** (Autoscale deployment) as this is a full-stack application that requires a server to handle API routes. The static deployment option is not suitable for applications with backend functionality.
-
-## Current Architecture
-- Frontend: React app built with Vite
-- Backend: Express.js server
-- Build output: `dist/public` (frontend) + `dist/index.js` (server)
-- Production: Server serves static files and handles API routes
+## Recommended Next Steps
+1. Use Replit's Autoscale deployment for immediate hosting
+2. For long-term hosting, consider adding PostgreSQL database
+3. The app is production-ready once properly deployed

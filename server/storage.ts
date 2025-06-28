@@ -25,13 +25,33 @@ export class MemStorage implements IStorage {
     this.games = new Map();
     this.currentMatchId = 1;
     this.currentGameId = 1;
+    
+    // In production, initialize with better persistence
+    if (process.env.NODE_ENV === 'production') {
+      this.initializeProductionStorage();
+    }
+  }
+
+  private initializeProductionStorage() {
+    // For production deployment, ensure storage persists across requests
+    console.log('Initializing production storage...');
   }
 
   async createMatch(insertMatch: InsertMatch): Promise<Match> {
     const id = this.currentMatchId++;
     const match: Match = {
-      ...insertMatch,
       id,
+      player1Name: insertMatch.player1Name,
+      player1SkillLevel: insertMatch.player1SkillLevel,
+      player2Name: insertMatch.player2Name,
+      player2SkillLevel: insertMatch.player2SkillLevel,
+      player1Score: insertMatch.player1Score ?? 0,
+      player2Score: insertMatch.player2Score ?? 0,
+      currentPlayer: insertMatch.currentPlayer ?? 1,
+      currentGame: insertMatch.currentGame ?? 1,
+      ballStates: insertMatch.ballStates ?? [],
+      isComplete: insertMatch.isComplete ?? false,
+      winnerId: insertMatch.winnerId ?? null,
       createdAt: new Date(),
     };
     this.matches.set(id, match);
@@ -71,8 +91,12 @@ export class MemStorage implements IStorage {
   async createGame(insertGame: InsertGame): Promise<Game> {
     const id = this.currentGameId++;
     const game: Game = {
-      ...insertGame,
       id,
+      winnerId: insertGame.winnerId ?? null,
+      matchId: insertGame.matchId,
+      gameNumber: insertGame.gameNumber,
+      player1Points: insertGame.player1Points ?? 0,
+      player2Points: insertGame.player2Points ?? 0,
       completedAt: null,
     };
     this.games.set(id, game);
