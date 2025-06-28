@@ -33,14 +33,28 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
     } else if (state === 'dead') {
       return <X className="h-6 w-6 text-red-500" />;
     } else if (ballNumber === 9) {
-      // Use the actual 9-ball image provided by user
+      // CSS-based 9-ball design matching reference image
       return (
-        <div className="relative w-full h-full rounded-full overflow-hidden">
-          <img 
-            src="/attached_assets/360_F_164815013_dTTCrIEDJtEUsssQKo6p6SqdFnI8zPoT_1751146723688.jpg"
-            alt="9-ball"
-            className="w-full h-full object-cover rounded-full"
-          />
+        <div className="relative w-full h-full">
+          {/* Light gray base ball */}
+          <div className="absolute inset-0 bg-gray-200 rounded-full"></div>
+          
+          {/* Yellow horizontal stripe - positioned to span across middle */}
+          <div 
+            className="absolute left-0 right-0 bg-yellow-400"
+            style={{ 
+              top: '30%',
+              bottom: '30%',
+              background: 'linear-gradient(to bottom, #eab308, #fbbf24, #eab308)'
+            }}
+          ></div>
+          
+          {/* White circle for number in center */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center border border-gray-400 shadow-sm">
+              <span className="font-bold text-sm text-black">9</span>
+            </div>
+          </div>
         </div>
       );
     } else {
