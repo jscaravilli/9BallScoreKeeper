@@ -7,7 +7,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogAction, AlertDialogCancel }
 import { Menu, Users, History, Settings, Plus, RotateCcw } from "lucide-react";
 import PlayerSetupModal from "@/components/player-setup-modal";
 import GameWinModal from "@/components/game-win-modal";
-import MatchWinModal from "@/components/match-win-modal";
+
 import BallRack from "@/components/ball-rack";
 import PlayerScores from "@/components/player-scores";
 import { getPointsToWin } from "@/lib/apa-handicaps";
@@ -16,7 +16,6 @@ import type { Match, BallInfo } from "@shared/schema";
 export default function Game() {
   const [showPlayerSetup, setShowPlayerSetup] = useState(false);
   const [showGameWin, setShowGameWin] = useState(false);
-  const [showMatchWin, setShowMatchWin] = useState(false);
   const [gameWinner, setGameWinner] = useState<1 | 2 | null>(null);
   const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -51,11 +50,6 @@ export default function Game() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
-      // If match was completed, show the win modal
-      if (data.isComplete) {
-        console.log('Match completed, showing win modal');
-        setShowMatchWin(true);
-      }
     },
   });
 
@@ -131,18 +125,8 @@ export default function Game() {
       // Check if this scoring wins the match (reaches or exceeds handicap)
       const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
       
-      console.log('Scoring check:', {
-        currentPlayer: currentMatch.currentPlayer,
-        currentScore: currentMatch.currentPlayer === 1 ? currentMatch.player1Score : currentMatch.player2Score,
-        points,
-        newScore,
-        target: targetForCurrentPlayer,
-        willWin: newScore >= targetForCurrentPlayer
-      });
-      
       if (newScore >= targetForCurrentPlayer) {
         // Match won - player reached or exceeded handicap target
-        console.log('MATCH WON!', { newScore, target: targetForCurrentPlayer });
         
         updateMatchMutation.mutate({
           id: currentMatch.id,
@@ -261,6 +245,8 @@ export default function Game() {
         currentPlayer: 1,
         player1Score: 0,
         player2Score: 0,
+        isComplete: false,
+        winnerId: null,
       }
     });
 
@@ -282,6 +268,8 @@ export default function Game() {
         currentPlayer: previousTurnState.currentPlayer,
         player1Score: previousTurnState.player1Score,
         player2Score: previousTurnState.player2Score,
+        isComplete: false,
+        winnerId: null,
       }
     });
 
@@ -396,6 +384,21 @@ export default function Game() {
         </div>
       </header>
 
+      {/* Winner Announcement */}
+      {currentMatch.isComplete && currentMatch.winnerId && (
+        <div className="mx-4 mb-4 p-4 bg-green-100 border-2 border-green-300 rounded-lg text-center">
+          <h2 className="text-2xl font-bold text-green-800 mb-2">
+            🏆 {currentMatch.winnerId === 1 ? currentMatch.player1Name : currentMatch.player2Name} Wins!
+          </h2>
+          <p className="text-green-700 text-lg">
+            Final Score: {currentMatch.player1Score} - {currentMatch.player2Score}
+          </p>
+          <p className="text-green-600 text-sm mt-2">
+            Match complete! Click "Reset" to undo or "New Game" to start fresh.
+          </p>
+        </div>
+      )}
+
       {/* Player Scores */}
       <PlayerScores match={currentMatch} />
 
@@ -493,12 +496,7 @@ export default function Game() {
         onRerack={handleRerack}
       />
       
-      <MatchWinModal 
-        open={showMatchWin}
-        onClose={() => setShowMatchWin(false)}
-        currentMatch={currentMatch}
-        onNewMatch={handleNewGame}
-      />
+
 
       {/* Confirmation Dialogs */}
       <Dialog open={showNewGameConfirm} onOpenChange={setShowNewGameConfirm}>
