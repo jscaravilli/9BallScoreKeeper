@@ -49,8 +49,13 @@ export default function Game() {
       const response = await apiRequest("PATCH", `/api/match/${id}`, updates);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
+      // If match was completed, show the win modal
+      if (data.isComplete) {
+        console.log('Match completed, showing win modal');
+        setShowMatchWin(true);
+      }
     },
   });
 
@@ -154,7 +159,6 @@ export default function Game() {
           ballStates,
         });
         
-        setShowMatchWin(true);
         return;
       }
 
