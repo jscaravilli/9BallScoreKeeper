@@ -101,7 +101,7 @@ export default function Game() {
   };
 
   const handleBallTap = (ballNumber: number) => {
-    if (!currentMatch || isProcessing) return;
+    if (!currentMatch || isProcessing || currentMatch.isComplete || matchWinner) return;
     
     setIsProcessing(true);
     
@@ -154,6 +154,14 @@ export default function Game() {
           name: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
           finalScore1: currentMatch.currentPlayer === 1 ? newScore : currentMatch.player2Score,
           finalScore2: currentMatch.currentPlayer === 2 ? newScore : currentMatch.player1Score,
+        });
+        
+        // Save state before match completion for undo functionality
+        setPreviousTurnState({
+          ballStates: [...(currentMatch.ballStates as BallInfo[] || [])],
+          currentPlayer: currentMatch.currentPlayer,
+          player1Score: currentMatch.player1Score,
+          player2Score: currentMatch.player2Score,
         });
         
         try {
