@@ -31,6 +31,7 @@ export default function Game() {
     player2Score: number;
   } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [undoInProgress, setUndoInProgress] = useState(false);
 
   // Get current match
   const { data: currentMatch, isLoading } = useQuery<Match | null>({
@@ -291,7 +292,9 @@ export default function Game() {
   };
 
   const handleUndoTurn = () => {
-    if (!currentMatch || !previousTurnState) return;
+    if (!currentMatch || !previousTurnState || undoInProgress) return;
+    
+    setUndoInProgress(true);
 
     updateMatchMutation.mutate({
       id: currentMatch.id,
@@ -311,6 +314,10 @@ export default function Game() {
 
     setPreviousTurnState(null);
     setMatchWinner(null);
+    
+    setTimeout(() => {
+      setUndoInProgress(false);
+    }, 500);
   };
 
   const handleNewGame = () => {
@@ -426,7 +433,7 @@ export default function Game() {
               variant="outline"
               size="sm"
               className="text-orange-700 border-orange-300 hover:bg-orange-50"
-              disabled={!previousTurnState}
+              disabled={!previousTurnState || undoInProgress}
             >
               <RotateCcw className="h-4 w-4 mr-1" />
               Undo Final Point
