@@ -123,13 +123,7 @@ export default function Game() {
         return;
       }
 
-      // Switch players
-      updateMatchMutation.mutate({
-        id: currentMatch.id,
-        updates: {
-          currentPlayer: currentMatch.currentPlayer === 1 ? 2 : 1,
-        }
-      });
+      // Player continues shooting after making a ball - no turn switch
       
     } else if (ball.state === 'scored') {
       // Second tap - mark as dead
@@ -144,6 +138,18 @@ export default function Game() {
     updateBallsMutation.mutate({
       id: currentMatch.id,
       ballStates,
+    });
+  };
+
+  const handleEndTurn = () => {
+    if (!currentMatch) return;
+
+    // Switch to the other player
+    updateMatchMutation.mutate({
+      id: currentMatch.id,
+      updates: {
+        currentPlayer: currentMatch.currentPlayer === 1 ? 2 : 1,
+      }
     });
   };
 
@@ -249,14 +255,21 @@ export default function Game() {
 
       {/* Game Actions */}
       <section className="p-4 pb-20">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3 mb-3">
+          <Button 
+            variant="outline" 
+            className="py-3 px-4 bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+            onClick={handleEndTurn}
+          >
+            End Turn
+          </Button>
           <Button 
             variant="secondary" 
             className="py-3 px-4"
             onClick={handleResetGame}
           >
             <RotateCcw className="h-4 w-4 mr-2" />
-            Reset Game
+            Reset
           </Button>
           <Button 
             className="pool-green text-white py-3 px-4 hover:pool-felt"
