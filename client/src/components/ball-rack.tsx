@@ -155,24 +155,7 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
         })}
       </div>
 
-      {/* Ball States Legend */}
-      <div className="mt-6 bg-gray-100 rounded-lg p-3">
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">Ball Controls:</h3>
-        <div className="grid grid-cols-1 gap-2 text-xs text-gray-600">
-          <div className="flex items-center">
-            <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
-            <span>Single tap: Award points to current player</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-4 rounded-full bg-gray-400 border border-red-500 mr-2"></div>
-            <span>Double tap: Mark dead (deducts points from scorer)</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-4 rounded-full bg-gray-300 mr-2"></div>
-            <span>Triple tap: Reset to active (deducts points if scored)</span>
-          </div>
-        </div>
-      </div>
+
     </section>
   );
 }

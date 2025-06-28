@@ -560,7 +560,7 @@ export default function Game() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 pb-20">
       {/* Header */}
-      <header className="bg-green-950/50 backdrop-blur-sm border-b border-green-700/30 sticky top-0 z-10">
+      <header className="bg-green-950/50 backdrop-blur-sm border-b border-green-700/30">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <button 

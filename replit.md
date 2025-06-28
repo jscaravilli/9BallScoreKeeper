@@ -130,6 +130,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 28, 2025: RESOLVED deployment issue - created automated scripts to restructure build output for static deployment
 - June 28, 2025: Fixed "index.html not found" error by moving files from dist/public to dist root directory
 - June 28, 2025: Added deployment preparation scripts (prepare-static-deploy.js and deploy-static.sh) for easy static deployment
+- June 28, 2025: Enhanced match history with detailed ball scoring events, timestamps, and expandable timelines
+- June 28, 2025: Cleaned up UI by removing ball controls from main screen and making navigation scroll with content
 
 ## User Preferences
 
