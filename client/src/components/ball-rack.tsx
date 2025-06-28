@@ -39,9 +39,12 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
           {/* White base ball */}
           <div className="absolute inset-0 bg-white rounded-full"></div>
           
-          {/* Yellow horizontal stripe across the middle */}
-          <div className="absolute top-1/2 left-0 right-0 h-4 bg-yellow-400 transform -translate-y-1/2"
-               style={{ background: 'linear-gradient(180deg, #eab308 0%, #facc15 50%, #eab308 100%)' }}>
+          {/* Yellow horizontal stripe across the entire ball */}
+          <div className="absolute top-1/2 left-0 right-0 h-6 bg-yellow-400 transform -translate-y-1/2"
+               style={{ 
+                 background: 'linear-gradient(180deg, #eab308 0%, #facc15 50%, #eab308 100%)',
+                 width: '100%'
+               }}>
           </div>
           
           {/* Number 9 positioned in the center */}
