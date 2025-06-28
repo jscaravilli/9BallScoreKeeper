@@ -231,6 +231,20 @@ export default function Game() {
           const nineBallIndex = ballStates.findIndex(b => b.number === 9);
           ballStates[nineBallIndex] = { number: 9, state: 'scored', scoredBy: lastStateNineBall.scoredBy };
           
+          // Restore locked balls from before the rerack
+          // Find balls that were scored/dead by non-current players in the previous state
+          const newLockedBalls = new Set<number>();
+          const currentPlayer = currentMatch.currentPlayer;
+          
+          lastState.ballStates.forEach(ball => {
+            if ((ball.state === 'scored' || ball.state === 'dead') && 
+                ball.scoredBy && ball.scoredBy !== currentPlayer) {
+              newLockedBalls.add(ball.number);
+            }
+          });
+          
+          setLockedBalls(newLockedBalls);
+          
           // Deduct 2 points from the player who scored it
           const scoringPlayer = lastStateNineBall.scoredBy;
           const currentScore = scoringPlayer === 1 ? currentMatch.player1Score : currentMatch.player2Score;
@@ -618,23 +632,22 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Calculate which balls should be unlocked when we undo to this state
-    const currentBallStates = currentMatch.ballStates as BallInfo[];
-    const previousBallStates = previousState.ballStates;
+    // Completely rebuild the locked balls set based on the previous state
+    // This ensures proper locking after rerack undos
+    const newLockedBalls = new Set<number>();
+    const targetPlayer = previousState.currentPlayer; // Player who will be active after undo
     
-    // Find balls that were active in the previous state but are scored/dead now
-    const ballsToUnlock: number[] = [];
-    previousBallStates.forEach(prevBall => {
-      const currentBall = currentBallStates.find(b => b.number === prevBall.number);
-      if (prevBall.state === 'active' && currentBall && currentBall.state !== 'active') {
-        ballsToUnlock.push(prevBall.number);
+    // Lock balls that were scored/dead by the OTHER player in the previous state
+    previousState.ballStates.forEach(ball => {
+      if ((ball.state === 'scored' || ball.state === 'dead') && 
+          ball.scoredBy && ball.scoredBy !== targetPlayer) {
+        newLockedBalls.add(ball.number);
       }
     });
     
-    // Remove unlocked balls from the locked set
-    const newLockedBalls = new Set(lockedBalls);
-    ballsToUnlock.forEach(ballNum => newLockedBalls.delete(ballNum));
     setLockedBalls(newLockedBalls);
+    
+    console.log('Restored locked balls:', Array.from(newLockedBalls));
     
     // Log the undo event
     const undoEvent: MatchEvent = {
