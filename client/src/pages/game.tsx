@@ -101,6 +101,13 @@ export default function Game() {
   };
 
   const handleBallTap = (ballNumber: number) => {
+    console.log('handleBallTap called:', { 
+      hasMatch: !!currentMatch, 
+      isProcessing, 
+      isComplete: currentMatch?.isComplete, 
+      hasMatchWinner: !!matchWinner 
+    });
+    
     if (!currentMatch || isProcessing || currentMatch.isComplete || matchWinner) return;
     
     setIsProcessing(true);
@@ -333,9 +340,11 @@ export default function Game() {
 
     setPreviousTurnState(null);
     setMatchWinner(null);
+    console.log('Undo complete - matchWinner cleared');
     
     setTimeout(() => {
       setUndoInProgress(false);
+      console.log('Undo processing flag cleared');
     }, 500);
   };
 
