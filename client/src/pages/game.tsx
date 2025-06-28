@@ -110,14 +110,6 @@ export default function Game() {
       setIsProcessing(false);
     }, 300);
 
-    // Store current state for undo functionality BEFORE any changes
-    setPreviousTurnState({
-      ballStates: [...(currentMatch.ballStates as BallInfo[] || [])],
-      currentPlayer: currentMatch.currentPlayer,
-      player1Score: currentMatch.player1Score,
-      player2Score: currentMatch.player2Score,
-    });
-
     const ballStates = [...(currentMatch.ballStates as BallInfo[] || [])];
     const ballIndex = ballStates.findIndex(b => b.number === ballNumber);
     
@@ -126,6 +118,14 @@ export default function Game() {
     const ball = ballStates[ballIndex];
     
     if (ball.state === 'active') {
+      // Store current state for undo functionality BEFORE modifying the ball
+      setPreviousTurnState({
+        ballStates: [...(currentMatch.ballStates as BallInfo[] || [])],
+        currentPlayer: currentMatch.currentPlayer,
+        player1Score: currentMatch.player1Score,
+        player2Score: currentMatch.player2Score,
+      });
+
       // First tap - score the ball
       ball.state = 'scored';
       ball.scoredBy = currentMatch.currentPlayer as 1 | 2;
