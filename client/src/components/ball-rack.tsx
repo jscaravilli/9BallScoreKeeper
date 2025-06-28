@@ -30,11 +30,8 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
   };
 
   const isNineBallUndoable = (): boolean => {
-    if (turnHistory.length === 0) return false;
-    const lastState = turnHistory[turnHistory.length - 1];
     const currentNineBall = ballStates.find(b => b.number === 9);
-    const previousNineBall = lastState.ballStates?.find((b: any) => b.number === 9);
-    return currentNineBall?.state === 'scored' && previousNineBall?.state === 'active';
+    return currentNineBall?.state === 'scored' && turnHistory.length > 0;
   };
 
   const getBallGradient = (ballNumber: number) => {

@@ -213,15 +213,12 @@ export default function Game() {
   const handleBallTap = (ballNumber: number) => {
     if (!currentMatch || isProcessing || currentMatch.isComplete || matchWinner) return;
     
-    // Special handling for 9-ball undo: Check if this is the 9-ball and it's the next to be undone
-    if (ballNumber === 9 && turnHistory.length > 0) {
-      const lastState = turnHistory[turnHistory.length - 1];
+    // Special handling for 9-ball undo
+    if (ballNumber === 9) {
       const currentNineBall = (currentMatch.ballStates as BallInfo[]).find((b: BallInfo) => b.number === 9);
-      const previousNineBall = lastState.ballStates.find(b => b.number === 9);
       
-      // If 9-ball is currently scored but was active in previous state, show it as undone (with checkmark)
-      if (currentNineBall?.state === 'scored' && previousNineBall?.state === 'active') {
-        // Mark as undone (still shows checkmark but can be tapped again)
+      // If 9-ball is currently scored and there's history, allow undo to "undone" state
+      if (currentNineBall?.state === 'scored' && turnHistory.length > 0) {
         const ballStates = [...(currentMatch.ballStates as BallInfo[] || [])];
         const nineBall = ballStates.find(b => b.number === 9);
         if (nineBall) {
@@ -232,21 +229,19 @@ export default function Game() {
         // Update ball states but keep match state for now
         localStorageAPI.updateBallStates(currentMatch.id, ballStates);
         
-        // Log the undo event
-        const undoEvent: MatchEvent = {
-          type: 'turn_ended',
-          timestamp: new Date().toISOString(),
-          player: currentMatch.currentPlayer as 1 | 2,
-          playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
-          details: '9-Ball undone - can be made active'
-        };
-        localStorageAPI.addMatchEvent(undoEvent);
+        // Clear any winner states
+        setGameWinner(null);
+        setShowGameWin(false);
+        setMatchWinner(null);
+        setShowMatchWin(false);
         
         return; // Exit early after handling 9-ball undo
       }
       
       // If 9-ball is in undone state, make it active and restore previous state
-      if (currentNineBall?.state === 'undone' as any) {
+      if (currentNineBall?.state === 'undone' as any && turnHistory.length > 0) {
+        const lastState = turnHistory[turnHistory.length - 1];
+        
         // Restore previous match state completely
         localStorageAPI.updateMatch(currentMatch.id, {
           ...lastState,
@@ -255,12 +250,6 @@ export default function Game() {
         
         // Remove the last state from history
         setTurnHistory(prev => prev.slice(0, -1));
-        
-        // Clear any winner states
-        setGameWinner(null);
-        setShowGameWin(false);
-        setMatchWinner(null);
-        setShowMatchWin(false);
         
         return; // Exit early after making 9-ball active
       }
