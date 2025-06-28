@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { clientQueryFunctions, clientMutation, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
@@ -41,8 +41,7 @@ export default function Game() {
   // Create new match mutation
   const createMatchMutation = useMutation({
     mutationFn: async (matchData: any) => {
-      const response = await apiRequest("POST", "/api/match", matchData);
-      return response.json();
+      return clientMutation(() => clientQueryFunctions.createMatch(matchData));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
@@ -52,8 +51,7 @@ export default function Game() {
   // Update match mutation
   const updateMatchMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: number; updates: any }) => {
-      const response = await apiRequest("PATCH", `/api/match/${id}`, updates);
-      return response.json();
+      return clientMutation(() => clientQueryFunctions.updateMatch(id, updates));
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
@@ -63,8 +61,7 @@ export default function Game() {
   // Update ball states mutation
   const updateBallsMutation = useMutation({
     mutationFn: async ({ id, ballStates }: { id: number; ballStates: BallInfo[] }) => {
-      const response = await apiRequest("PATCH", `/api/match/${id}/balls`, { ballStates });
-      return response.json();
+      return clientMutation(() => clientQueryFunctions.updateBallStates(id, ballStates));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });

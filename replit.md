@@ -120,6 +120,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 28, 2025: Fixed port conflicts and API endpoints for production environment
 - June 28, 2025: Successfully resolved all deployment issues with simplified production server
 - June 28, 2025: Final production build ready for deployment with working API endpoints
+- June 28, 2025: Converted to client-only application using localStorage for match data persistence
+- June 28, 2025: Created static build system for deployment to any static hosting service
 
 ## User Preferences
 

@@ -1,53 +1,57 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
+import { localStorageAPI } from "./localStorage";
+import type { Match, BallInfo } from "@shared/schema";
 
-async function throwIfResNotOk(res: Response) {
-  if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+// Client-side query functions using localStorage
+export const clientQueryFunctions = {
+  getCurrentMatch: (): Match | null => {
+    return localStorageAPI.getCurrentMatch();
+  },
+  
+  createMatch: (matchData: {
+    player1Name: string;
+    player1SkillLevel: number;
+    player2Name: string;
+    player2SkillLevel: number;
+    ballStates?: BallInfo[];
+  }): Match => {
+    return localStorageAPI.createMatch(matchData);
+  },
+  
+  updateMatch: (matchId: number, updates: Partial<Match>): Match | null => {
+    return localStorageAPI.updateMatch(matchId, updates);
+  },
+  
+  updateBallStates: (matchId: number, ballStates: BallInfo[]): Match | null => {
+    return localStorageAPI.updateBallStates(matchId, ballStates);
   }
+};
+
+// Custom query function for client-side operations
+const getQueryFn = (context: { queryKey: readonly unknown[] }) => {
+  const [endpoint] = context.queryKey as string[];
+  
+  switch (endpoint) {
+    case '/api/match/current':
+      return Promise.resolve(clientQueryFunctions.getCurrentMatch());
+    default:
+      throw new Error(`Unknown query endpoint: ${endpoint}`);
+  }
+};
+
+// Client-side mutation helper
+export function clientMutation<T>(
+  mutationFn: () => T
+): Promise<T> {
+  return Promise.resolve(mutationFn());
 }
-
-export async function apiRequest(
-  method: string,
-  url: string,
-  data?: unknown | undefined,
-): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
-
-  await throwIfResNotOk(res);
-  return res;
-}
-
-type UnauthorizedBehavior = "returnNull" | "throw";
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
-}) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
-    });
-
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
-    }
-
-    await throwIfResNotOk(res);
-    return await res.json();
-  };
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
-      refetchInterval: false,
+      queryFn: getQueryFn,
+      staleTime: 0, // Always fresh for localStorage
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
       retry: false,
     },
     mutations: {
