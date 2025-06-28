@@ -47,37 +47,22 @@ export default function GameWinModal({
             Ball 9 pocketed for <strong>2 points</strong>
           </p>
           
-          {matchIsComplete ? (
-            // Match is complete - show match completion options
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" onClick={onContinueMatch}>
-                Continue Match
-              </Button>
-              <Button 
-                onClick={onNewMatch}
-                className="pool-green text-white hover:pool-felt"
-              >
-                New Match
-              </Button>
-            </div>
-          ) : (
-            // Game won but match not complete - show rerack option
-            <div className="grid grid-cols-2 gap-3">
-              <Button 
-                variant="outline" 
-                onClick={onRerack}
-                className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-              >
-                Rerack
-              </Button>
-              <Button 
-                onClick={onNewMatch}
-                className="pool-green text-white hover:pool-felt"
-              >
-                New Match
-              </Button>
-            </div>
-          )}
+          {/* Game won - only show rerack option */}
+          <div className="grid grid-cols-2 gap-3">
+            <Button 
+              variant="outline" 
+              onClick={onRerack}
+              className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+            >
+              Rerack
+            </Button>
+            <Button 
+              onClick={onNewMatch}
+              className="pool-green text-white hover:pool-felt"
+            >
+              New Game
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

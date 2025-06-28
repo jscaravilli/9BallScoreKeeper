@@ -113,45 +113,45 @@ export default function Game() {
       ball.state = 'scored';
       ball.scoredBy = currentMatch.currentPlayer as 1 | 2;
       
+      // Get handicap targets
+      const player1Target = getPointsToWin(currentMatch.player1SkillLevel as any);
+      const player2Target = getPointsToWin(currentMatch.player2SkillLevel as any);
+      
       // Calculate points (balls 1-8 = 1 point, ball 9 = 2 points)
       const points = ballNumber === 9 ? 2 : 1;
-      const currentPlayerScore = currentMatch.currentPlayer === 1 
+      const newScore = currentMatch.currentPlayer === 1 
         ? currentMatch.player1Score + points
         : currentMatch.player2Score + points;
 
-      // Update match with new score
+      // Check if this scoring wins the match (reaches or exceeds handicap)
+      const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
+      
+      if (newScore >= targetForCurrentPlayer) {
+        // Match won - cap score at target and complete match
+        updateMatchMutation.mutate({
+          id: currentMatch.id,
+          updates: {
+            [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: targetForCurrentPlayer,
+            isComplete: true,
+            winnerId: currentMatch.currentPlayer,
+          }
+        });
+        setShowMatchWin(true);
+        return;
+      }
+
+      // Update match with new score (not winning yet)
       updateMatchMutation.mutate({
         id: currentMatch.id,
         updates: {
-          [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: currentPlayerScore,
+          [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: newScore,
         }
       });
 
-      // Check if ball 9 was scored (game over)
+      // Check if ball 9 was scored (game over, but match continues)
       if (ballNumber === 9) {
         setGameWinner(currentMatch.currentPlayer as 1 | 2);
-        
-        // Check if match is won (player reached their handicap target)
-        const player1Target = getPointsToWin(currentMatch.player1SkillLevel as any);
-        const player2Target = getPointsToWin(currentMatch.player2SkillLevel as any);
-        
-        const finalPlayer1Score = currentMatch.currentPlayer === 1 ? currentPlayerScore : currentMatch.player1Score;
-        const finalPlayer2Score = currentMatch.currentPlayer === 2 ? currentPlayerScore : currentMatch.player2Score;
-        
-        if (finalPlayer1Score >= player1Target || finalPlayer2Score >= player2Target) {
-          // Match is won - complete the match
-          updateMatchMutation.mutate({
-            id: currentMatch.id,
-            updates: {
-              isComplete: true,
-              winnerId: currentMatch.currentPlayer,
-            }
-          });
-          setShowMatchWin(true);
-        } else {
-          // Game won but match not over - show game win modal with rerack option
-          setShowGameWin(true);
-        }
+        setShowGameWin(true);
         return;
       }
 
@@ -471,7 +471,7 @@ export default function Game() {
           <div className="text-center">
             <h2 className="text-xl font-bold text-gray-800 mb-2">Start New Game?</h2>
             <p className="text-gray-600 mb-6">
-              This will reset all ball states and scores. Current progress will be lost.
+              This will start a completely new match with reset scores. Current progress will be lost.
             </p>
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" onClick={() => setShowNewGameConfirm(false)}>

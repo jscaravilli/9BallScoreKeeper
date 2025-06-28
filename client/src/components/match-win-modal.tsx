@@ -63,7 +63,7 @@ export default function MatchWinModal({
             onClick={onNewMatch}
             className="w-full pool-green text-white py-3 px-4 hover:pool-felt"
           >
-            Start New Match
+            Start New Game
           </Button>
         </div>
       </DialogContent>
