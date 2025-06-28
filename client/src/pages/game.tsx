@@ -18,6 +18,12 @@ export default function Game() {
   const [gameWinner, setGameWinner] = useState<1 | 2 | null>(null);
   const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [matchWinner, setMatchWinner] = useState<{
+    player: 1 | 2;
+    name: string;
+    finalScore1: number;
+    finalScore2: number;
+  } | null>(null);
   const [previousTurnState, setPreviousTurnState] = useState<{
     ballStates: BallInfo[];
     currentPlayer: number;
@@ -132,6 +138,14 @@ export default function Game() {
       if (newScore >= targetForCurrentPlayer) {
         // Match won - player reached or exceeded handicap target
         console.log('TRIGGERING MATCH WIN');
+        
+        // Set local match winner state for immediate UI feedback
+        setMatchWinner({
+          player: currentMatch.currentPlayer as 1 | 2,
+          name: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+          finalScore1: currentMatch.currentPlayer === 1 ? newScore : currentMatch.player2Score,
+          finalScore2: currentMatch.currentPlayer === 2 ? newScore : currentMatch.player1Score,
+        });
         
         try {
           updateMatchMutation.mutate({
@@ -264,6 +278,7 @@ export default function Game() {
     });
 
     setPreviousTurnState(null);
+    setMatchWinner(null);
     setShowResetConfirm(false);
   };
 
@@ -287,6 +302,7 @@ export default function Game() {
     });
 
     setPreviousTurnState(null);
+    setMatchWinner(null);
   };
 
   const handleNewGame = () => {
@@ -319,6 +335,7 @@ export default function Game() {
     });
 
     setPreviousTurnState(null);
+    setMatchWinner(null);
     setShowNewGameConfirm(false);
   };
 
@@ -387,13 +404,13 @@ export default function Game() {
       </header>
 
       {/* Winner Announcement */}
-      {currentMatch.isComplete && currentMatch.winnerId && (
+      {(matchWinner || (currentMatch.isComplete && currentMatch.winnerId)) && (
         <div className="mx-4 mb-4 p-4 bg-green-100 border-2 border-green-300 rounded-lg text-center">
           <h2 className="text-2xl font-bold text-green-800 mb-2">
-            🏆 {currentMatch.winnerId === 1 ? currentMatch.player1Name : currentMatch.player2Name} Wins!
+            🏆 {matchWinner ? matchWinner.name : (currentMatch.winnerId === 1 ? currentMatch.player1Name : currentMatch.player2Name)} Wins!
           </h2>
           <p className="text-green-700 text-lg">
-            Final Score: {currentMatch.player1Score} - {currentMatch.player2Score}
+            Final Score: {matchWinner ? `${matchWinner.finalScore1} - ${matchWinner.finalScore2}` : `${currentMatch.player1Score} - ${currentMatch.player2Score}`}
           </p>
           <p className="text-green-600 text-sm mt-2">
             Match complete! Click "Reset" to undo or "New Game" to start fresh.
