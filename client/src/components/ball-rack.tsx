@@ -37,7 +37,7 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
       6: 'radial-gradient(circle at 30% 30%, #4ade80, #16a34a, #15803d, #14532d)',
       7: 'radial-gradient(circle at 30% 30%, #991b1b, #7f1d1d, #450a0a, #1c0606)',
       8: 'radial-gradient(circle at 30% 30%, #4b5563, #374151, #1f2937, #000000)',
-      9: 'radial-gradient(circle at 30% 30%, #ffffff, #f3f4f6, #e5e7eb, #d1d5db)'
+      9: 'radial-gradient(circle at 30% 30%, #ffffff, #f9fafb, #e5e7eb, #9ca3af)'
     };
     return gradients[ballNumber as keyof typeof gradients] || '';
   };
