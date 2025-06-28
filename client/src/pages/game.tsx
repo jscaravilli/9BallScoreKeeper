@@ -292,8 +292,15 @@ export default function Game() {
   };
 
   const handleUndoTurn = () => {
+    console.log('handleUndoTurn called', { 
+      hasMatch: !!currentMatch, 
+      hasPreviousState: !!previousTurnState, 
+      undoInProgress 
+    });
+    
     if (!currentMatch || !previousTurnState || undoInProgress) return;
     
+    console.log('Executing undo...');
     setUndoInProgress(true);
 
     updateMatchMutation.mutate({
