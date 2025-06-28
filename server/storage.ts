@@ -1,4 +1,6 @@
 import { matches, games, type Match, type InsertMatch, type Game, type InsertGame, type BallInfo } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Match operations
@@ -122,4 +124,83 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database storage implementation
+export class DatabaseStorage implements IStorage {
+  async getMatch(id: number): Promise<Match | undefined> {
+    const [match] = await db.select().from(matches).where(eq(matches.id, id));
+    return match || undefined;
+  }
+
+  async getCurrentMatch(): Promise<Match | undefined> {
+    const [match] = await db.select().from(matches).orderBy(matches.id).limit(1);
+    return match || undefined;
+  }
+
+  async createMatch(insertMatch: InsertMatch): Promise<Match> {
+    const [match] = await db
+      .insert(matches)
+      .values({
+        player1Name: insertMatch.player1Name,
+        player1SkillLevel: insertMatch.player1SkillLevel,
+        player2Name: insertMatch.player2Name,
+        player2SkillLevel: insertMatch.player2SkillLevel,
+        player1Score: insertMatch.player1Score ?? 0,
+        player2Score: insertMatch.player2Score ?? 0,
+        currentPlayer: insertMatch.currentPlayer ?? 1,
+        currentGame: insertMatch.currentGame ?? 1,
+        ballStates: insertMatch.ballStates ?? [],
+        isComplete: insertMatch.isComplete ?? false,
+        winnerId: insertMatch.winnerId ?? null,
+      })
+      .returning();
+    return match;
+  }
+
+  async updateMatch(id: number, updates: Partial<Match>): Promise<Match | undefined> {
+    const [match] = await db
+      .update(matches)
+      .set(updates)
+      .where(eq(matches.id, id))
+      .returning();
+    return match || undefined;
+  }
+
+  async updateBallStates(matchId: number, ballStates: BallInfo[]): Promise<Match | undefined> {
+    const [match] = await db
+      .update(matches)
+      .set({ ballStates })
+      .where(eq(matches.id, matchId))
+      .returning();
+    return match || undefined;
+  }
+
+  async createGame(insertGame: InsertGame): Promise<Game> {
+    const [game] = await db
+      .insert(games)
+      .values({
+        matchId: insertGame.matchId,
+        gameNumber: insertGame.gameNumber,
+        player1Points: insertGame.player1Points ?? 0,
+        player2Points: insertGame.player2Points ?? 0,
+        winnerId: insertGame.winnerId ?? null,
+      })
+      .returning();
+    return game;
+  }
+
+  async getGamesByMatch(matchId: number): Promise<Game[]> {
+    return await db.select().from(games).where(eq(games.matchId, matchId));
+  }
+
+  async updateGame(id: number, updates: Partial<Game>): Promise<Game | undefined> {
+    const [game] = await db
+      .update(games)
+      .set(updates)
+      .where(eq(games.id, id))
+      .returning();
+    return game || undefined;
+  }
+}
+
+// Use database storage if DATABASE_URL is available, otherwise use memory storage
+export const storage = process.env.DATABASE_URL ? new DatabaseStorage() : new MemStorage();
