@@ -33,23 +33,26 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
     } else if (state === 'dead') {
       return <X className="h-6 w-6 text-red-500" />;
     } else if (ballNumber === 9) {
-      // Authentic 9-ball design - white base with yellow stripe and number in the stripe
+      // Authentic 9-ball design based on real pool ball image
       return (
         <div className="relative w-full h-full rounded-full overflow-hidden">
-          {/* White base ball */}
-          <div className="absolute inset-0 bg-white rounded-full"></div>
+          {/* White/light gray base ball */}
+          <div className="absolute inset-0 bg-gray-200 rounded-full"></div>
           
-          {/* Yellow horizontal stripe across the entire ball */}
-          <div className="absolute top-1/2 left-0 right-0 h-6 bg-yellow-400 transform -translate-y-1/2"
+          {/* Wide yellow horizontal stripe that spans the full width */}
+          <div className="absolute top-1/2 left-0 right-0 transform -translate-y-1/2"
                style={{ 
-                 background: 'linear-gradient(180deg, #eab308 0%, #facc15 50%, #eab308 100%)',
+                 height: '38%', // Takes up about 40% of the ball like in the real image
+                 background: 'linear-gradient(180deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%)',
                  width: '100%'
                }}>
           </div>
           
-          {/* Number 9 positioned in the center */}
+          {/* White circle for the number in the center of the yellow stripe */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="font-bold text-lg text-black drop-shadow-sm">9</span>
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center border border-gray-300 shadow-sm">
+              <span className="font-bold text-lg text-black">9</span>
+            </div>
           </div>
         </div>
       );
