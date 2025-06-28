@@ -104,7 +104,7 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
   };
 
   const getBallStyles = (ballNumber: number, state: BallInfo['state']) => {
-    const baseStyles = "w-16 h-16 rounded-full border-2 shadow-lg flex items-center justify-center font-bold text-lg hover:shadow-xl transition-all active:scale-95 touch-target";
+    const baseStyles = "w-16 h-16 rounded-full border shadow-lg flex items-center justify-center font-bold text-lg hover:shadow-xl transition-all active:scale-95 touch-target";
     
     if (state === 'scored') {
       return `${baseStyles} bg-gray-300 border-green-600 opacity-60 text-gray-600`;
