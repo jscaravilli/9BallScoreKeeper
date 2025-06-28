@@ -86,10 +86,19 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 2. Backend bundles server code with esbuild to `dist/index.js`
 3. Production serves static files from Express with fallback to React app
 
+### Deployment Configuration Issue
+- **Issue**: Static deployment expects `index.html` directly in `dist` but build outputs to `dist/public`
+- **Root Cause**: Build configuration outputs frontend to `dist/public` subdirectory
+- **Solutions Available**:
+  1. Use Autoscale deployment (recommended for full-stack apps)
+  2. Manual file restructuring after build (`cp -r dist/public/* dist/ && rm -rf dist/public`)
+  3. Use provided `prepare-deploy.js` script for automated restructuring
+
 ### Environment Configuration
 - Database URL required via `DATABASE_URL` environment variable
 - Development mode uses Vite middleware for hot reload
 - Production mode serves pre-built static assets
+- **Recommended**: Use Autoscale deployment type for proper full-stack support
 
 ### Database Management
 - Drizzle migrations stored in `./migrations` directory
