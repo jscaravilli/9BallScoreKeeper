@@ -444,7 +444,7 @@ export default function Game() {
               size="sm"
               className="text-blue-700 border-blue-300 hover:bg-blue-50"
             >
-              New Game
+              New Match
             </Button>
           </div>
         </div>
@@ -527,9 +527,9 @@ export default function Game() {
       <Dialog open={showNewGameConfirm} onOpenChange={setShowNewGameConfirm}>
         <DialogContent className="max-w-sm mx-auto">
           <div className="text-center">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Start New Game?</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Start New Match?</h2>
             <p className="text-gray-600 mb-6">
-              This will start a completely new match with reset scores. Current progress will be lost.
+              This will take you back to player setup to start a completely new match. Current progress will be lost.
             </p>
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" onClick={() => setShowNewGameConfirm(false)}>
@@ -539,7 +539,7 @@ export default function Game() {
                 onClick={confirmNewGame}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                Start New Game
+                New Match
               </Button>
             </div>
           </div>
