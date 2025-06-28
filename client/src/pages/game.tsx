@@ -8,6 +8,7 @@ import GameWinModal from "@/components/game-win-modal";
 import MatchWinModal from "@/components/match-win-modal";
 import BallRack from "@/components/ball-rack";
 import PlayerScores from "@/components/player-scores";
+import { getPointsToWin } from "@/lib/apa-handicaps";
 import type { Match, BallInfo } from "@shared/schema";
 
 export default function Game() {
@@ -119,18 +120,54 @@ export default function Game() {
       // Check if ball 9 was scored (game over)
       if (ballNumber === 9) {
         setGameWinner(currentMatch.currentPlayer as 1 | 2);
-        setShowGameWin(true);
+        
+        // Check if match is won (player reached their handicap target)
+        const player1Target = getPointsToWin(currentMatch.player1SkillLevel as any);
+        const player2Target = getPointsToWin(currentMatch.player2SkillLevel as any);
+        
+        const finalPlayer1Score = currentMatch.currentPlayer === 1 ? currentPlayerScore : currentMatch.player1Score;
+        const finalPlayer2Score = currentMatch.currentPlayer === 2 ? currentPlayerScore : currentMatch.player2Score;
+        
+        if (finalPlayer1Score >= player1Target || finalPlayer2Score >= player2Target) {
+          // Match is won - complete the match
+          updateMatchMutation.mutate({
+            id: currentMatch.id,
+            updates: {
+              isComplete: true,
+              winnerId: currentMatch.currentPlayer,
+            }
+          });
+          setShowMatchWin(true);
+        } else {
+          // Game won but match not over - show game win modal with rerack option
+          setShowGameWin(true);
+        }
         return;
       }
 
       // Player continues shooting after making a ball - no turn switch
       
     } else if (ball.state === 'scored') {
-      // Second tap - mark as dead
+      // Second tap - mark as dead (deduct points from the player who scored it)
+      if (ball.scoredBy) {
+        const points = ballNumber === 9 ? 2 : 1;
+        const currentPlayerScore = ball.scoredBy === 1 
+          ? currentMatch.player1Score - points
+          : currentMatch.player2Score - points;
+
+        // Update match with deducted score
+        updateMatchMutation.mutate({
+          id: currentMatch.id,
+          updates: {
+            [ball.scoredBy === 1 ? 'player1Score' : 'player2Score']: Math.max(0, currentPlayerScore),
+          }
+        });
+      }
+      
       ball.state = 'dead';
       ball.scoredBy = undefined;
     } else {
-      // Third tap - reset to active
+      // Third tap - reset to active (also deduct points if it was previously scored)
       ball.state = 'active';
       ball.scoredBy = undefined;
     }
@@ -192,6 +229,23 @@ export default function Game() {
   const handleContinueMatch = () => {
     setShowGameWin(false);
     handleNewGame();
+  };
+
+  const handleRerack = () => {
+    if (!currentMatch) return;
+
+    const initialBallStates: BallInfo[] = Array.from({ length: 9 }, (_, i) => ({
+      number: (i + 1) as BallInfo['number'],
+      state: 'active' as const,
+    }));
+
+    // Reset ball states but keep current player
+    updateBallsMutation.mutate({
+      id: currentMatch.id,
+      ballStates: initialBallStates,
+    });
+
+    setShowGameWin(false);
   };
 
   if (isLoading) {
@@ -324,6 +378,7 @@ export default function Game() {
         currentMatch={currentMatch}
         onContinueMatch={handleContinueMatch}
         onNewMatch={handleNewMatch}
+        onRerack={handleRerack}
       />
       
       <MatchWinModal 

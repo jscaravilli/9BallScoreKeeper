@@ -85,11 +85,11 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
           </div>
           <div className="flex items-center">
             <div className="w-4 h-4 rounded-full bg-gray-400 border border-red-500 mr-2"></div>
-            <span>Double tap: Mark ball as dead (no points)</span>
+            <span>Double tap: Mark dead (deducts points from scorer)</span>
           </div>
           <div className="flex items-center">
             <div className="w-4 h-4 rounded-full bg-gray-300 mr-2"></div>
-            <span>Triple tap: Reset ball state</span>
+            <span>Triple tap: Reset to active (deducts points if scored)</span>
           </div>
         </div>
       </div>
