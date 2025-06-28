@@ -133,6 +133,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 28, 2025: Enhanced match history with detailed ball scoring events, timestamps, and expandable timelines
 - June 28, 2025: Cleaned up UI by removing ball controls from main screen and making navigation scroll with content
 - June 28, 2025: Enhanced undo functionality to support multiple turn rewinds (up to 10 turns) with visual counter
+- June 28, 2025: Perfected 9-ball undo system with proper rerack event handling and clean state transitions
 
 ## User Preferences
 
