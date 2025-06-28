@@ -54,7 +54,7 @@ export default function Game() {
     },
   });
 
-  // Check if we need to show player setup modal on first load
+  // Always show player setup modal when there's no current match
   useEffect(() => {
     if (!isLoading && !currentMatch) {
       setShowPlayerSetup(true);
@@ -201,8 +201,16 @@ export default function Game() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">APA 9-Ball Scorer</h1>
-          <Button onClick={handleNewMatch}>Start New Match</Button>
+          <p className="text-gray-600">Setting up your match...</p>
         </div>
+        
+        {/* Player Setup Modal - always show when no match */}
+        <PlayerSetupModal 
+          open={showPlayerSetup}
+          onClose={() => {}} // Don't allow closing when no match exists
+          onSave={handlePlayerSetup}
+          currentMatch={null}
+        />
       </div>
     );
   }
