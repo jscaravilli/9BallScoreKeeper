@@ -119,8 +119,9 @@ export default function Game() {
     
     if (ball.state === 'active') {
       // Store current state for undo functionality BEFORE modifying the ball
+      // Deep clone the ball states to prevent reference issues
       setPreviousTurnState({
-        ballStates: [...(currentMatch.ballStates as BallInfo[] || [])],
+        ballStates: (currentMatch.ballStates as BallInfo[] || []).map(b => ({ ...b })),
         currentPlayer: currentMatch.currentPlayer,
         player1Score: currentMatch.player1Score,
         player2Score: currentMatch.player2Score,
