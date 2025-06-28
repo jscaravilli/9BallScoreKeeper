@@ -8,15 +8,15 @@ interface BallRackProps {
 }
 
 const BALL_COLORS = {
-  1: "bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-600", // Yellow
-  2: "bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800",       // Blue
-  3: "bg-gradient-to-br from-red-400 via-red-600 to-red-800",          // Red
-  4: "bg-gradient-to-br from-purple-400 via-purple-600 to-purple-800", // Purple
-  5: "bg-gradient-to-br from-orange-300 via-orange-500 to-orange-700", // Orange
-  6: "bg-gradient-to-br from-green-400 via-green-600 to-green-800",    // Green
-  7: "bg-gradient-to-br from-red-700 via-red-900 to-red-950",          // Maroon
-  8: "bg-gradient-to-br from-gray-700 via-gray-900 to-black",          // Black
-  9: "bg-gradient-to-r from-yellow-400 via-white to-yellow-400",       // Yellow with stripe (handled separately)
+  1: "", // Yellow - handled with custom gradient
+  2: "", // Blue - handled with custom gradient
+  3: "", // Red - handled with custom gradient
+  4: "", // Purple - handled with custom gradient
+  5: "", // Orange - handled with custom gradient
+  6: "", // Green - handled with custom gradient
+  7: "", // Maroon - handled with custom gradient
+  8: "", // Black - handled with custom gradient
+  9: "", // Yellow with stripe (handled separately)
 };
 
 export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
@@ -25,6 +25,20 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
       number: ballNumber as BallInfo['number'],
       state: 'active' as const,
     };
+  };
+
+  const getBallGradient = (ballNumber: number) => {
+    const gradients = {
+      1: 'radial-gradient(circle at 30% 30%, #fef08a, #facc15, #ca8a04, #713f12)',
+      2: 'radial-gradient(circle at 30% 30%, #93c5fd, #3b82f6, #1d4ed8, #1e3a8a)',
+      3: 'radial-gradient(circle at 30% 30%, #fca5a5, #ef4444, #dc2626, #991b1b)',
+      4: 'radial-gradient(circle at 30% 30%, #c4b5fd, #8b5cf6, #7c3aed, #581c87)',
+      5: 'radial-gradient(circle at 30% 30%, #fed7aa, #fb923c, #ea580c, #c2410c)',
+      6: 'radial-gradient(circle at 30% 30%, #86efac, #22c55e, #16a34a, #166534)',
+      7: 'radial-gradient(circle at 30% 30%, #b91c1c, #7f1d1d, #450a0a, #1c0606)',
+      8: 'radial-gradient(circle at 30% 30%, #6b7280, #374151, #1f2937, #000000)'
+    };
+    return gradients[ballNumber as keyof typeof gradients] || '';
   };
 
   const renderBallContent = (ballNumber: number, state: BallInfo['state']) => {
@@ -58,7 +72,34 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
         </div>
       );
     } else {
-      return <span className="font-bold text-lg">{ballNumber}</span>;
+      return (
+        <div className="relative w-full h-full rounded-full overflow-hidden">
+          {/* Base gradient */}
+          <div 
+            className="absolute inset-0 rounded-full"
+            style={{ background: getBallGradient(ballNumber) }}
+          ></div>
+          
+          {/* Glossy highlight effect */}
+          <div 
+            className="absolute rounded-full"
+            style={{
+              top: '10%',
+              left: '20%',
+              width: '35%',
+              height: '35%',
+              background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 40%, transparent 70%)',
+            }}
+          ></div>
+          
+          {/* Number */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className={`font-bold text-lg ${ballNumber === 1 ? 'text-black' : 'text-white'} drop-shadow-sm`}>
+              {ballNumber}
+            </span>
+          </div>
+        </div>
+      );
     }
   };
 
@@ -69,14 +110,9 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
       return `${baseStyles} bg-gray-300 border-green-600 opacity-60 text-gray-600`;
     } else if (state === 'dead') {
       return `${baseStyles} bg-gray-400 border-red-500 opacity-40 text-white`;
-    } else if (ballNumber === 9) {
-      // Special styling for 9-ball - remove padding to allow full circle usage
-      return `${baseStyles} bg-gray-200 border-gray-300 text-black overflow-hidden p-0`;
     } else {
-      const colorClass = BALL_COLORS[ballNumber as keyof typeof BALL_COLORS];
-      const textColor = [1].includes(ballNumber) ? "text-black" : "text-white";
-      const borderColor = "border-gray-300";
-      return `${baseStyles} ${colorClass} ${borderColor} ${textColor}`;
+      // All balls now use custom gradients, no background needed here
+      return `${baseStyles} bg-transparent border-gray-300 text-white overflow-hidden p-0`;
     }
   };
 
