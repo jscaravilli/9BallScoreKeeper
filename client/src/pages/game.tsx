@@ -361,18 +361,18 @@ export default function Game() {
         }
       });
 
+      // Update ball states first
+      updateBallsMutation.mutate({
+        id: currentMatch.id,
+        ballStates,
+      });
+
       // Check for special 9-ball win (9-ball pocketed during game)
       if (ballNumber === 9) {
         setGameWinner(currentMatch.currentPlayer as 1 | 2);
         setShowGameWin(true);
         return;
       }
-
-      // Update ball states
-      updateBallsMutation.mutate({
-        id: currentMatch.id,
-        ballStates,
-      });
     } else if (ball.state === 'scored') {
       // Second tap on scored ball - mark as dead and deduct points
       const currentPlayerScore = ball.scoredBy === currentMatch.currentPlayer 

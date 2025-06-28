@@ -44,11 +44,15 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
   };
 
   const renderBallContent = (ballNumber: number, state: BallInfo['state']) => {
+    // Handle scored/dead states first, regardless of ball number
     if (state === 'scored') {
       return <Check className="h-6 w-6 text-green-600" />;
     } else if (state === 'dead') {
       return <X className="h-6 w-6 text-red-500" />;
-    } else if (ballNumber === 9) {
+    }
+    
+    // Only render special ball designs for active balls
+    if (ballNumber === 9 && state === 'active') {
       // CSS-based 9-ball design with gradient effect
       return (
         <div className="relative w-full h-full rounded-full overflow-hidden">
