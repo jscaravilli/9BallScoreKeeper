@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,7 +51,10 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-sm mx-auto">
         <DialogHeader>
-          <DialogTitle>APA 9 Ball Scorekeeper</DialogTitle>
+          <DialogTitle>Joseph's Unofficial APA 9 Ball Scorekeeper</DialogTitle>
+          <DialogDescription>
+            Set up player names and APA skill levels to start tracking your 9-ball match.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">
