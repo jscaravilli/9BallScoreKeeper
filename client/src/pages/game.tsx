@@ -214,15 +214,18 @@ export default function Game() {
   const handleBallTap = (ballNumber: number) => {
     if (!currentMatch || isProcessing || currentMatch.isComplete || matchWinner) return;
     
-    // Special handling for 9-ball undo - simple two-state system
+    // Special handling for 9-ball undo - handle both scored 9-ball and rerack events
     if (ballNumber === 9 && turnHistory.length > 0) {
       const currentNineBall = (currentMatch.ballStates as BallInfo[]).find((b: BallInfo) => b.number === 9);
+      const lastState = turnHistory[turnHistory.length - 1];
+      const lastStateNineBall = lastState.ballStates.find((b: BallInfo) => b.number === 9);
       
-      // If 9-ball is currently scored, make it active and restore previous state
-      if (currentNineBall?.state === 'scored') {
+      // Check if this is a rerack undo (all balls are active, but previous state had 9-ball scored)
+      const isRerackUndo = currentNineBall?.state === 'active' && lastStateNineBall?.state === 'scored';
+      
+      // If 9-ball is currently scored OR this is a rerack undo, restore previous state
+      if (currentNineBall?.state === 'scored' || isRerackUndo) {
         setNineBallUndoInProgress(true);
-        
-        const lastState = turnHistory[turnHistory.length - 1];
         
         // Restore previous match state completely
         localStorageAPI.updateMatch(currentMatch.id, {
@@ -244,7 +247,7 @@ export default function Game() {
           setNineBallUndoInProgress(false);
         }, 1000);
         
-        return; // Exit early after making 9-ball active
+        return; // Exit early after restoring previous state
       }
     }
     
@@ -658,6 +661,22 @@ export default function Game() {
   const handleRerack = () => {
     if (!currentMatch) return;
 
+    // Save current state before rerack (with 9-ball scored)
+    const currentBallStates = currentMatch.ballStates as BallInfo[];
+    const stateBeforeRerack = {
+      player1Score: currentMatch.player1Score,
+      player2Score: currentMatch.player2Score,
+      currentPlayer: currentMatch.currentPlayer,
+      ballStates: JSON.parse(JSON.stringify(currentBallStates)),
+      previousBallStates: turnHistory.length > 0 ? turnHistory[turnHistory.length - 1].ballStates : currentBallStates
+    };
+
+    // Add rerack state to turn history
+    setTurnHistory(prev => {
+      const newHistory = [...prev, stateBeforeRerack];
+      return newHistory.slice(-maxTurnHistory); // Keep only last 10 states
+    });
+
     const initialBallStates: BallInfo[] = Array.from({ length: 9 }, (_, i) => ({
       number: (i + 1) as BallInfo['number'],
       state: 'active' as const,
@@ -667,6 +686,16 @@ export default function Game() {
       id: currentMatch.id,
       ballStates: initialBallStates,
     });
+
+    // Create rerack event
+    const rerackEvent: MatchEvent = {
+      type: 'turn_ended',
+      timestamp: new Date().toISOString(),
+      player: gameWinner as 1 | 2,
+      playerName: gameWinner === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+      details: 'Rerack - New game started after 9-ball win'
+    };
+    localStorageAPI.addMatchEvent(rerackEvent);
 
     setShowGameWin(false);
     setGameWinner(null);
@@ -1015,7 +1044,7 @@ export default function Game() {
           <div className="bg-orange-600 text-white px-6 py-3 rounded-lg shadow-lg animate-in fade-in duration-300">
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-              <span className="font-medium">Rack undone - 9-ball returned to active</span>
+              <span className="font-medium">Undoing previous action</span>
             </div>
           </div>
         </div>
