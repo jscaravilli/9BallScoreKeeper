@@ -3,13 +3,20 @@ import { getPointsToWin, getProgressPercentage } from "@/lib/apa-handicaps";
 
 interface PlayerScoresProps {
   match: Match;
+  overrideScores?: {
+    player1Score?: number;
+    player2Score?: number;
+  };
 }
 
-export default function PlayerScores({ match }: PlayerScoresProps) {
+export default function PlayerScores({ match, overrideScores }: PlayerScoresProps) {
+  const player1Score = overrideScores?.player1Score ?? match.player1Score;
+  const player2Score = overrideScores?.player2Score ?? match.player2Score;
+  
   const player1Target = getPointsToWin(match.player1SkillLevel as any);
   const player2Target = getPointsToWin(match.player2SkillLevel as any);
-  const player1Progress = getProgressPercentage(match.player1Score, match.player1SkillLevel as any);
-  const player2Progress = getProgressPercentage(match.player2Score, match.player2SkillLevel as any);
+  const player1Progress = getProgressPercentage(player1Score, match.player1SkillLevel as any);
+  const player2Progress = getProgressPercentage(player2Score, match.player2SkillLevel as any);
 
   return (
     <section className="p-4 bg-gray-100">
@@ -23,7 +30,7 @@ export default function PlayerScores({ match }: PlayerScoresProps) {
             <div className="text-xs text-gray-600 mb-2">
               Skill Level {match.player1SkillLevel}
             </div>
-            <div className="text-2xl font-bold text-green-600">{match.player1Score}</div>
+            <div className="text-2xl font-bold text-green-600">{player1Score}</div>
             <div className="text-xs text-gray-500">
               of {player1Target} points
             </div>
@@ -49,7 +56,7 @@ export default function PlayerScores({ match }: PlayerScoresProps) {
             <div className={`text-2xl font-bold ${
               match.currentPlayer === 2 ? 'text-green-600' : 'text-gray-700'
             }`}>
-              {match.player2Score}
+              {player2Score}
             </div>
             <div className="text-xs text-gray-500">
               of {player2Target} points

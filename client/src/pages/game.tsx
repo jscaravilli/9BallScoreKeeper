@@ -152,8 +152,8 @@ export default function Game() {
         setMatchWinner({
           player: currentMatch.currentPlayer as 1 | 2,
           name: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
-          finalScore1: currentMatch.currentPlayer === 1 ? newScore : currentMatch.player2Score,
-          finalScore2: currentMatch.currentPlayer === 2 ? newScore : currentMatch.player1Score,
+          finalScore1: currentMatch.currentPlayer === 1 ? newScore : currentMatch.player1Score,
+          finalScore2: currentMatch.currentPlayer === 2 ? newScore : currentMatch.player2Score,
         });
         
         // Save state before match completion for undo functionality
@@ -466,7 +466,13 @@ export default function Game() {
       )}
 
       {/* Player Scores */}
-      <PlayerScores match={currentMatch} />
+      <PlayerScores 
+        match={currentMatch}
+        overrideScores={matchWinner ? {
+          player1Score: matchWinner.finalScore1,
+          player2Score: matchWinner.finalScore2
+        } : undefined}
+      />
 
       {/* Ball Rack */}
       <BallRack 
