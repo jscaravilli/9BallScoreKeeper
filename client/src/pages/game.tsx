@@ -127,7 +127,8 @@ export default function Game() {
       const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
       
       if (newScore >= targetForCurrentPlayer) {
-        // Match won - update score, complete match, and update ball states all at once
+        // Match won - player reached or exceeded handicap target
+        // Even if they needed 1 point but sunk the 9-ball (2 points), they win with full score
         updateMatchMutation.mutate({
           id: currentMatch.id,
           updates: {
