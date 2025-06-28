@@ -54,3 +54,15 @@ export interface BallInfo {
 
 // APA Skill Level type
 export type ApaSkillLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+
+// Match event tracking for detailed history
+export interface MatchEvent {
+  type: 'ball_scored' | 'ball_dead' | 'turn_ended' | 'match_completed';
+  timestamp: string;
+  player: 1 | 2;
+  playerName: string;
+  ballNumber?: number;
+  pointsAwarded?: number;
+  newScore?: number;
+  details?: string;
+}

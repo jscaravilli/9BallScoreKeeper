@@ -1,9 +1,10 @@
-import type { Match, Game, BallInfo } from "@shared/schema";
+import type { Match, Game, BallInfo, MatchEvent } from "@shared/schema";
 
 const STORAGE_KEYS = {
   CURRENT_MATCH: 'poolscorer_current_match',
   MATCH_COUNTER: 'poolscorer_match_counter',
-  MATCH_HISTORY: 'poolscorer_match_history'
+  MATCH_HISTORY: 'poolscorer_match_history',
+  CURRENT_MATCH_EVENTS: 'poolscorer_current_match_events'
 } as const;
 
 export class LocalStorageAPI {
@@ -75,8 +76,33 @@ export class LocalStorageAPI {
     localStorage.removeItem(STORAGE_KEYS.CURRENT_MATCH);
   }
 
+  // Match event tracking
+  getCurrentMatchEvents(): MatchEvent[] {
+    try {
+      const events = localStorage.getItem(STORAGE_KEYS.CURRENT_MATCH_EVENTS);
+      return events ? JSON.parse(events) : [];
+    } catch (error) {
+      console.error('Error getting match events:', error);
+      return [];
+    }
+  }
+
+  addMatchEvent(event: MatchEvent): void {
+    try {
+      const events = this.getCurrentMatchEvents();
+      events.push(event);
+      localStorage.setItem(STORAGE_KEYS.CURRENT_MATCH_EVENTS, JSON.stringify(events));
+    } catch (error) {
+      console.error('Error adding match event:', error);
+    }
+  }
+
+  clearCurrentMatchEvents(): void {
+    localStorage.removeItem(STORAGE_KEYS.CURRENT_MATCH_EVENTS);
+  }
+
   // History management
-  getMatchHistory(): (Match & { completedAt: string })[] {
+  getMatchHistory(): (Match & { completedAt: string; events: MatchEvent[] })[] {
     try {
       const history = localStorage.getItem(STORAGE_KEYS.MATCH_HISTORY);
       return history ? JSON.parse(history) : [];
@@ -91,9 +117,12 @@ export class LocalStorageAPI {
     
     try {
       const history = this.getMatchHistory();
+      const events = this.getCurrentMatchEvents();
+      
       const historyEntry = {
         ...match,
-        completedAt: new Date().toISOString()
+        completedAt: new Date().toISOString(),
+        events: events
       };
       
       // Add to beginning of array (newest first)
@@ -105,6 +134,9 @@ export class LocalStorageAPI {
       }
       
       localStorage.setItem(STORAGE_KEYS.MATCH_HISTORY, JSON.stringify(history));
+      
+      // Clear current match events after saving to history
+      this.clearCurrentMatchEvents();
     } catch (error) {
       console.error('Error adding to match history:', error);
     }

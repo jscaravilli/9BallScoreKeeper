@@ -12,7 +12,109 @@ import BallRack from "@/components/ball-rack";
 import PlayerScores from "@/components/player-scores";
 import { getPointsToWin } from "@/lib/apa-handicaps";
 import { localStorageAPI } from "@/lib/localStorage";
-import type { Match, BallInfo } from "@shared/schema";
+import type { Match, BallInfo, MatchEvent } from "@shared/schema";
+
+// History Display Component
+function HistoryDisplay({ 
+  expandedMatch, 
+  setExpandedMatch 
+}: { 
+  expandedMatch: number | null; 
+  setExpandedMatch: (index: number | null) => void; 
+}) {
+  const history = localStorageAPI.getMatchHistory();
+  
+  if (history.length === 0) {
+    return (
+      <div className="overflow-y-auto max-h-96">
+        <div className="text-center py-8 text-gray-500">
+          <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
+          <p>No completed matches yet.</p>
+          <p className="text-sm">Win your first match to see it here!</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-y-auto max-h-96">
+      <div className="space-y-3">
+        {history.map((match, index) => {
+          const completedDate = new Date(match.completedAt);
+          const winnerName = match.winnerId === 1 ? match.player1Name : match.player2Name;
+          const player1Target = getPointsToWin(match.player1SkillLevel as any);
+          const player2Target = getPointsToWin(match.player2SkillLevel as any);
+          
+          return (
+            <div key={`${match.id}-${index}`} className="bg-gray-50 rounded-lg border">
+              <div 
+                className="p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                onClick={() => setExpandedMatch(expandedMatch === index ? null : index)}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="font-semibold text-gray-800">
+                    🏆 {winnerName} Wins!
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {completedDate.toLocaleDateString()} {completedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className={`p-2 rounded ${match.winnerId === 1 ? 'bg-green-100' : 'bg-white'}`}>
+                    <div className="font-medium">{match.player1Name}</div>
+                    <div className="text-xs text-gray-600">Skill Level {match.player1SkillLevel}</div>
+                    <div className="font-bold">{match.player1Score} / {player1Target}</div>
+                  </div>
+                  
+                  <div className={`p-2 rounded ${match.winnerId === 2 ? 'bg-green-100' : 'bg-white'}`}>
+                    <div className="font-medium">{match.player2Name}</div>
+                    <div className="text-xs text-gray-600">Skill Level {match.player2SkillLevel}</div>
+                    <div className="font-bold">{match.player2Score} / {player2Target}</div>
+                  </div>
+                </div>
+                
+                <div className="text-xs text-blue-600 mt-2">
+                  Click to {expandedMatch === index ? 'hide' : 'show'} ball-by-ball details
+                </div>
+              </div>
+              
+              {expandedMatch === index && match.events && match.events.length > 0 && (
+                <div className="border-t border-gray-200 p-4 bg-white">
+                  <h4 className="font-medium text-gray-800 mb-3">Match Timeline</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {match.events.map((event, eventIndex) => {
+                      const eventTime = new Date(event.timestamp);
+                      const timeStr = eventTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                      
+                      return (
+                        <div key={eventIndex} className={`text-xs p-2 rounded flex justify-between items-center ${
+                          event.type === 'ball_scored' ? 'bg-green-50 border-l-2 border-green-400' :
+                          event.type === 'ball_dead' ? 'bg-red-50 border-l-2 border-red-400' :
+                          event.type === 'match_completed' ? 'bg-yellow-50 border-l-2 border-yellow-400' :
+                          'bg-gray-50 border-l-2 border-gray-400'
+                        }`}>
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-800">{event.playerName}</div>
+                            <div className="text-gray-600">{event.details}</div>
+                            {event.newScore !== undefined && (
+                              <div className="text-gray-500">New score: {event.newScore}</div>
+                            )}
+                          </div>
+                          <div className="text-gray-400 ml-2">{timeStr}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function Game() {
   const [showPlayerSetup, setShowPlayerSetup] = useState(false);
@@ -21,6 +123,7 @@ export default function Game() {
   const [showControls, setShowControls] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [expandedMatch, setExpandedMatch] = useState<number | null>(null);
   const [gameWinner, setGameWinner] = useState<1 | 2 | null>(null);
   const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -144,6 +247,19 @@ export default function Game() {
         ? currentMatch.player1Score + points
         : currentMatch.player2Score + points;
 
+      // Track ball scoring event
+      const ballScoredEvent: MatchEvent = {
+        type: 'ball_scored',
+        timestamp: new Date().toISOString(),
+        player: currentMatch.currentPlayer as 1 | 2,
+        playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+        ballNumber: ballNumber,
+        pointsAwarded: points,
+        newScore: newScore,
+        details: `Ball ${ballNumber} scored for ${points} point${points > 1 ? 's' : ''}`
+      };
+      localStorageAPI.addMatchEvent(ballScoredEvent);
+
       // Check if this scoring wins the match (reaches or exceeds handicap)
       const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
       
@@ -195,6 +311,16 @@ export default function Game() {
             ballStates,
           });
           
+          // Track match completion event
+          const matchCompletedEvent: MatchEvent = {
+            type: 'match_completed',
+            timestamp: new Date().toISOString(),
+            player: currentMatch.currentPlayer as 1 | 2,
+            playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+            details: `Match won by ${currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name} with final score ${currentMatch.currentPlayer === 1 ? newScore : currentMatch.player1Score}-${currentMatch.currentPlayer === 2 ? newScore : currentMatch.player2Score}`
+          };
+          localStorageAPI.addMatchEvent(matchCompletedEvent);
+
           // Save completed match to local history
           localStorageAPI.addToHistory(completedMatch);
           
@@ -235,6 +361,19 @@ export default function Game() {
       const newScore = Math.max(0, currentPlayerScore - points);
 
       if (ball.scoredBy) {
+        // Track points deduction event
+        const ballDeadEvent: MatchEvent = {
+          type: 'ball_dead',
+          timestamp: new Date().toISOString(),
+          player: ball.scoredBy,
+          playerName: ball.scoredBy === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+          ballNumber: ballNumber,
+          pointsAwarded: -points,
+          newScore: newScore,
+          details: `Ball ${ballNumber} marked dead, ${points} point${points > 1 ? 's' : ''} deducted`
+        };
+        localStorageAPI.addMatchEvent(ballDeadEvent);
+
         updateMatchMutation.mutate({
           id: currentMatch.id,
           updates: {
@@ -675,59 +814,10 @@ export default function Game() {
               </div>
             </div>
             
-            <div className="overflow-y-auto max-h-96">
-              {(() => {
-                const history = localStorageAPI.getMatchHistory();
-                
-                if (history.length === 0) {
-                  return (
-                    <div className="text-center py-8 text-gray-500">
-                      <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                      <p>No completed matches yet.</p>
-                      <p className="text-sm">Win your first match to see it here!</p>
-                    </div>
-                  );
-                }
-                
-                return (
-                  <div className="space-y-3">
-                    {history.map((match, index) => {
-                      const completedDate = new Date(match.completedAt);
-                      const winnerName = match.winnerId === 1 ? match.player1Name : match.player2Name;
-                      const player1Target = getPointsToWin(match.player1SkillLevel as any);
-                      const player2Target = getPointsToWin(match.player2SkillLevel as any);
-                      
-                      return (
-                        <div key={`${match.id}-${index}`} className="bg-gray-50 p-4 rounded-lg border">
-                          <div className="flex justify-between items-start mb-2">
-                            <div className="font-semibold text-gray-800">
-                              🏆 {winnerName} Wins!
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {completedDate.toLocaleDateString()} {completedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                            </div>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div className={`p-2 rounded ${match.winnerId === 1 ? 'bg-green-100' : 'bg-gray-100'}`}>
-                              <div className="font-medium">{match.player1Name}</div>
-                              <div className="text-xs text-gray-600">Skill Level {match.player1SkillLevel}</div>
-                              <div className="font-bold">{match.player1Score} / {player1Target}</div>
-                            </div>
-                            
-                            <div className={`p-2 rounded ${match.winnerId === 2 ? 'bg-green-100' : 'bg-gray-100'}`}>
-                              <div className="font-medium">{match.player2Name}</div>
-                              <div className="text-xs text-gray-600">Skill Level {match.player2SkillLevel}</div>
-                              <div className="font-bold">{match.player2Score} / {player2Target}</div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
-            </div>
+            <HistoryDisplay 
+              expandedMatch={expandedMatch} 
+              setExpandedMatch={setExpandedMatch} 
+            />
           </div>
         </DialogContent>
       </Dialog>
