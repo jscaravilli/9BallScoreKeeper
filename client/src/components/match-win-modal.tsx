@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Crown } from "lucide-react";
 import { getPointsToWin } from "@/lib/apa-handicaps";
@@ -44,6 +44,12 @@ export default function MatchWinModal({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-sm mx-auto">
+        <DialogHeader>
+          <DialogTitle className="sr-only">Match Complete</DialogTitle>
+          <DialogDescription className="sr-only">
+            The match has been completed. {matchWinner.name} has won by reaching their handicap target.
+          </DialogDescription>
+        </DialogHeader>
         <div className="text-center">
           <Crown className="h-20 w-20 text-yellow-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Match Winner!</h2>
@@ -53,10 +59,23 @@ export default function MatchWinModal({
           <p className="text-sm text-gray-500 mb-4">
             Reached {matchWinner.target} points
           </p>
-          <div className="bg-gray-100 rounded-lg p-3 mb-6">
-            <div className="text-sm text-gray-600">
-              <div>Game {currentMatch.currentGame}</div>
-              <div>Total points: {matchWinner.score}</div>
+          <div className="bg-gray-100 rounded-lg p-4 mb-6">
+            <div className="text-sm text-gray-600 mb-2 font-medium">Final Scores</div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">{currentMatch.player1Name}</span>
+                <div className="text-right">
+                  <span className="text-lg font-bold">{currentMatch.player1Score}</span>
+                  <span className="text-xs text-gray-500 ml-1">/ {player1Target}</span>
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">{currentMatch.player2Name}</span>
+                <div className="text-right">
+                  <span className="text-lg font-bold">{currentMatch.player2Score}</span>
+                  <span className="text-xs text-gray-500 ml-1">/ {player2Target}</span>
+                </div>
+              </div>
             </div>
           </div>
           <Button 
