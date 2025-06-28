@@ -63,6 +63,16 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
       );
     }
     
+    // Handle undone state (shows checkmark with different indicator)
+    if (state === 'undone') {
+      return (
+        <div className="relative">
+          <Check className="h-6 w-6 text-green-600" />
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full animate-pulse" />
+        </div>
+      );
+    }
+    
     // Handle scored/dead states first, regardless of ball number
     if (state === 'scored') {
       return <Check className="h-6 w-6 text-green-600" />;
@@ -146,7 +156,7 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
   const getBallStyles = (ballNumber: number, state: BallInfo['state'], isLocked: boolean) => {
     const baseStyles = "w-16 h-16 rounded-full border shadow-lg flex items-center justify-center font-bold text-lg transition-all touch-target";
     
-    if (isLocked) {
+    if (isLocked && state !== 'undone') {
       return `${baseStyles} bg-gray-300 border-gray-400 opacity-40 cursor-not-allowed`;
     } else if (state === 'scored') {
       return `${baseStyles} bg-gray-300 border-green-600 opacity-60 text-gray-600 hover:shadow-xl active:scale-95`;
