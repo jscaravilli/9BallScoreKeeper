@@ -1,0 +1,316 @@
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { Menu, Users, History, Settings, Plus, RotateCcw } from "lucide-react";
+import PlayerSetupModal from "@/components/player-setup-modal";
+import GameWinModal from "@/components/game-win-modal";
+import MatchWinModal from "@/components/match-win-modal";
+import BallRack from "@/components/ball-rack";
+import PlayerScores from "@/components/player-scores";
+import type { Match, BallInfo } from "@shared/schema";
+
+export default function Game() {
+  const [showPlayerSetup, setShowPlayerSetup] = useState(false);
+  const [showGameWin, setShowGameWin] = useState(false);
+  const [showMatchWin, setShowMatchWin] = useState(false);
+  const [gameWinner, setGameWinner] = useState<1 | 2 | null>(null);
+
+  // Get current match
+  const { data: currentMatch, isLoading } = useQuery<Match | null>({
+    queryKey: ["/api/match/current"],
+  });
+
+  // Create new match mutation
+  const createMatchMutation = useMutation({
+    mutationFn: async (matchData: any) => {
+      const response = await apiRequest("POST", "/api/match", matchData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
+    },
+  });
+
+  // Update match mutation
+  const updateMatchMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: number; updates: any }) => {
+      const response = await apiRequest("PATCH", `/api/match/${id}`, updates);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
+    },
+  });
+
+  // Update ball states mutation
+  const updateBallsMutation = useMutation({
+    mutationFn: async ({ id, ballStates }: { id: number; ballStates: BallInfo[] }) => {
+      const response = await apiRequest("PATCH", `/api/match/${id}/balls`, { ballStates });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
+    },
+  });
+
+  // Check if we need to show player setup modal on first load
+  useEffect(() => {
+    if (!isLoading && !currentMatch) {
+      setShowPlayerSetup(true);
+    }
+  }, [isLoading, currentMatch]);
+
+  const handleNewMatch = () => {
+    setShowPlayerSetup(true);
+  };
+
+  const handlePlayerSetup = (player1Name: string, player1SkillLevel: number, player2Name: string, player2SkillLevel: number) => {
+    const initialBallStates: BallInfo[] = Array.from({ length: 9 }, (_, i) => ({
+      number: (i + 1) as BallInfo['number'],
+      state: 'active' as const,
+    }));
+
+    createMatchMutation.mutate({
+      player1Name,
+      player1SkillLevel,
+      player1Score: 0,
+      player2Name,
+      player2SkillLevel,
+      player2Score: 0,
+      currentPlayer: 1,
+      currentGame: 1,
+      ballStates: initialBallStates,
+      isComplete: false,
+      winnerId: null,
+    });
+    setShowPlayerSetup(false);
+  };
+
+  const handleBallTap = (ballNumber: number) => {
+    if (!currentMatch) return;
+
+    const ballStates = [...(currentMatch.ballStates as BallInfo[] || [])];
+    const ballIndex = ballStates.findIndex(b => b.number === ballNumber);
+    
+    if (ballIndex === -1) return;
+
+    const ball = ballStates[ballIndex];
+    
+    if (ball.state === 'active') {
+      // First tap - score the ball
+      ball.state = 'scored';
+      ball.scoredBy = currentMatch.currentPlayer as 1 | 2;
+      
+      // Calculate points (balls 1-8 = 1 point, ball 9 = 2 points)
+      const points = ballNumber === 9 ? 2 : 1;
+      const currentPlayerScore = currentMatch.currentPlayer === 1 
+        ? currentMatch.player1Score + points
+        : currentMatch.player2Score + points;
+
+      // Update match with new score
+      updateMatchMutation.mutate({
+        id: currentMatch.id,
+        updates: {
+          [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: currentPlayerScore,
+        }
+      });
+
+      // Check if ball 9 was scored (game over)
+      if (ballNumber === 9) {
+        setGameWinner(currentMatch.currentPlayer as 1 | 2);
+        setShowGameWin(true);
+        return;
+      }
+
+      // Switch players
+      updateMatchMutation.mutate({
+        id: currentMatch.id,
+        updates: {
+          currentPlayer: currentMatch.currentPlayer === 1 ? 2 : 1,
+        }
+      });
+      
+    } else if (ball.state === 'scored') {
+      // Second tap - mark as dead
+      ball.state = 'dead';
+      ball.scoredBy = undefined;
+    } else {
+      // Third tap - reset to active
+      ball.state = 'active';
+      ball.scoredBy = undefined;
+    }
+
+    updateBallsMutation.mutate({
+      id: currentMatch.id,
+      ballStates,
+    });
+  };
+
+  const handleResetGame = () => {
+    if (!currentMatch) return;
+
+    const initialBallStates: BallInfo[] = Array.from({ length: 9 }, (_, i) => ({
+      number: (i + 1) as BallInfo['number'],
+      state: 'active' as const,
+    }));
+
+    updateBallsMutation.mutate({
+      id: currentMatch.id,
+      ballStates: initialBallStates,
+    });
+  };
+
+  const handleNewGame = () => {
+    if (!currentMatch) return;
+
+    const initialBallStates: BallInfo[] = Array.from({ length: 9 }, (_, i) => ({
+      number: (i + 1) as BallInfo['number'],
+      state: 'active' as const,
+    }));
+
+    updateMatchMutation.mutate({
+      id: currentMatch.id,
+      updates: {
+        currentGame: currentMatch.currentGame + 1,
+        currentPlayer: 1,
+      }
+    });
+
+    updateBallsMutation.mutate({
+      id: currentMatch.id,
+      ballStates: initialBallStates,
+    });
+  };
+
+  const handleContinueMatch = () => {
+    setShowGameWin(false);
+    handleNewGame();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!currentMatch) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">APA 9-Ball Scorer</h1>
+          <Button onClick={handleNewMatch}>Start New Match</Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-md mx-auto bg-white shadow-lg min-h-screen relative">
+      {/* Header */}
+      <header className="pool-green text-white p-4 sticky top-0 z-10 shadow-md">
+        <div className="flex justify-between items-center mb-3">
+          <h1 className="text-xl font-bold">APA 9-Ball</h1>
+          <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400">
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
+        
+        <div className="text-sm opacity-90 mb-2">
+          <span>Match: Game {currentMatch.currentGame}</span>
+          <span className="float-right">Race to Handicap</span>
+        </div>
+        
+        <div className="pool-felt rounded-lg p-2 text-center">
+          <span className="text-yellow-400 font-medium">
+            Current Player: {currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name}
+          </span>
+        </div>
+      </header>
+
+      {/* Player Scores */}
+      <PlayerScores match={currentMatch} />
+
+      {/* Ball Rack */}
+      <BallRack 
+        ballStates={currentMatch.ballStates as BallInfo[] || []}
+        onBallTap={handleBallTap}
+      />
+
+      {/* Game Actions */}
+      <section className="p-4 pb-20">
+        <div className="grid grid-cols-2 gap-3">
+          <Button 
+            variant="secondary" 
+            className="py-3 px-4"
+            onClick={handleResetGame}
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Reset Game
+          </Button>
+          <Button 
+            className="pool-green text-white py-3 px-4 hover:pool-felt"
+            onClick={handleNewGame}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Game
+          </Button>
+        </div>
+      </section>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-200 p-4">
+        <div className="grid grid-cols-3 gap-2">
+          <Button 
+            variant="ghost" 
+            className="flex flex-col items-center py-2 text-gray-600 hover:text-green-600"
+            onClick={() => setShowPlayerSetup(true)}
+          >
+            <Users className="h-5 w-5 mb-1" />
+            <span className="text-xs">Players</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            className="flex flex-col items-center py-2 text-gray-600 hover:text-green-600"
+          >
+            <History className="h-5 w-5 mb-1" />
+            <span className="text-xs">History</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            className="flex flex-col items-center py-2 text-gray-600 hover:text-green-600"
+          >
+            <Settings className="h-5 w-5 mb-1" />
+            <span className="text-xs">Settings</span>
+          </Button>
+        </div>
+      </nav>
+
+      {/* Modals */}
+      <PlayerSetupModal 
+        open={showPlayerSetup}
+        onClose={() => setShowPlayerSetup(false)}
+        onSave={handlePlayerSetup}
+        currentMatch={currentMatch}
+      />
+      
+      <GameWinModal 
+        open={showGameWin}
+        onClose={() => setShowGameWin(false)}
+        winner={gameWinner}
+        currentMatch={currentMatch}
+        onContinueMatch={handleContinueMatch}
+        onNewMatch={handleNewMatch}
+      />
+      
+      <MatchWinModal 
+        open={showMatchWin}
+        onClose={() => setShowMatchWin(false)}
+        currentMatch={currentMatch}
+        onNewMatch={handleNewMatch}
+      />
+    </div>
+  );
+}
