@@ -4,7 +4,7 @@ import { clientQueryFunctions, clientMutation, queryClient } from "@/lib/queryCl
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
-import { Menu, Users, History, Settings, Plus, RotateCcw } from "lucide-react";
+import { Menu, Users, History, Settings, Plus, RotateCcw, Info, X } from "lucide-react";
 import PlayerSetupModal from "@/components/player-setup-modal";
 import GameWinModal from "@/components/game-win-modal";
 import MatchWinModal from "@/components/match-win-modal";
@@ -17,6 +17,8 @@ export default function Game() {
   const [showPlayerSetup, setShowPlayerSetup] = useState(false);
   const [showGameWin, setShowGameWin] = useState(false);
   const [showMatchWin, setShowMatchWin] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [gameWinner, setGameWinner] = useState<1 | 2 | null>(null);
   const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -409,11 +411,14 @@ export default function Game() {
       <header className="bg-green-950/50 backdrop-blur-sm border-b border-green-700/30 sticky top-0 z-10">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
-            <div className="bg-green-800 p-2 rounded-lg">
+            <button 
+              onClick={() => setShowMenu(true)}
+              className="bg-green-800 p-2 rounded-lg hover:bg-green-700 transition-colors"
+            >
               <Menu className="h-5 w-5 text-green-100" />
-            </div>
+            </button>
             <div>
-              <h1 className="text-lg font-bold text-white">APA 9 Ball Scorekeeper</h1>
+              <h1 className="text-lg font-bold text-white">Joseph's Unofficial APA 9 Ball Scorekeeper</h1>
               <p className="text-green-200 text-sm">Game {currentMatch.currentGame}</p>
             </div>
           </div>
@@ -534,6 +539,89 @@ export default function Game() {
         currentMatch={currentMatch}
         onNewMatch={handleNewGame}
       />
+
+      {/* Menu Modal */}
+      <Dialog open={showMenu} onOpenChange={setShowMenu}>
+        <DialogContent className="max-w-sm mx-auto">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Menu</h2>
+              <button 
+                onClick={() => setShowMenu(false)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  setShowControls(true);
+                }}
+                className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                <Info className="h-5 w-5 text-blue-600" />
+                <span className="font-medium">Controls</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  setShowPlayerSetup(true);
+                }}
+                className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                <Users className="h-5 w-5 text-green-600" />
+                <span className="font-medium">Player Setup</span>
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Controls Modal */}
+      <Dialog open={showControls} onOpenChange={setShowControls}>
+        <DialogContent className="max-w-md mx-auto">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Ball Controls</h2>
+              <button 
+                onClick={() => setShowControls(false)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="space-y-4 text-sm text-gray-700">
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <h3 className="font-semibold text-gray-800 mb-2">How to Use Ball Controls:</h3>
+                <ul className="space-y-2">
+                  <li><strong>First tap:</strong> Mark ball as scored by current player</li>
+                  <li><strong>Second tap:</strong> Mark ball as dead (removes points)</li>
+                  <li><strong>Third tap:</strong> Reset ball to active state</li>
+                </ul>
+              </div>
+              
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <h3 className="font-semibold text-blue-800 mb-2">Scoring:</h3>
+                <ul className="space-y-2 text-blue-700">
+                  <li>• Balls 1-8: 1 point each</li>
+                  <li>• 9-ball: 2 points</li>
+                  <li>• Pocketing the 9-ball wins the game instantly</li>
+                </ul>
+              </div>
+              
+              <div className="bg-green-50 p-3 rounded-lg">
+                <h3 className="font-semibold text-green-800 mb-2">APA Handicap System:</h3>
+                <p className="text-green-700">Players race to their skill level target. Higher skill levels need more points to win the match.</p>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Confirmation Dialogs */}
       <Dialog open={showNewGameConfirm} onOpenChange={setShowNewGameConfirm}>
