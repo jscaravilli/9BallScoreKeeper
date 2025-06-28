@@ -256,7 +256,7 @@ export default function Game() {
         ballNumber: ballNumber,
         pointsAwarded: points,
         newScore: newScore,
-        details: `Ball ${ballNumber} scored for ${points} point${points > 1 ? 's' : ''}`
+        details: `${ballNumber}-Ball scored for ${points} point${points > 1 ? 's' : ''}`
       };
       localStorageAPI.addMatchEvent(ballScoredEvent);
 
@@ -370,7 +370,7 @@ export default function Game() {
           ballNumber: ballNumber,
           pointsAwarded: -points,
           newScore: newScore,
-          details: `Ball ${ballNumber} marked dead, ${points} point${points > 1 ? 's' : ''} deducted`
+          details: `${ballNumber}-Ball marked dead, ${points} point${points > 1 ? 's' : ''} deducted`
         };
         localStorageAPI.addMatchEvent(ballDeadEvent);
 
