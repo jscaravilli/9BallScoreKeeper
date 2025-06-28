@@ -496,7 +496,9 @@ export default function Game() {
       previousBallStates
     });
     
-    const isUndoingRack = nineBallCurrent?.state === 'scored' && nineBallPrevious?.state !== 'scored';
+    // Check if we're about to undo a turn where the 9-ball was scored
+    // Previous state should have 9-ball NOT scored, current state should have it scored
+    const isUndoingRack = nineBallCurrent?.state === 'scored' && nineBallPrevious?.state === 'active';
     
     console.log('Is undoing rack?', isUndoingRack);
     
