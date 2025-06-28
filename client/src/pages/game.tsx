@@ -127,7 +127,7 @@ export default function Game() {
       const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
       
       if (newScore >= targetForCurrentPlayer) {
-        // Match won - set score to exactly what was achieved and complete match
+        // Match won - update score, complete match, and update ball states all at once
         updateMatchMutation.mutate({
           id: currentMatch.id,
           updates: {
@@ -136,6 +136,13 @@ export default function Game() {
             winnerId: currentMatch.currentPlayer,
           }
         });
+        
+        // Update ball states to reflect the winning ball
+        updateBallsMutation.mutate({
+          id: currentMatch.id,
+          ballStates,
+        });
+        
         setShowMatchWin(true);
         return;
       }
@@ -146,6 +153,12 @@ export default function Game() {
         updates: {
           [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: newScore,
         }
+      });
+
+      // Always update ball states for scoring
+      updateBallsMutation.mutate({
+        id: currentMatch.id,
+        ballStates,
       });
 
       // Check if ball 9 was scored (game over, but match continues)
@@ -176,16 +189,23 @@ export default function Game() {
       
       ball.state = 'dead';
       ball.scoredBy = undefined;
+      
+      // Update ball states
+      updateBallsMutation.mutate({
+        id: currentMatch.id,
+        ballStates,
+      });
     } else {
-      // Third tap - reset to active (also deduct points if it was previously scored)
+      // Third tap - reset to active
       ball.state = 'active';
       ball.scoredBy = undefined;
+      
+      // Update ball states
+      updateBallsMutation.mutate({
+        id: currentMatch.id,
+        ballStates,
+      });
     }
-
-    updateBallsMutation.mutate({
-      id: currentMatch.id,
-      ballStates,
-    });
   };
 
   const handleEndTurn = () => {
