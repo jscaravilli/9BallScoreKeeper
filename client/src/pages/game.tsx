@@ -213,6 +213,51 @@ export default function Game() {
   const handleBallTap = (ballNumber: number) => {
     if (!currentMatch || isProcessing || currentMatch.isComplete || matchWinner) return;
     
+    // Special handling for 9-ball undo: Check if this is the 9-ball and it's the next to be undone
+    if (ballNumber === 9 && turnHistory.length > 0) {
+      const lastState = turnHistory[turnHistory.length - 1];
+      const currentNineBall = (currentMatch.ballStates as BallInfo[]).find((b: BallInfo) => b.number === 9);
+      const previousNineBall = lastState.ballStates.find(b => b.number === 9);
+      
+      // If 9-ball is currently scored but was active in previous state, allow undo
+      if (currentNineBall?.state === 'scored' && previousNineBall?.state === 'active') {
+        // Execute the undo for the 9-ball
+        const ballStates = [...(currentMatch.ballStates as BallInfo[] || [])];
+        const nineBall = ballStates.find(b => b.number === 9);
+        if (nineBall) {
+          nineBall.state = 'active';
+          nineBall.scoredBy = undefined;
+        }
+        
+        // Restore previous match state
+        localStorageAPI.updateMatch(currentMatch.id, {
+          ...lastState,
+          ballStates: ballStates
+        });
+        
+        // Remove the last state from history
+        setTurnHistory(prev => prev.slice(0, -1));
+        
+        // Clear any winner states
+        setGameWinner(null);
+        setShowGameWin(false);
+        setMatchWinner(null);
+        setShowMatchWin(false);
+        
+        // Log the undo event
+        const undoEvent: MatchEvent = {
+          type: 'turn_ended',
+          timestamp: new Date().toISOString(),
+          player: currentMatch.currentPlayer as 1 | 2,
+          playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+          details: '9-Ball undone - returned to active state'
+        };
+        localStorageAPI.addMatchEvent(undoEvent);
+        
+        return; // Exit early after handling 9-ball undo
+      }
+    }
+    
     // Check if ball is locked (pocketed/marked dead in previous turn)
     if (lockedBalls.has(ballNumber)) {
       return; // Don't allow interaction with locked balls
@@ -729,6 +774,7 @@ export default function Game() {
         ballStates={currentMatch.ballStates as BallInfo[] || []}
         onBallTap={handleBallTap}
         lockedBalls={lockedBalls}
+        turnHistory={turnHistory}
       />
 
       {/* Game Actions */}

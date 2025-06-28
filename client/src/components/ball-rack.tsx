@@ -6,6 +6,7 @@ interface BallRackProps {
   ballStates: BallInfo[];
   onBallTap: (ballNumber: number) => void;
   lockedBalls?: Set<number>;
+  turnHistory?: any[]; // Turn history to check if 9-ball can be undone
 }
 
 const BALL_COLORS = {
@@ -20,12 +21,20 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set() }: BallRackProps) {
+export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(), turnHistory = [] }: BallRackProps) {
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
       number: ballNumber as BallInfo['number'],
       state: 'active' as const,
     };
+  };
+
+  const isNineBallUndoable = (): boolean => {
+    if (turnHistory.length === 0) return false;
+    const lastState = turnHistory[turnHistory.length - 1];
+    const currentNineBall = ballStates.find(b => b.number === 9);
+    const previousNineBall = lastState.ballStates?.find((b: any) => b.number === 9);
+    return currentNineBall?.state === 'scored' && previousNineBall?.state === 'active';
   };
 
   const getBallGradient = (ballNumber: number) => {
@@ -44,6 +53,16 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
   };
 
   const renderBallContent = (ballNumber: number, state: BallInfo['state']) => {
+    // Special handling for 9-ball when it's scored and undoable
+    if (ballNumber === 9 && state === 'scored' && isNineBallUndoable()) {
+      return (
+        <div className="relative">
+          <Check className="h-6 w-6 text-green-600" />
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+        </div>
+      );
+    }
+    
     // Handle scored/dead states first, regardless of ball number
     if (state === 'scored') {
       return <Check className="h-6 w-6 text-green-600" />;
