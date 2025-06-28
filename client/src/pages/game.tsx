@@ -7,6 +7,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogAction, AlertDialogCancel }
 import { Menu, Users, History, Settings, Plus, RotateCcw } from "lucide-react";
 import PlayerSetupModal from "@/components/player-setup-modal";
 import GameWinModal from "@/components/game-win-modal";
+import MatchWinModal from "@/components/match-win-modal";
 import BallRack from "@/components/ball-rack";
 import PlayerScores from "@/components/player-scores";
 import { getPointsToWin } from "@/lib/apa-handicaps";
@@ -15,6 +16,7 @@ import type { Match, BallInfo } from "@shared/schema";
 export default function Game() {
   const [showPlayerSetup, setShowPlayerSetup] = useState(false);
   const [showGameWin, setShowGameWin] = useState(false);
+  const [showMatchWin, setShowMatchWin] = useState(false);
   const [gameWinner, setGameWinner] = useState<1 | 2 | null>(null);
   const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -162,6 +164,9 @@ export default function Game() {
           finalScore2: currentMatch.currentPlayer === 2 ? newScore : currentMatch.player2Score,
         });
         
+        // Show match win modal
+        setShowMatchWin(true);
+        
         try {
           updateMatchMutation.mutate({
             id: currentMatch.id,
@@ -294,6 +299,7 @@ export default function Game() {
 
     setPreviousTurnState(null);
     setMatchWinner(null);
+    setShowMatchWin(false);
     setShowResetConfirm(false);
   };
 
@@ -330,6 +336,7 @@ export default function Game() {
 
     setPreviousTurnState(null);
     setMatchWinner(null);
+    setShowMatchWin(false);
     
     setTimeout(() => {
       setUndoInProgress(false);
@@ -344,6 +351,7 @@ export default function Game() {
     // Clear current match state and show player setup for new match
     setPreviousTurnState(null);
     setMatchWinner(null);
+    setShowMatchWin(false);
     setShowNewGameConfirm(false);
     setShowPlayerSetup(true);
     
@@ -518,6 +526,13 @@ export default function Game() {
         onContinueMatch={handleContinueMatch}
         onNewMatch={handleNewGame}
         onRerack={handleRerack}
+      />
+
+      <MatchWinModal 
+        open={showMatchWin}
+        onClose={() => setShowMatchWin(false)}
+        currentMatch={currentMatch}
+        onNewMatch={handleNewGame}
       />
 
       {/* Confirmation Dialogs */}
