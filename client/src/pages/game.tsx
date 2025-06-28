@@ -133,14 +133,15 @@ export default function Game() {
     finalScore1: number;
     finalScore2: number;
   } | null>(null);
-  const [previousTurnState, setPreviousTurnState] = useState<{
+  const [turnHistory, setTurnHistory] = useState<{
     ballStates: BallInfo[];
     currentPlayer: number;
     player1Score: number;
     player2Score: number;
-  } | null>(null);
+  }[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [undoInProgress, setUndoInProgress] = useState(false);
+  const maxTurnHistory = 10; // Keep last 10 turns for undo
 
   // Get current match
   const { data: currentMatch, isLoading } = useQuery<Match | null>({
@@ -226,11 +227,17 @@ export default function Game() {
     if (ball.state === 'active') {
       // Store current state for undo functionality BEFORE modifying the ball
       // Deep clone the ball states to prevent reference issues
-      setPreviousTurnState({
+      const currentState = {
         ballStates: (currentMatch.ballStates as BallInfo[] || []).map(b => ({ ...b })),
         currentPlayer: currentMatch.currentPlayer,
         player1Score: currentMatch.player1Score,
         player2Score: currentMatch.player2Score,
+      };
+      
+      // Add to turn history, keeping only the last maxTurnHistory turns
+      setTurnHistory(prev => {
+        const newHistory = [...prev, currentState];
+        return newHistory.slice(-maxTurnHistory);
       });
 
       // First tap - score the ball
@@ -407,11 +414,16 @@ export default function Game() {
     if (!currentMatch) return;
 
     // Save current state before switching turns
-    setPreviousTurnState({
+    const currentState = {
       ballStates: currentMatch.ballStates as BallInfo[] || [],
       currentPlayer: currentMatch.currentPlayer,
       player1Score: currentMatch.player1Score,
       player2Score: currentMatch.player2Score,
+    };
+    
+    setTurnHistory(prev => {
+      const newHistory = [...prev, currentState];
+      return newHistory.slice(-maxTurnHistory);
     });
 
     // Switch to the other player
@@ -451,7 +463,7 @@ export default function Game() {
       ballStates: initialBallStates,
     });
 
-    setPreviousTurnState(null);
+    setTurnHistory([]);
     setMatchWinner(null);
     setShowMatchWin(false);
     setShowResetConfirm(false);
@@ -460,24 +472,27 @@ export default function Game() {
   const handleUndoTurn = () => {
     console.log('handleUndoTurn called', { 
       hasMatch: !!currentMatch, 
-      hasPreviousState: !!previousTurnState, 
+      historyLength: turnHistory.length, 
       undoInProgress 
     });
     
-    if (!currentMatch || !previousTurnState || undoInProgress) return;
+    if (!currentMatch || turnHistory.length === 0 || undoInProgress) return;
+    
+    // Get the most recent state from history
+    const previousState = turnHistory[turnHistory.length - 1];
     
     console.log('Executing undo...');
     console.log('Current ball states:', currentMatch.ballStates);
-    console.log('Previous ball states to restore:', previousTurnState.ballStates);
+    console.log('Previous ball states to restore:', previousState.ballStates);
     
     setUndoInProgress(true);
 
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
-        currentPlayer: previousTurnState.currentPlayer,
-        player1Score: previousTurnState.player1Score,
-        player2Score: previousTurnState.player2Score,
+        currentPlayer: previousState.currentPlayer,
+        player1Score: previousState.player1Score,
+        player2Score: previousState.player2Score,
         isComplete: false,
         winnerId: null,
       }
@@ -485,10 +500,11 @@ export default function Game() {
 
     updateBallsMutation.mutate({
       id: currentMatch.id,
-      ballStates: previousTurnState.ballStates,
+      ballStates: previousState.ballStates,
     });
 
-    setPreviousTurnState(null);
+    // Remove the last state from history
+    setTurnHistory(prev => prev.slice(0, -1));
     setMatchWinner(null);
     setShowMatchWin(false);
     
@@ -503,7 +519,7 @@ export default function Game() {
 
   const confirmNewGame = () => {
     // Clear current match state and show player setup for new match
-    setPreviousTurnState(null);
+    setTurnHistory([]);
     setMatchWinner(null);
     setShowMatchWin(false);
     setShowNewGameConfirm(false);
@@ -595,10 +611,10 @@ export default function Game() {
               variant="outline"
               size="sm"
               className="text-orange-700 border-orange-300 hover:bg-orange-50"
-              disabled={!previousTurnState || undoInProgress}
+              disabled={turnHistory.length === 0 || undoInProgress}
             >
               <RotateCcw className="h-4 w-4 mr-1" />
-              Undo Final Point
+              Undo Last Turn
             </Button>
             <Button
               onClick={() => setShowNewGameConfirm(true)}
@@ -655,14 +671,14 @@ export default function Game() {
           </Button>
         </div>
 
-        {previousTurnState && (
+        {turnHistory.length > 0 && (
           <Button
             variant="outline"
             className="w-full py-3 px-4 bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100"
             onClick={handleUndoTurn}
           >
             <History className="h-4 w-4 mr-2" />
-            Undo Last Turn
+            Undo Last Turn ({turnHistory.length} available)
           </Button>
         )}
       </section>
