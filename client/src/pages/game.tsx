@@ -127,11 +127,11 @@ export default function Game() {
       const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
       
       if (newScore >= targetForCurrentPlayer) {
-        // Match won - cap score at target and complete match
+        // Match won - set score to exactly what was achieved and complete match
         updateMatchMutation.mutate({
           id: currentMatch.id,
           updates: {
-            [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: targetForCurrentPlayer,
+            [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: newScore,
             isComplete: true,
             winnerId: currentMatch.currentPlayer,
           }

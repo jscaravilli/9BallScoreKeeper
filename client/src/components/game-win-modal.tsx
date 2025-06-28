@@ -48,19 +48,12 @@ export default function GameWinModal({
           </p>
           
           {/* Game won - only show rerack option */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex justify-center">
             <Button 
-              variant="outline" 
               onClick={onRerack}
-              className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+              className="bg-blue-600 text-white hover:bg-blue-700 px-8 py-3"
             >
               Rerack
-            </Button>
-            <Button 
-              onClick={onNewMatch}
-              className="pool-green text-white hover:pool-felt"
-            >
-              New Game
             </Button>
           </div>
         </div>
