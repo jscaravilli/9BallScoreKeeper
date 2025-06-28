@@ -129,7 +129,7 @@ export default function Game() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showUndoRackConfirm, setShowUndoRackConfirm] = useState(false);
   const [showRackUndoneMessage, setShowRackUndoneMessage] = useState(false);
-  const [lastScoredNineBall, setLastScoredNineBall] = useState(false);
+  const [rackCompleted, setRackCompleted] = useState(false);
   const [lockedBalls, setLockedBalls] = useState<Set<number>>(new Set());
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
@@ -255,8 +255,8 @@ export default function Game() {
       
       // Track if we just scored the 9-ball (rack completion)
       if (ballNumber === 9) {
-        setLastScoredNineBall(true);
-        console.log('9-ball scored, setting lastScoredNineBall to true');
+        setRackCompleted(true);
+        console.log('9-ball scored, rack completed');
       }
       
       // Get handicap targets
@@ -525,16 +525,25 @@ export default function Game() {
       previousBallStates
     });
     
-    // Check if we're about to undo a turn where the 9-ball went from active to scored
-    const isUndoingRack = nineBallCurrent?.state === 'scored' && nineBallPrevious?.state === 'active';
+    // Improved rack undo detection: Check if 9-ball is currently scored and we have rack completion flag
+    // OR if this specific undo will change 9-ball from scored to active
+    const nineBallCurrentlyScored = nineBallCurrent?.state === 'scored';
+    const nineBallWillBecomeActive = nineBallPrevious?.state === 'active';
+    const willUnscoreNineBall = nineBallCurrentlyScored && nineBallWillBecomeActive;
+    
+    // Show confirmation if we have a completed rack and 9-ball is scored, OR if we're directly unscoring the 9-ball
+    const shouldShowRackUndo = (rackCompleted && nineBallCurrentlyScored) || willUnscoreNineBall;
     
     console.log('Rack undo check:', {
       nineBallCurrent: nineBallCurrent?.state,
       nineBallPrevious: nineBallPrevious?.state,
-      isUndoingRack
+      rackCompleted,
+      nineBallCurrentlyScored,
+      willUnscoreNineBall,
+      shouldShowRackUndo
     });
     
-    if (isUndoingRack) {
+    if (shouldShowRackUndo) {
       console.log('Showing rack undo confirmation');
       setShowUndoRackConfirm(true);
       return;
@@ -602,7 +611,7 @@ export default function Game() {
     setTurnHistory(prev => prev.slice(0, -1));
     setMatchWinner(null);
     setShowMatchWin(false);
-    setLastScoredNineBall(false); // Clear 9-ball tracking flag
+    setRackCompleted(false); // Clear rack completion flag
     
     setTimeout(() => {
       setUndoInProgress(false);
@@ -625,7 +634,7 @@ export default function Game() {
     }
     
     executeUndo();
-    setLastScoredNineBall(false); // Clear the flag
+    setRackCompleted(false); // Clear the flag
     
     // Show temporary success message
     setShowRackUndoneMessage(true);
