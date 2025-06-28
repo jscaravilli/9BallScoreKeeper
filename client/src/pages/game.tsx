@@ -369,9 +369,10 @@ export default function Game() {
 
       // Check for special 9-ball win (9-ball pocketed during game)
       if (ballNumber === 9) {
+        console.log('9-ball win triggered, ball states should be:', ballStates);
         setGameWinner(currentMatch.currentPlayer as 1 | 2);
         setShowGameWin(true);
-        return;
+        // Don't return - let the mutation complete
       }
     } else if (ball.state === 'scored') {
       // Second tap on scored ball - mark as dead and deduct points
@@ -527,6 +528,11 @@ export default function Game() {
     
     // Simple and reliable rack undo detection: ANY time user tries to undo while 9-ball is scored
     const nineBallCurrentlyScored = nineBallCurrent?.state === 'scored';
+    
+    // Debug: Check what the current match actually shows for ball states
+    console.log('Debug - Current match ball states:', currentMatch.ballStates);
+    console.log('Debug - 9-ball state from current match:', 
+      (currentMatch.ballStates as BallInfo[])?.find(b => b.number === 9));
     
     // Show confirmation if 9-ball is currently scored - this covers all scenarios
     const shouldShowRackUndo = nineBallCurrentlyScored;
