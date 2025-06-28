@@ -33,26 +33,26 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
     } else if (state === 'dead') {
       return <X className="h-6 w-6 text-red-500" />;
     } else if (ballNumber === 9) {
-      // CSS-based 9-ball design matching reference image
+      // CSS-based 9-ball design using full circle size
       return (
-        <div className="relative w-full h-full">
+        <div className="absolute inset-0 rounded-full overflow-hidden">
           {/* Light gray base ball */}
           <div className="absolute inset-0 bg-gray-200 rounded-full"></div>
           
-          {/* Yellow horizontal stripe - positioned to span across middle */}
+          {/* Yellow horizontal stripe spanning full width */}
           <div 
-            className="absolute left-0 right-0 bg-yellow-400"
+            className="absolute inset-x-0 bg-yellow-400"
             style={{ 
-              top: '30%',
-              bottom: '30%',
+              top: '28%',
+              height: '44%',
               background: 'linear-gradient(to bottom, #eab308, #fbbf24, #eab308)'
             }}
           ></div>
           
           {/* White circle for number in center */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center border border-gray-400 shadow-sm">
-              <span className="font-bold text-sm text-black">9</span>
+            <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center border border-gray-400 shadow-sm">
+              <span className="font-bold text-base text-black">9</span>
             </div>
           </div>
         </div>
@@ -70,8 +70,8 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
     } else if (state === 'dead') {
       return `${baseStyles} bg-gray-400 border-red-500 opacity-40 text-white`;
     } else if (ballNumber === 9) {
-      // Special styling for 9-ball with white base and yellow stripe
-      return `${baseStyles} bg-white border-amber-400 text-black overflow-hidden`;
+      // Special styling for 9-ball - remove padding to allow full circle usage
+      return `${baseStyles} bg-gray-200 border-gray-300 text-black overflow-hidden p-0`;
     } else {
       const colorClass = BALL_COLORS[ballNumber as keyof typeof BALL_COLORS];
       const textColor = [1].includes(ballNumber) ? "text-black" : "text-white";
