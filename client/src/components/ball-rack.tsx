@@ -5,6 +5,7 @@ import type { BallInfo } from "@shared/schema";
 interface BallRackProps {
   ballStates: BallInfo[];
   onBallTap: (ballNumber: number) => void;
+  lockedBalls?: Set<number>;
 }
 
 const BALL_COLORS = {
@@ -19,7 +20,7 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
+export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set() }: BallRackProps) {
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
       number: ballNumber as BallInfo['number'],
@@ -119,16 +120,18 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
     }
   };
 
-  const getBallStyles = (ballNumber: number, state: BallInfo['state']) => {
-    const baseStyles = "w-16 h-16 rounded-full border shadow-lg flex items-center justify-center font-bold text-lg hover:shadow-xl transition-all active:scale-95 touch-target";
+  const getBallStyles = (ballNumber: number, state: BallInfo['state'], isLocked: boolean) => {
+    const baseStyles = "w-16 h-16 rounded-full border shadow-lg flex items-center justify-center font-bold text-lg transition-all touch-target";
     
-    if (state === 'scored') {
-      return `${baseStyles} bg-gray-300 border-green-600 opacity-60 text-gray-600`;
+    if (isLocked) {
+      return `${baseStyles} bg-gray-300 border-gray-400 opacity-40 cursor-not-allowed`;
+    } else if (state === 'scored') {
+      return `${baseStyles} bg-gray-300 border-green-600 opacity-60 text-gray-600 hover:shadow-xl active:scale-95`;
     } else if (state === 'dead') {
-      return `${baseStyles} bg-gray-400 border-red-500 opacity-40 text-white`;
+      return `${baseStyles} bg-gray-400 border-red-500 opacity-40 text-white hover:shadow-xl active:scale-95`;
     } else {
       // All balls now use custom gradients, no background needed here
-      return `${baseStyles} bg-transparent border-gray-300 text-white overflow-hidden p-0`;
+      return `${baseStyles} bg-transparent border-gray-300 text-white overflow-hidden p-0 hover:shadow-xl active:scale-95`;
     }
   };
 
@@ -141,15 +144,21 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
         {Array.from({ length: 9 }, (_, i) => {
           const ballNumber = i + 1;
           const ballState = getBallState(ballNumber);
+          const isLocked = lockedBalls.has(ballNumber);
           
           return (
             <Button
               key={ballNumber}
-              className={getBallStyles(ballNumber, ballState.state)}
-              onClick={() => onBallTap(ballNumber)}
+              className={getBallStyles(ballNumber, ballState.state, isLocked)}
+              onClick={() => !isLocked && onBallTap(ballNumber)}
               variant="outline"
+              disabled={isLocked}
             >
-              {renderBallContent(ballNumber, ballState.state)}
+              {isLocked ? (
+                <span className="text-gray-500 font-bold">{ballNumber}</span>
+              ) : (
+                renderBallContent(ballNumber, ballState.state)
+              )}
             </Button>
           );
         })}

@@ -130,6 +130,7 @@ export default function Game() {
   const [showUndoRackConfirm, setShowUndoRackConfirm] = useState(false);
   const [showRackUndoneMessage, setShowRackUndoneMessage] = useState(false);
   const [lastScoredNineBall, setLastScoredNineBall] = useState(false);
+  const [lockedBalls, setLockedBalls] = useState<Set<number>>(new Set());
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
     name: string;
@@ -213,6 +214,11 @@ export default function Game() {
   const handleBallTap = (ballNumber: number) => {
     if (!currentMatch || isProcessing || currentMatch.isComplete || matchWinner) return;
     
+    // Check if ball is locked (pocketed/marked dead in previous turn)
+    if (lockedBalls.has(ballNumber)) {
+      return; // Don't allow interaction with locked balls
+    }
+    
     setIsProcessing(true);
     
     // Add a small delay to prevent rapid double-taps
@@ -250,6 +256,7 @@ export default function Game() {
       // Track if we just scored the 9-ball (rack completion)
       if (ballNumber === 9) {
         setLastScoredNineBall(true);
+        console.log('9-ball scored, setting lastScoredNineBall to true');
       }
       
       // Get handicap targets
@@ -421,6 +428,22 @@ export default function Game() {
   const handleEndTurn = () => {
     if (!currentMatch) return;
 
+    // Find balls that were modified in the current turn (scored or dead by current player)
+    const ballStates = currentMatch.ballStates as BallInfo[];
+    const modifiedBalls: number[] = [];
+    
+    ballStates.forEach(ball => {
+      if ((ball.state === 'scored' || ball.state === 'dead') && 
+          ball.scoredBy === currentMatch.currentPlayer) {
+        modifiedBalls.push(ball.number);
+      }
+    });
+    
+    // Add these balls to the locked set
+    const newLockedBalls = new Set(lockedBalls);
+    modifiedBalls.forEach(ballNum => newLockedBalls.add(ballNum));
+    setLockedBalls(newLockedBalls);
+
     // Save current state before switching turns
     const currentState = {
       ballStates: currentMatch.ballStates as BallInfo[] || [],
@@ -502,14 +525,14 @@ export default function Game() {
       previousBallStates
     });
     
-    // Check if we're about to undo the last turn that scored a 9-ball
-    console.log('Last scored nine ball:', lastScoredNineBall);
-    console.log('Current 9-ball state:', nineBallCurrent?.state);
-    console.log('Previous 9-ball state:', nineBallPrevious?.state);
+    // Check if we're about to undo a turn where the 9-ball went from active to scored
+    const isUndoingRack = nineBallCurrent?.state === 'scored' && nineBallPrevious?.state === 'active';
     
-    const isUndoingRack = lastScoredNineBall && nineBallCurrent?.state === 'scored' && nineBallPrevious?.state === 'active';
-    
-    console.log('Is undoing rack?', isUndoingRack);
+    console.log('Rack undo check:', {
+      nineBallCurrent: nineBallCurrent?.state,
+      nineBallPrevious: nineBallPrevious?.state,
+      isUndoingRack
+    });
     
     if (isUndoingRack) {
       console.log('Showing rack undo confirmation');
@@ -528,6 +551,24 @@ export default function Game() {
     console.log('Executing undo...');
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
+    
+    // Calculate which balls should be unlocked when we undo to this state
+    const currentBallStates = currentMatch.ballStates as BallInfo[];
+    const previousBallStates = previousState.ballStates;
+    
+    // Find balls that were active in the previous state but are scored/dead now
+    const ballsToUnlock: number[] = [];
+    previousBallStates.forEach(prevBall => {
+      const currentBall = currentBallStates.find(b => b.number === prevBall.number);
+      if (prevBall.state === 'active' && currentBall && currentBall.state !== 'active') {
+        ballsToUnlock.push(prevBall.number);
+      }
+    });
+    
+    // Remove unlocked balls from the locked set
+    const newLockedBalls = new Set(lockedBalls);
+    ballsToUnlock.forEach(ballNum => newLockedBalls.delete(ballNum));
+    setLockedBalls(newLockedBalls);
     
     // Log the undo event
     const undoEvent: MatchEvent = {
@@ -721,6 +762,7 @@ export default function Game() {
       <BallRack 
         ballStates={currentMatch.ballStates as BallInfo[] || []}
         onBallTap={handleBallTap}
+        lockedBalls={lockedBalls}
       />
 
       {/* Game Actions */}
