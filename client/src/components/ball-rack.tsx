@@ -33,17 +33,21 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
     } else if (state === 'dead') {
       return <X className="h-6 w-6 text-red-500" />;
     } else if (ballNumber === 9) {
-      // Special 9-ball design with yellow stripe
+      // Authentic 9-ball design - white base with yellow stripe and number in the stripe
       return (
-        <div className="relative w-full h-full flex items-center justify-center">
-          <div className="absolute inset-0 rounded-full bg-white"></div>
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-90" 
-               style={{ 
-                 background: 'linear-gradient(90deg, transparent 20%, #facc15 35%, #facc15 65%, transparent 80%)'
-               }}></div>
-          <span className="relative z-10 font-bold text-lg text-black bg-white rounded-full w-8 h-8 flex items-center justify-center border border-gray-300">
-            {ballNumber}
-          </span>
+        <div className="relative w-full h-full rounded-full overflow-hidden">
+          {/* White base ball */}
+          <div className="absolute inset-0 bg-white rounded-full"></div>
+          
+          {/* Yellow horizontal stripe across the middle */}
+          <div className="absolute top-1/2 left-0 right-0 h-4 bg-yellow-400 transform -translate-y-1/2"
+               style={{ background: 'linear-gradient(180deg, #eab308 0%, #facc15 50%, #eab308 100%)' }}>
+          </div>
+          
+          {/* Number 9 positioned in the center */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="font-bold text-lg text-black drop-shadow-sm">9</span>
+          </div>
         </div>
       );
     } else {
