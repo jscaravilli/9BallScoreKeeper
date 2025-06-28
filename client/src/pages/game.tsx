@@ -678,7 +678,7 @@ export default function Game() {
             onClick={handleUndoTurn}
           >
             <History className="h-4 w-4 mr-2" />
-            Undo Last Turn ({turnHistory.length} available)
+            Undo Last Turn
           </Button>
         )}
       </section>
