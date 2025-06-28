@@ -472,7 +472,7 @@ export default function Game() {
   };
 
   const handleUndoTurn = () => {
-    console.log('handleUndoTurn called', { 
+    console.log('ENHANCED handleUndoTurn called', { 
       hasMatch: !!currentMatch, 
       historyLength: turnHistory.length, 
       undoInProgress 
@@ -489,9 +489,19 @@ export default function Game() {
     const nineBallCurrent = currentBallStates.find(ball => ball.number === 9);
     const nineBallPrevious = previousBallStates.find(ball => ball.number === 9);
     
+    console.log('Checking rack undo:', {
+      nineBallCurrent: nineBallCurrent?.state,
+      nineBallPrevious: nineBallPrevious?.state,
+      currentBallStates,
+      previousBallStates
+    });
+    
     const isUndoingRack = nineBallCurrent?.state === 'scored' && nineBallPrevious?.state !== 'scored';
     
+    console.log('Is undoing rack?', isUndoingRack);
+    
     if (isUndoingRack) {
+      console.log('Showing rack undo confirmation');
       setShowUndoRackConfirm(true);
       return;
     }
