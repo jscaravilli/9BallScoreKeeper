@@ -112,6 +112,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 28, 2025: Enhanced PlayerScores component with override capability for immediate final score display
 - June 28, 2025: Resolved ball state timing issue - winning ball now correctly resets when undo is pressed
 - June 28, 2025: Implemented deep cloning for proper undo state management
+- June 28, 2025: Updated terminology from "New Game" to "New Match" throughout interface
+- June 28, 2025: Fixed winner banner re-display issue after undo - now shows correctly on repeated wins
 
 ## User Preferences
 
