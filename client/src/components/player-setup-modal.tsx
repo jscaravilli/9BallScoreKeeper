@@ -35,6 +35,13 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
     }
   };
 
+  const handleReset = () => {
+    setPlayer1Name("");
+    setPlayer1SkillLevel(5);
+    setPlayer2Name("");
+    setPlayer2SkillLevel(5);
+  };
+
   const skillLevelOptions = Object.entries(APA_HANDICAPS).map(([level, points]) => ({
     value: level,
     label: `${level} (${points} points to win)`,
@@ -44,7 +51,7 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-sm mx-auto">
         <DialogHeader>
-          <DialogTitle>Setup Players</DialogTitle>
+          <DialogTitle>APA 9 Ball Scorekeeper</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
@@ -105,8 +112,8 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-4">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
+            <Button variant="outline" onClick={handleReset}>
+              Reset Form
             </Button>
             <Button 
               onClick={handleSave}
