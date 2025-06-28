@@ -30,6 +30,7 @@ export default function Game() {
     player1Score: number;
     player2Score: number;
   } | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Get current match
   const { data: currentMatch, isLoading } = useQuery<Match | null>({
@@ -99,7 +100,14 @@ export default function Game() {
   };
 
   const handleBallTap = (ballNumber: number) => {
-    if (!currentMatch) return;
+    if (!currentMatch || isProcessing) return;
+    
+    setIsProcessing(true);
+    
+    // Add a small delay to prevent rapid double-taps
+    setTimeout(() => {
+      setIsProcessing(false);
+    }, 300);
 
     const ballStates = [...(currentMatch.ballStates as BallInfo[] || [])];
     const ballIndex = ballStates.findIndex(b => b.number === ballNumber);
@@ -413,17 +421,16 @@ export default function Game() {
             Final Score: {matchWinner ? `${matchWinner.finalScore1} - ${matchWinner.finalScore2}` : `${currentMatch.player1Score} - ${currentMatch.player2Score}`}
           </p>
           <div className="flex gap-2 justify-center mt-3">
-            {previousTurnState && (
-              <Button
-                onClick={handleUndo}
-                variant="outline"
-                size="sm"
-                className="text-orange-700 border-orange-300 hover:bg-orange-50"
-              >
-                <RotateCcw className="h-4 w-4 mr-1" />
-                Undo Final Point
-              </Button>
-            )}
+            <Button
+              onClick={handleUndoTurn}
+              variant="outline"
+              size="sm"
+              className="text-orange-700 border-orange-300 hover:bg-orange-50"
+              disabled={!previousTurnState}
+            >
+              <RotateCcw className="h-4 w-4 mr-1" />
+              Undo Final Point
+            </Button>
             <Button
               onClick={() => setShowNewGameConfirm(true)}
               variant="outline"
