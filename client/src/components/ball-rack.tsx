@@ -32,6 +32,20 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
       return <Check className="h-6 w-6 text-green-600" />;
     } else if (state === 'dead') {
       return <X className="h-6 w-6 text-red-500" />;
+    } else if (ballNumber === 9) {
+      // Special 9-ball design with yellow stripe
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-white"></div>
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-90" 
+               style={{ 
+                 background: 'linear-gradient(90deg, transparent 20%, #facc15 35%, #facc15 65%, transparent 80%)'
+               }}></div>
+          <span className="relative z-10 font-bold text-lg text-black bg-white rounded-full w-8 h-8 flex items-center justify-center border border-gray-300">
+            {ballNumber}
+          </span>
+        </div>
+      );
     } else {
       return <span className="font-bold text-lg">{ballNumber}</span>;
     }
@@ -44,10 +58,13 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
       return `${baseStyles} bg-gray-300 border-green-600 opacity-60 text-gray-600`;
     } else if (state === 'dead') {
       return `${baseStyles} bg-gray-400 border-red-500 opacity-40 text-white`;
+    } else if (ballNumber === 9) {
+      // Special styling for 9-ball with white base and yellow stripe
+      return `${baseStyles} bg-white border-amber-400 text-black overflow-hidden`;
     } else {
       const colorClass = BALL_COLORS[ballNumber as keyof typeof BALL_COLORS];
-      const textColor = [1, 9].includes(ballNumber) ? "text-black" : "text-white";
-      const borderColor = ballNumber === 9 ? "border-amber-400" : "border-gray-300";
+      const textColor = [1].includes(ballNumber) ? "text-black" : "text-white";
+      const borderColor = "border-gray-300";
       return `${baseStyles} ${colorClass} ${borderColor} ${textColor}`;
     }
   };
