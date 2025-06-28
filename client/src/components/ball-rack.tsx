@@ -50,17 +50,7 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
   };
 
   const renderBallContent = (ballNumber: number, state: BallInfo['state']) => {
-    // Special handling for 9-ball when it's scored and undoable
-    if (ballNumber === 9 && state === 'scored' && isNineBallUndoable()) {
-      return (
-        <div className="relative">
-          <Check className="h-6 w-6 text-green-600" />
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
-        </div>
-      );
-    }
-    
-    // Handle undone state (shows checkmark with different indicator)
+    // Handle undone state (shows checkmark with orange indicator for 9-ball only)
     if (state === 'undone') {
       return (
         <div className="relative">
@@ -70,10 +60,21 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
       );
     }
     
-    // Handle scored/dead states first, regardless of ball number
+    // Handle scored state - show blue pulse only for 9-ball when undoable
     if (state === 'scored') {
+      if (ballNumber === 9 && isNineBallUndoable()) {
+        return (
+          <div className="relative">
+            <Check className="h-6 w-6 text-green-600" />
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+          </div>
+        );
+      }
       return <Check className="h-6 w-6 text-green-600" />;
-    } else if (state === 'dead') {
+    }
+    
+    // Handle dead state
+    if (state === 'dead') {
       return <X className="h-6 w-6 text-red-500" />;
     }
     
