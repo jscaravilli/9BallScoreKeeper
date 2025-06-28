@@ -127,6 +127,8 @@ export default function Game() {
   const [gameWinner, setGameWinner] = useState<1 | 2 | null>(null);
   const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showUndoRackConfirm, setShowUndoRackConfirm] = useState(false);
+  const [showRackUndoneMessage, setShowRackUndoneMessage] = useState(false);
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
     name: string;
@@ -480,6 +482,27 @@ export default function Game() {
     
     // Get the most recent state from history
     const previousState = turnHistory[turnHistory.length - 1];
+    const currentBallStates = currentMatch.ballStates as BallInfo[] || [];
+    const previousBallStates = previousState.ballStates;
+    
+    // Check if undoing involves a 9-ball that was scored (rack completion)
+    const nineBallCurrent = currentBallStates.find(ball => ball.number === 9);
+    const nineBallPrevious = previousBallStates.find(ball => ball.number === 9);
+    
+    const isUndoingRack = nineBallCurrent?.state === 'scored' && nineBallPrevious?.state !== 'scored';
+    
+    if (isUndoingRack) {
+      setShowUndoRackConfirm(true);
+      return;
+    }
+    
+    executeUndo();
+  };
+
+  const executeUndo = () => {
+    if (!currentMatch || turnHistory.length === 0) return;
+    
+    const previousState = turnHistory[turnHistory.length - 1];
     
     console.log('Executing undo...');
     console.log('Current ball states:', currentMatch.ballStates);
@@ -511,6 +534,17 @@ export default function Game() {
     setTimeout(() => {
       setUndoInProgress(false);
     }, 500);
+  };
+
+  const confirmUndoRack = () => {
+    setShowUndoRackConfirm(false);
+    executeUndo();
+    
+    // Show temporary success message
+    setShowRackUndoneMessage(true);
+    setTimeout(() => {
+      setShowRackUndoneMessage(false);
+    }, 2500);
   };
 
   const handleNewGame = () => {
@@ -882,6 +916,39 @@ export default function Game() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Undo Rack Confirmation */}
+      <Dialog open={showUndoRackConfirm} onOpenChange={setShowUndoRackConfirm}>
+        <DialogContent className="max-w-sm mx-auto">
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Undo Last Rack?</h2>
+            <p className="text-gray-600 mb-6">
+              This will undo the 9-ball and restore the previous rack state. Are you sure?
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" onClick={() => setShowUndoRackConfirm(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={confirmUndoRack}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+              >
+                Undo Rack
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Temporary Success Message */}
+      {showRackUndoneMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 shadow-lg text-center animate-in fade-in duration-300">
+            <div className="text-green-600 text-xl font-bold mb-2">✓</div>
+            <p className="text-gray-800 font-medium">Last rack undone!</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
