@@ -1,3 +1,14 @@
+
+// Production environment validation
+if (process.env.NODE_ENV === 'production') {
+  console.log('Production mode detected');
+  console.log('Database URL available:', !!process.env.DATABASE_URL);
+  
+  if (!process.env.DATABASE_URL) {
+    console.warn('Warning: No DATABASE_URL in production - using memory storage');
+  }
+}
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";

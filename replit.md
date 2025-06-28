@@ -114,6 +114,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 28, 2025: Implemented deep cloning for proper undo state management
 - June 28, 2025: Updated terminology from "New Game" to "New Match" throughout interface
 - June 28, 2025: Fixed winner banner re-display issue after undo - now shows correctly on repeated wins
+- June 28, 2025: Resolved production deployment issue by implementing PostgreSQL database storage
+- June 28, 2025: App now automatically switches between memory storage (development) and database storage (production)
 
 ## User Preferences
 

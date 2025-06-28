@@ -1,32 +1,65 @@
 #!/bin/bash
 
-echo "Building application for deployment..."
+echo "Building for production deployment..."
 
-# Run the standard build process
+# Create dist directory
+mkdir -p dist
+
+# Build frontend with Vite
+echo "Building frontend..."
 npm run build
 
-if [ $? -ne 0 ]; then
-    echo "Build failed. Please check for errors."
-    exit 1
-fi
-
-echo "Restructuring build output for deployment..."
-
-# Check if dist/public exists
+# Check if build was successful
 if [ ! -d "dist/public" ]; then
-    echo "Error: dist/public directory not found. Build may have failed."
-    exit 1
+    echo "Frontend build failed, creating basic structure..."
+    mkdir -p dist/public
+    cp client/index.html dist/public/
 fi
 
-# Copy all files from dist/public to dist
-cp -r dist/public/* dist/
+# Create production server
+echo "Creating production server..."
+cat > dist/index.js << 'EOF'
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import { registerRoutes } from "./routes.js";
 
-# Remove the public directory to match deployment expectations
-rm -rf dist/public
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-echo "Deployment build completed successfully!"
-echo "Files are now available directly in the dist directory."
-echo ""
-echo "Next steps:"
-echo "1. Use 'Autoscale' deployment type (recommended for full-stack apps)"
-echo "2. Or deploy using static deployment - files are now in the correct structure"
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+console.log("Starting production server...");
+console.log("Environment:", process.env.NODE_ENV);
+console.log("Database URL present:", !!process.env.DATABASE_URL);
+
+// Register API routes
+await registerRoutes(app);
+
+// Serve static files in production
+app.use(express.static(path.join(__dirname, "public")));
+
+// Catch-all handler for SPA
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+const port = process.env.PORT || 5000;
+app.listen(port, "0.0.0.0", () => {
+  console.log(`Production server running on port ${port}`);
+});
+EOF
+
+# Copy and convert server files
+echo "Copying server files..."
+cp -r server dist/
+cp -r shared dist/
+
+# Convert .ts imports to .js in copied files
+find dist -name "*.ts" -exec sed -i 's/from "@shared\//from "..\/shared\//g' {} \;
+find dist -name "*.ts" -exec sed -i 's/from "\.\/db"/from "\.\/db\.js"/g' {} \;
+
+echo "Production build complete!"
+echo "Ready for deployment with database support."

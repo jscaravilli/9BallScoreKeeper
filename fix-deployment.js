@@ -1,57 +1,36 @@
-#!/usr/bin/env node
-
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+console.log('Creating production-ready deployment...');
 
-console.log('🔧 Fixing deployment structure...');
+// Update package.json to ensure proper production startup
+const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+packageJson.scripts.start = "NODE_ENV=production tsx server/index.ts";
+packageJson.main = "server/index.ts";
+fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2));
 
-// Step 1: Run the build
-console.log('📦 Building application...');
-try {
-  execSync('npm run build', { stdio: 'inherit' });
-} catch (error) {
-  console.error('❌ Build failed:', error.message);
-  process.exit(1);
-}
-
-// Step 2: Check if dist/public exists
-const distPath = path.join(__dirname, 'dist');
-const publicPath = path.join(distPath, 'public');
-
-if (!fs.existsSync(publicPath)) {
-  console.error('❌ No dist/public directory found after build');
-  process.exit(1);
-}
-
-// Step 3: Move files from dist/public to dist
-console.log('📁 Restructuring files for deployment...');
-
-const publicFiles = fs.readdirSync(publicPath);
-
-for (const file of publicFiles) {
-  const srcPath = path.join(publicPath, file);
-  const destPath = path.join(distPath, file);
+// Create a production environment check
+const productionCheck = `
+// Production environment validation
+if (process.env.NODE_ENV === 'production') {
+  console.log('Production mode detected');
+  console.log('Database URL available:', !!process.env.DATABASE_URL);
   
-  // Remove existing file/directory in dist if it exists
-  if (fs.existsSync(destPath)) {
-    fs.rmSync(destPath, { recursive: true, force: true });
+  if (!process.env.DATABASE_URL) {
+    console.warn('Warning: No DATABASE_URL in production - using memory storage');
   }
-  
-  // Move the file/directory
-  fs.renameSync(srcPath, destPath);
-  console.log(`  ✓ Moved ${file}`);
 }
+`;
 
-// Step 4: Remove empty public directory
-fs.rmdirSync(publicPath);
+// Add production check to server startup
+const serverIndex = fs.readFileSync('server/index.ts', 'utf8');
+const updatedServerIndex = productionCheck + '\n' + serverIndex;
+fs.writeFileSync('server/index.ts', updatedServerIndex);
 
-console.log('✅ Deployment structure fixed!');
-console.log('📋 Files are now in dist/ for static deployment');
+console.log('✅ Production deployment configured');
 console.log('');
-console.log('🚀 Next steps:');
-console.log('   1. Deploy using static deployment');
-console.log('   2. Or use autoscale deployment for full-stack support');
+console.log('Deploy instructions:');
+console.log('1. Click Deploy in Replit');
+console.log('2. Choose Autoscale deployment');
+console.log('3. App will use database storage in production');
+console.log('4. Environment variables will be automatically available');

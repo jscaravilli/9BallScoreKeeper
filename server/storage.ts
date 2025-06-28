@@ -132,7 +132,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCurrentMatch(): Promise<Match | undefined> {
-    const [match] = await db.select().from(matches).orderBy(matches.id).limit(1);
+    const allMatches = await db.select().from(matches);
+    // Get the most recent match (highest ID)
+    const match = allMatches.sort((a, b) => b.id - a.id)[0];
     return match || undefined;
   }
 
@@ -204,3 +206,11 @@ export class DatabaseStorage implements IStorage {
 
 // Use database storage if DATABASE_URL is available, otherwise use memory storage
 export const storage = process.env.DATABASE_URL ? new DatabaseStorage() : new MemStorage();
+
+// Log which storage is being used
+console.log(`Using ${process.env.DATABASE_URL ? 'Database' : 'Memory'} storage`);
+if (process.env.DATABASE_URL) {
+  console.log('DATABASE_URL is set, using PostgreSQL');
+} else {
+  console.log('No DATABASE_URL, using in-memory storage');
+}
