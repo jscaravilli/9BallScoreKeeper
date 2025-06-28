@@ -3,40 +3,38 @@
 ## Issue
 The deployment fails because it expects `index.html` directly in the `dist` directory, but the build process creates `dist/public/index.html`.
 
-## Solution Options
+## Solution: File Restructuring (Your Choice)
 
-### Option 1: Manual File Structure Fix (Recommended)
-After running `npm run build`, manually restructure the files:
+I've created multiple automated solutions for you:
 
-1. Run the build command:
-   ```bash
-   npm run build
-   ```
+### Method 1: Simple Shell Script (Recommended)
+```bash
+./deploy-fix.sh
+```
 
-2. Move files from `dist/public` to `dist`:
-   ```bash
-   # Copy all files from dist/public to dist
-   cp -r dist/public/* dist/
-   # Remove the public directory
-   rm -rf dist/public
-   ```
+This script:
+- Builds your application
+- Moves all files from `dist/public` to `dist`
+- Removes the empty `public` directory
+- Prepares everything for static deployment
 
-3. Deploy using the standard deployment process
+### Method 2: Node.js Script with Build Integration
+```bash
+node fix-deployment.js
+```
 
-### Option 2: Use the Deployment Script
-I've created a `prepare-deploy.js` script that automates the file restructuring:
+This script:
+- Automatically runs the build process
+- Restructures the files
+- Provides detailed progress feedback
 
-1. Run the build:
-   ```bash
-   npm run build
-   ```
-
-2. Run the deployment preparation script:
-   ```bash
-   node prepare-deploy.js
-   ```
-
-3. Deploy the application
+### Method 3: Manual Commands
+If you prefer manual control:
+```bash
+npm run build
+mv dist/public/* dist/
+rmdir dist/public
+```
 
 ### Option 3: Change Deployment Type
 Since this is a full-stack application with both frontend and backend:

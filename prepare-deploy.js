@@ -31,7 +31,19 @@ async function prepareDeployment() {
   
   // Check if dist/public exists
   if (!fs.existsSync(publicPath)) {
-    console.error('Build output not found at dist/public. Please run "npm run build" first.');
+    console.log('Build output not found at dist/public.');
+    console.log('Current directory structure:');
+    try {
+      const distExists = fs.existsSync(distPath);
+      console.log(`- dist directory exists: ${distExists}`);
+      if (distExists) {
+        const distContents = await fs.promises.readdir(distPath);
+        console.log(`- dist contents: ${distContents.join(', ')}`);
+      }
+    } catch (e) {
+      console.log('Could not read directory structure');
+    }
+    console.error('Please run "npm run build" first to generate the build output.');
     process.exit(1);
   }
   
