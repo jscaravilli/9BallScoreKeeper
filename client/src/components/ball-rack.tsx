@@ -8,15 +8,15 @@ interface BallRackProps {
 }
 
 const BALL_COLORS = {
-  1: "bg-yellow-400", // Yellow
-  2: "bg-blue-600",   // Blue
-  3: "bg-red-600",    // Red
-  4: "bg-purple-600", // Purple
-  5: "bg-orange-500", // Orange
-  6: "bg-green-600",  // Green
-  7: "bg-red-900",    // Maroon
-  8: "bg-gray-900",   // Black
-  9: "bg-gradient-to-r from-yellow-400 via-white to-yellow-400", // Yellow with stripe
+  1: "bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-600", // Yellow
+  2: "bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800",       // Blue
+  3: "bg-gradient-to-br from-red-400 via-red-600 to-red-800",          // Red
+  4: "bg-gradient-to-br from-purple-400 via-purple-600 to-purple-800", // Purple
+  5: "bg-gradient-to-br from-orange-300 via-orange-500 to-orange-700", // Orange
+  6: "bg-gradient-to-br from-green-400 via-green-600 to-green-800",    // Green
+  7: "bg-gradient-to-br from-red-700 via-red-900 to-red-950",          // Maroon
+  8: "bg-gradient-to-br from-gray-700 via-gray-900 to-black",          // Black
+  9: "bg-gradient-to-r from-yellow-400 via-white to-yellow-400",       // Yellow with stripe (handled separately)
 };
 
 export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
