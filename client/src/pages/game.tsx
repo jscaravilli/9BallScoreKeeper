@@ -120,24 +120,40 @@ export default function Game() {
       // Check if this scoring wins the match (reaches or exceeds handicap)
       const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
       
+      console.log('Final point check:', {
+        ballNumber,
+        points,
+        newScore,
+        target: targetForCurrentPlayer,
+        willWin: newScore >= targetForCurrentPlayer,
+        currentPlayer: currentMatch.currentPlayer
+      });
+      
       if (newScore >= targetForCurrentPlayer) {
         // Match won - player reached or exceeded handicap target
-        updateMatchMutation.mutate({
-          id: currentMatch.id,
-          updates: {
-            [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: newScore,
-            isComplete: true,
-            winnerId: currentMatch.currentPlayer,
-          }
-        });
+        console.log('TRIGGERING MATCH WIN');
         
-        // Update ball states to reflect the winning ball
-        updateBallsMutation.mutate({
-          id: currentMatch.id,
-          ballStates,
-        });
-        
-        return;
+        try {
+          updateMatchMutation.mutate({
+            id: currentMatch.id,
+            updates: {
+              [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: newScore,
+              isComplete: true,
+              winnerId: currentMatch.currentPlayer,
+            }
+          });
+          
+          // Update ball states to reflect the winning ball
+          updateBallsMutation.mutate({
+            id: currentMatch.id,
+            ballStates,
+          });
+          
+          console.log('Match win mutations sent');
+          return;
+        } catch (error) {
+          console.error('Error in match completion:', error);
+        }
       }
 
       // Update match with new score (not winning yet)
