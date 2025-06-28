@@ -412,9 +412,27 @@ export default function Game() {
           <p className="text-green-700 text-lg">
             Final Score: {matchWinner ? `${matchWinner.finalScore1} - ${matchWinner.finalScore2}` : `${currentMatch.player1Score} - ${currentMatch.player2Score}`}
           </p>
-          <p className="text-green-600 text-sm mt-2">
-            Match complete! Click "Reset" to undo or "New Game" to start fresh.
-          </p>
+          <div className="flex gap-2 justify-center mt-3">
+            {previousTurnState && (
+              <Button
+                onClick={handleUndo}
+                variant="outline"
+                size="sm"
+                className="text-orange-700 border-orange-300 hover:bg-orange-50"
+              >
+                <RotateCcw className="h-4 w-4 mr-1" />
+                Undo Final Point
+              </Button>
+            )}
+            <Button
+              onClick={() => setShowNewGameConfirm(true)}
+              variant="outline"
+              size="sm"
+              className="text-blue-700 border-blue-300 hover:bg-blue-50"
+            >
+              New Game
+            </Button>
+          </div>
         </div>
       )}
 
