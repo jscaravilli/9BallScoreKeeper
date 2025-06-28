@@ -100,6 +100,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 3. **Verification**: Check that `index.html` exists in `dist/` directory after preparation
 4. **Result**: App will be deployed as a client-only application using localStorage for data persistence
 
+**Note**: The deployment preparation script automatically resolves the build output mismatch by moving files from `dist/public` to `dist` root directory, ensuring compatibility with static deployment requirements.
+
 ### Environment Configuration
 - Client-only application - no server environment variables needed
 - Development mode uses Vite middleware for hot reload
@@ -134,6 +136,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 28, 2025: Cleaned up UI by removing ball controls from main screen and making navigation scroll with content
 - June 28, 2025: Enhanced undo functionality to support multiple turn rewinds (up to 10 turns) with visual counter
 - June 28, 2025: Perfected 9-ball undo system with proper rerack event handling and clean state transitions
+- June 28, 2025: RESOLVED static deployment issue - deployment preparation script now successfully moves files from dist/public to dist root
+- June 28, 2025: Created executable deploy-static.sh wrapper for streamlined deployment preparation workflow
 
 ## User Preferences
 
