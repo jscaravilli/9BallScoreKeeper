@@ -309,6 +309,9 @@ export default function Game() {
     if (!currentMatch || !previousTurnState || undoInProgress) return;
     
     console.log('Executing undo...');
+    console.log('Current ball states:', currentMatch.ballStates);
+    console.log('Previous ball states to restore:', previousTurnState.ballStates);
+    
     setUndoInProgress(true);
 
     updateMatchMutation.mutate({
