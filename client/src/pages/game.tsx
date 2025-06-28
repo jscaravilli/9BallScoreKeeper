@@ -144,6 +144,7 @@ export default function Game() {
   }[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [undoInProgress, setUndoInProgress] = useState(false);
+  const [nineBallUndoInProgress, setNineBallUndoInProgress] = useState(false);
   const maxTurnHistory = 10; // Keep last 10 turns for undo
 
   // Get current match
@@ -219,6 +220,8 @@ export default function Game() {
       
       // If 9-ball is currently scored, make it active and restore previous state
       if (currentNineBall?.state === 'scored') {
+        setNineBallUndoInProgress(true);
+        
         const lastState = turnHistory[turnHistory.length - 1];
         
         // Restore previous match state completely
@@ -235,6 +238,11 @@ export default function Game() {
         setShowGameWin(false);
         setMatchWinner(null);
         setShowMatchWin(false);
+        
+        // Hide the indicator after a short delay
+        setTimeout(() => {
+          setNineBallUndoInProgress(false);
+        }, 1000);
         
         return; // Exit early after making 9-ball active
       }
@@ -1001,8 +1009,17 @@ export default function Game() {
         </DialogContent>
       </Dialog>
 
-
-
+      {/* 9-Ball Undo Indicator */}
+      {nineBallUndoInProgress && (
+        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-orange-600 text-white px-6 py-3 rounded-lg shadow-lg animate-in fade-in duration-300">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+              <span className="font-medium">Rack undone - 9-ball returned to active</span>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
