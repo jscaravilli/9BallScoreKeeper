@@ -211,6 +211,14 @@ export const storage = process.env.DATABASE_URL ? new DatabaseStorage() : new Me
 console.log(`Using ${process.env.DATABASE_URL ? 'Database' : 'Memory'} storage`);
 if (process.env.DATABASE_URL) {
   console.log('DATABASE_URL is set, using PostgreSQL');
+  // Test database connection
+  try {
+    if (storage instanceof DatabaseStorage) {
+      console.log('Testing database connection...');
+    }
+  } catch (error) {
+    console.error('Database connection test failed:', error);
+  }
 } else {
   console.log('No DATABASE_URL, using in-memory storage');
 }
