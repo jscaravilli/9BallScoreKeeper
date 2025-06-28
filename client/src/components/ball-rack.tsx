@@ -33,15 +33,15 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
     } else if (state === 'dead') {
       return <X className="h-6 w-6 text-red-500" />;
     } else if (ballNumber === 9) {
-      // CSS-based 9-ball design using full circle size
+      // CSS-based 9-ball design contained within the button
       return (
-        <div className="absolute inset-0 rounded-full overflow-hidden">
+        <div className="relative w-full h-full rounded-full overflow-hidden">
           {/* Light gray base ball */}
           <div className="absolute inset-0 bg-gray-200 rounded-full"></div>
           
-          {/* Yellow horizontal stripe spanning full width */}
+          {/* Yellow horizontal stripe spanning full width of the button */}
           <div 
-            className="absolute inset-x-0 bg-yellow-400"
+            className="absolute left-0 right-0 bg-yellow-400"
             style={{ 
               top: '28%',
               height: '44%',
