@@ -127,9 +127,8 @@ export default function Game() {
   const [gameWinner, setGameWinner] = useState<1 | 2 | null>(null);
   const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const [showUndoRackConfirm, setShowUndoRackConfirm] = useState(false);
-  const [showRackUndoneMessage, setShowRackUndoneMessage] = useState(false);
-  const [rackCompleted, setRackCompleted] = useState(false);
+
+
   const [lockedBalls, setLockedBalls] = useState<Set<number>>(new Set());
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
@@ -253,11 +252,7 @@ export default function Game() {
       ball.state = 'scored';
       ball.scoredBy = currentMatch.currentPlayer as 1 | 2;
       
-      // Track if we just scored the 9-ball (rack completion)
-      if (ballNumber === 9) {
-        setRackCompleted(true);
-        console.log('9-ball scored, rack completed');
-      }
+
       
       // Get handicap targets
       const player1Target = getPointsToWin(currentMatch.player1SkillLevel as any);
@@ -375,6 +370,11 @@ export default function Game() {
         // Don't return - let the mutation complete
       }
     } else if (ball.state === 'scored') {
+      // Prevent 9-ball from being marked dead
+      if (ballNumber === 9) {
+        return; // 9-ball cannot be marked dead
+      }
+      
       // Second tap on scored ball - mark as dead and deduct points
       const currentPlayerScore = ball.scoredBy === currentMatch.currentPlayer 
         ? (ball.scoredBy === 1 ? currentMatch.player1Score : currentMatch.player2Score)
@@ -591,37 +591,13 @@ export default function Game() {
     setTurnHistory(prev => prev.slice(0, -1));
     setMatchWinner(null);
     setShowMatchWin(false);
-    setRackCompleted(false); // Clear rack completion flag
     
     setTimeout(() => {
       setUndoInProgress(false);
     }, 500);
   };
 
-  const confirmUndoRack = () => {
-    setShowUndoRackConfirm(false);
-    
-    // Log the rack undo event
-    if (currentMatch) {
-      const rackUndoEvent: MatchEvent = {
-        type: 'turn_ended',
-        timestamp: new Date().toISOString(),
-        player: currentMatch.currentPlayer as 1 | 2,
-        playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
-        details: 'Rack undone - New rack started'
-      };
-      localStorageAPI.addMatchEvent(rackUndoEvent);
-    }
-    
-    // Execute the re-rack instead of undo
-    handleRerack();
-    
-    // Show temporary success message
-    setShowRackUndoneMessage(true);
-    setTimeout(() => {
-      setShowRackUndoneMessage(false);
-    }, 2500);
-  };
+
 
   const handleNewGame = () => {
     setShowNewGameConfirm(true);
@@ -640,8 +616,8 @@ export default function Game() {
   };
 
   const handleContinueMatch = () => {
-    // Show rack undo confirmation when user wants to continue (re-rack)
-    setShowUndoRackConfirm(true);
+    setShowGameWin(false);
+    setGameWinner(null);
   };
 
   const handleRerack = () => {
@@ -659,7 +635,6 @@ export default function Game() {
 
     setShowGameWin(false);
     setGameWinner(null);
-    setRackCompleted(false);
     setLockedBalls(new Set());
   };
 
@@ -998,38 +973,9 @@ export default function Game() {
         </DialogContent>
       </Dialog>
 
-      {/* Undo Rack Confirmation */}
-      <Dialog open={showUndoRackConfirm} onOpenChange={setShowUndoRackConfirm}>
-        <DialogContent className="max-w-sm mx-auto">
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Start New Rack?</h2>
-            <p className="text-gray-600 mb-6">
-              This will start a fresh rack with all balls active. Continue the match with a new rack?
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" onClick={() => setShowUndoRackConfirm(false)}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={confirmUndoRack}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                Start New Rack
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* Temporary Success Message */}
-      {showRackUndoneMessage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 shadow-lg text-center animate-in fade-in duration-300">
-            <div className="text-green-600 text-xl font-bold mb-2">✓</div>
-            <p className="text-gray-800 font-medium">New rack started!</p>
-          </div>
-        </div>
-      )}
+
+
     </div>
   );
 }
