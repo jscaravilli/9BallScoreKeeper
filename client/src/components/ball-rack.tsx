@@ -29,14 +29,15 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
 
   const getBallGradient = (ballNumber: number) => {
     const gradients = {
-      1: 'radial-gradient(circle at 30% 30%, #fef08a, #facc15, #ca8a04, #713f12)',
-      2: 'radial-gradient(circle at 30% 30%, #93c5fd, #3b82f6, #1d4ed8, #1e3a8a)',
-      3: 'radial-gradient(circle at 30% 30%, #fca5a5, #ef4444, #dc2626, #991b1b)',
-      4: 'radial-gradient(circle at 30% 30%, #c4b5fd, #8b5cf6, #7c3aed, #581c87)',
-      5: 'radial-gradient(circle at 30% 30%, #fed7aa, #fb923c, #ea580c, #c2410c)',
-      6: 'radial-gradient(circle at 30% 30%, #86efac, #22c55e, #16a34a, #166534)',
-      7: 'radial-gradient(circle at 30% 30%, #b91c1c, #7f1d1d, #450a0a, #1c0606)',
-      8: 'radial-gradient(circle at 30% 30%, #6b7280, #374151, #1f2937, #000000)'
+      1: 'radial-gradient(circle at 30% 30%, #facc15, #eab308, #a16207, #451a03)',
+      2: 'radial-gradient(circle at 30% 30%, #60a5fa, #2563eb, #1d4ed8, #172554)',
+      3: 'radial-gradient(circle at 30% 30%, #f87171, #dc2626, #b91c1c, #7f1d1d)',
+      4: 'radial-gradient(circle at 30% 30%, #a78bfa, #7c3aed, #6d28d9, #4c1d95)',
+      5: 'radial-gradient(circle at 30% 30%, #fb923c, #ea580c, #c2410c, #9a3412)',
+      6: 'radial-gradient(circle at 30% 30%, #4ade80, #16a34a, #15803d, #14532d)',
+      7: 'radial-gradient(circle at 30% 30%, #991b1b, #7f1d1d, #450a0a, #1c0606)',
+      8: 'radial-gradient(circle at 30% 30%, #4b5563, #374151, #1f2937, #000000)',
+      9: 'radial-gradient(circle at 30% 30%, #d1d5db, #9ca3af, #6b7280, #374151)'
     };
     return gradients[ballNumber as keyof typeof gradients] || '';
   };
@@ -47,15 +48,30 @@ export default function BallRack({ ballStates, onBallTap }: BallRackProps) {
     } else if (state === 'dead') {
       return <X className="h-6 w-6 text-red-500" />;
     } else if (ballNumber === 9) {
-      // CSS-based 9-ball design contained within the button
+      // CSS-based 9-ball design with gradient effect
       return (
         <div className="relative w-full h-full rounded-full overflow-hidden">
-          {/* Light gray base ball */}
-          <div className="absolute inset-0 bg-gray-200 rounded-full"></div>
+          {/* Base gradient ball */}
+          <div 
+            className="absolute inset-0 rounded-full"
+            style={{ background: getBallGradient(9) }}
+          ></div>
+          
+          {/* Glossy highlight effect */}
+          <div 
+            className="absolute rounded-full"
+            style={{
+              top: '10%',
+              left: '20%',
+              width: '35%',
+              height: '35%',
+              background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 40%, transparent 70%)',
+            }}
+          ></div>
           
           {/* Yellow horizontal stripe spanning full width of the button */}
           <div 
-            className="absolute left-0 right-0 bg-yellow-400"
+            className="absolute left-0 right-0"
             style={{ 
               top: '28%',
               height: '44%',
