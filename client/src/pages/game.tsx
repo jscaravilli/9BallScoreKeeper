@@ -526,29 +526,8 @@ export default function Game() {
       previousBallStates
     });
     
-    // Simple and reliable rack undo detection: ANY time user tries to undo while 9-ball is scored
-    const nineBallCurrentlyScored = nineBallCurrent?.state === 'scored';
-    
-    // Debug: Check what the current match actually shows for ball states
-    console.log('Debug - Current match ball states:', currentMatch.ballStates);
-    console.log('Debug - 9-ball state from current match:', 
-      (currentMatch.ballStates as BallInfo[])?.find(b => b.number === 9));
-    
-    // Show confirmation if 9-ball is currently scored - this covers all scenarios
-    const shouldShowRackUndo = nineBallCurrentlyScored;
-    
-    console.log('Rack undo check:', {
-      nineBallCurrent: nineBallCurrent?.state,
-      nineBallPrevious: nineBallPrevious?.state,
-      nineBallCurrentlyScored,
-      shouldShowRackUndo
-    });
-    
-    if (shouldShowRackUndo) {
-      console.log('Showing rack undo confirmation');
-      setShowUndoRackConfirm(true);
-      return;
-    }
+    // Rack undo detection is now handled via the "Continue Match" button
+    // Regular undo proceeds normally
     
     executeUndo();
   };
@@ -629,13 +608,13 @@ export default function Game() {
         timestamp: new Date().toISOString(),
         player: currentMatch.currentPlayer as 1 | 2,
         playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
-        details: 'Rack undone - 9-Ball scoring reversed'
+        details: 'Rack undone - New rack started'
       };
       localStorageAPI.addMatchEvent(rackUndoEvent);
     }
     
-    executeUndo();
-    setRackCompleted(false); // Clear the flag
+    // Execute the re-rack instead of undo
+    handleRerack();
     
     // Show temporary success message
     setShowRackUndoneMessage(true);
@@ -661,8 +640,8 @@ export default function Game() {
   };
 
   const handleContinueMatch = () => {
-    setShowGameWin(false);
-    setGameWinner(null);
+    // Show rack undo confirmation when user wants to continue (re-rack)
+    setShowUndoRackConfirm(true);
   };
 
   const handleRerack = () => {
@@ -680,6 +659,8 @@ export default function Game() {
 
     setShowGameWin(false);
     setGameWinner(null);
+    setRackCompleted(false);
+    setLockedBalls(new Set());
   };
 
   // Show loading state
@@ -1021,9 +1002,9 @@ export default function Game() {
       <Dialog open={showUndoRackConfirm} onOpenChange={setShowUndoRackConfirm}>
         <DialogContent className="max-w-sm mx-auto">
           <div className="text-center">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Undo Last Rack?</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Start New Rack?</h2>
             <p className="text-gray-600 mb-6">
-              This will undo the 9-ball and restore the previous rack state. Are you sure?
+              This will start a fresh rack with all balls active. Continue the match with a new rack?
             </p>
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" onClick={() => setShowUndoRackConfirm(false)}>
@@ -1031,9 +1012,9 @@ export default function Game() {
               </Button>
               <Button 
                 onClick={confirmUndoRack}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
+                className="bg-green-600 hover:bg-green-700 text-white"
               >
-                Undo Rack
+                Start New Rack
               </Button>
             </div>
           </div>
@@ -1045,7 +1026,7 @@ export default function Game() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 shadow-lg text-center animate-in fade-in duration-300">
             <div className="text-green-600 text-xl font-bold mb-2">✓</div>
-            <p className="text-gray-800 font-medium">Last rack undone!</p>
+            <p className="text-gray-800 font-medium">New rack started!</p>
           </div>
         </div>
       )}
