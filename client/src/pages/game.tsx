@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { Menu, Users, History, Settings, Plus, RotateCcw } from "lucide-react";
 import PlayerSetupModal from "@/components/player-setup-modal";
 import GameWinModal from "@/components/game-win-modal";
@@ -16,6 +18,14 @@ export default function Game() {
   const [showGameWin, setShowGameWin] = useState(false);
   const [showMatchWin, setShowMatchWin] = useState(false);
   const [gameWinner, setGameWinner] = useState<1 | 2 | null>(null);
+  const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [previousTurnState, setPreviousTurnState] = useState<{
+    ballStates: BallInfo[];
+    currentPlayer: number;
+    player1Score: number;
+    player2Score: number;
+  } | null>(null);
 
   // Get current match
   const { data: currentMatch, isLoading } = useQuery<Match | null>({
@@ -181,6 +191,14 @@ export default function Game() {
   const handleEndTurn = () => {
     if (!currentMatch) return;
 
+    // Save current state before switching turns
+    setPreviousTurnState({
+      ballStates: currentMatch.ballStates as BallInfo[] || [],
+      currentPlayer: currentMatch.currentPlayer,
+      player1Score: currentMatch.player1Score,
+      player2Score: currentMatch.player2Score,
+    });
+
     // Switch to the other player
     updateMatchMutation.mutate({
       id: currentMatch.id,
@@ -191,6 +209,10 @@ export default function Game() {
   };
 
   const handleResetGame = () => {
+    setShowResetConfirm(true);
+  };
+
+  const confirmReset = () => {
     if (!currentMatch) return;
 
     const initialBallStates: BallInfo[] = Array.from({ length: 9 }, (_, i) => ({
@@ -198,13 +220,49 @@ export default function Game() {
       state: 'active' as const,
     }));
 
+    updateMatchMutation.mutate({
+      id: currentMatch.id,
+      updates: {
+        currentPlayer: 1,
+        player1Score: 0,
+        player2Score: 0,
+      }
+    });
+
     updateBallsMutation.mutate({
       id: currentMatch.id,
       ballStates: initialBallStates,
     });
+
+    setPreviousTurnState(null);
+    setShowResetConfirm(false);
+  };
+
+  const handleUndoTurn = () => {
+    if (!currentMatch || !previousTurnState) return;
+
+    updateMatchMutation.mutate({
+      id: currentMatch.id,
+      updates: {
+        currentPlayer: previousTurnState.currentPlayer,
+        player1Score: previousTurnState.player1Score,
+        player2Score: previousTurnState.player2Score,
+      }
+    });
+
+    updateBallsMutation.mutate({
+      id: currentMatch.id,
+      ballStates: previousTurnState.ballStates,
+    });
+
+    setPreviousTurnState(null);
   };
 
   const handleNewGame = () => {
+    setShowNewGameConfirm(true);
+  };
+
+  const confirmNewGame = () => {
     if (!currentMatch) return;
 
     const initialBallStates: BallInfo[] = Array.from({ length: 9 }, (_, i) => ({
@@ -217,6 +275,8 @@ export default function Game() {
       updates: {
         currentGame: currentMatch.currentGame + 1,
         currentPlayer: 1,
+        player1Score: 0,
+        player2Score: 0,
       }
     });
 
@@ -224,6 +284,9 @@ export default function Game() {
       id: currentMatch.id,
       ballStates: initialBallStates,
     });
+
+    setPreviousTurnState(null);
+    setShowNewGameConfirm(false);
   };
 
   const handleContinueMatch = () => {
@@ -333,6 +396,20 @@ export default function Game() {
             New Game
           </Button>
         </div>
+        
+        {/* Undo Turn Button */}
+        {previousTurnState && (
+          <div className="mb-3">
+            <Button 
+              variant="outline"
+              className="w-full py-3 px-4 bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100"
+              onClick={handleUndoTurn}
+            >
+              <History className="h-4 w-4 mr-2" />
+              Undo Last Turn
+            </Button>
+          </div>
+        )}
       </section>
 
       {/* Bottom Navigation */}
@@ -377,7 +454,7 @@ export default function Game() {
         winner={gameWinner}
         currentMatch={currentMatch}
         onContinueMatch={handleContinueMatch}
-        onNewMatch={handleNewMatch}
+        onNewMatch={handleNewGame}
         onRerack={handleRerack}
       />
       
@@ -385,8 +462,53 @@ export default function Game() {
         open={showMatchWin}
         onClose={() => setShowMatchWin(false)}
         currentMatch={currentMatch}
-        onNewMatch={handleNewMatch}
+        onNewMatch={handleNewGame}
       />
+
+      {/* Confirmation Dialogs */}
+      <Dialog open={showNewGameConfirm} onOpenChange={setShowNewGameConfirm}>
+        <DialogContent className="max-w-sm mx-auto">
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Start New Game?</h2>
+            <p className="text-gray-600 mb-6">
+              This will reset all ball states and scores. Current progress will be lost.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" onClick={() => setShowNewGameConfirm(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={confirmNewGame}
+                className="pool-green text-white hover:pool-felt"
+              >
+                Start New Game
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <DialogContent className="max-w-sm mx-auto">
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Reset Current Game?</h2>
+            <p className="text-gray-600 mb-6">
+              This will reset all ball states and scores to start fresh. Current progress will be lost.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" onClick={() => setShowResetConfirm(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={confirmReset}
+                className="bg-red-600 text-white hover:bg-red-700"
+              >
+                Reset Game
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
