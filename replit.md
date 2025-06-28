@@ -138,6 +138,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 28, 2025: Perfected 9-ball undo system with proper rerack event handling and clean state transitions
 - June 28, 2025: RESOLVED static deployment issue - deployment preparation script now successfully moves files from dist/public to dist root
 - June 28, 2025: Created executable deploy-static.sh wrapper for streamlined deployment preparation workflow
+- June 28, 2025: FIXED ball locking persistence issue after rerack undo operations - balls scored by other players now remain properly locked
 
 ## User Preferences
 
