@@ -23,16 +23,14 @@ const BALL_COLORS = {
 };
 
 export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [], undoInProgress = false }: BallRackProps) {
-  // NEW APPROACH: Hide balls scored by other player instead of locking them
+  // NEW APPROACH: Hide all scored/dead balls regardless of who scored them
   const shouldHideBall = (ballNumber: number): boolean => {
     const ball = ballStates.find(b => b.number === ballNumber);
     
     if (!ball) return false;
     
-    // Hide balls that were scored/dead by the other player
-    return (ball.state === 'scored' || ball.state === 'dead') && 
-           ball.scoredBy !== undefined && 
-           ball.scoredBy !== currentPlayer;
+    // Hide all balls that are scored or dead (regardless of player)
+    return ball.state === 'scored' || ball.state === 'dead';
   };
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
