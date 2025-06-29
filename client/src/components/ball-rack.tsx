@@ -7,6 +7,7 @@ interface BallRackProps {
   onBallTap: (ballNumber: number) => void;
   currentPlayer: 1 | 2;
   turnHistory?: any[]; // Turn history to check if 9-ball can be undone
+  undoInProgress?: boolean; // Flag to indicate if undo operation is happening
 }
 
 const BALL_COLORS = {
@@ -21,12 +22,30 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [] }: BallRackProps) {
-  // OPTION 1: Unlock all balls during active gameplay (most permissive)
+export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [], undoInProgress = false }: BallRackProps) {
+  // OPTION 2: Unlock balls only during undo operations
   const getLockedBalls = (): Set<number> => {
-    // During active gameplay, no balls are locked
-    // This allows maximum flexibility for corrections and adjustments
-    return new Set<number>();
+    // If undo is in progress, unlock all balls for maximum flexibility
+    if (undoInProgress) {
+      return new Set<number>();
+    }
+    
+    // During normal play, lock balls scored by the opponent
+    const locked = new Set<number>();
+    ballStates.forEach(ball => {
+      // Active balls are never locked
+      if (ball.state === 'active') {
+        return;
+      }
+      
+      // Lock balls scored/marked dead by the other player
+      if ((ball.state === 'scored' || ball.state === 'dead') && 
+          ball.scoredBy && ball.scoredBy !== currentPlayer) {
+        locked.add(ball.number);
+      }
+    });
+    
+    return locked;
   };
   
   const lockedBalls = getLockedBalls();

@@ -804,6 +804,7 @@ export default function Game() {
         onBallTap={handleBallTap}
         currentPlayer={currentMatch.currentPlayer as 1 | 2}
         turnHistory={turnHistory}
+        undoInProgress={undoInProgress}
       />
 
       {/* Game Actions */}
