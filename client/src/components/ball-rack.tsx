@@ -26,34 +26,20 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
   const getLockedBalls = (): Set<number> => {
     const locked = new Set<number>();
     
-    console.log('BallRack: Calculating locked balls', {
-      currentPlayer,
-      ballStates: ballStates.map(b => ({
-        number: b.number,
-        state: b.state,
-        scoredBy: b.scoredBy
-      }))
-    });
-    
     ballStates.forEach(ball => {
       // CRITICAL: Only lock balls that are CURRENTLY scored/dead by the OTHER player
       // Active balls are NEVER locked, regardless of any scoredBy property
       if (ball.state === 'active') {
         // Active balls are never locked
-        console.log(`Ball ${ball.number}: ACTIVE - never locked`);
         return;
       }
       
       if ((ball.state === 'scored' || ball.state === 'dead') && 
           ball.scoredBy && ball.scoredBy !== currentPlayer) {
         locked.add(ball.number);
-        console.log(`Ball ${ball.number}: LOCKED (state: ${ball.state}, scoredBy: ${ball.scoredBy}, currentPlayer: ${currentPlayer})`);
-      } else {
-        console.log(`Ball ${ball.number}: NOT LOCKED (state: ${ball.state}, scoredBy: ${ball.scoredBy}, currentPlayer: ${currentPlayer})`);
       }
     });
     
-    console.log('BallRack: Final locked balls:', Array.from(locked));
     return locked;
   };
   
@@ -183,15 +169,18 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
           const ballState = getBallState(ballNumber);
           const isLocked = lockedBalls.has(ballNumber);
           
+          // CRITICAL FIX: Active balls are NEVER locked visually, regardless of isLocked flag
+          const shouldShowAsLocked = isLocked && ballState.state !== 'active';
+          
           return (
             <Button
               key={ballNumber}
-              className={getBallStyles(ballNumber, ballState.state, isLocked)}
-              onClick={() => !isLocked && onBallTap(ballNumber)}
+              className={getBallStyles(ballNumber, ballState.state, shouldShowAsLocked)}
+              onClick={() => !shouldShowAsLocked && onBallTap(ballNumber)}
               variant="outline"
-              disabled={isLocked}
+              disabled={shouldShowAsLocked}
             >
-              {isLocked ? (
+              {shouldShowAsLocked ? (
                 <span className="text-gray-500 font-bold">{ballNumber}</span>
               ) : (
                 renderBallContent(ballNumber, ballState.state)
