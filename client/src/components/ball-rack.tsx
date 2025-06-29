@@ -7,7 +7,7 @@ interface BallRackProps {
   onBallTap: (ballNumber: number) => void;
   lockedBalls?: Set<number>;
   turnHistory?: any[]; // Turn history to check if 9-ball can be undone
-  ballsScoredThisInning?: Set<number>; // Balls scored during current inning
+  currentInning: number; // Current inning number for visibility decisions
 }
 
 const BALL_COLORS = {
@@ -22,7 +22,7 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(), turnHistory = [], ballsScoredThisInning = new Set() }: BallRackProps) {
+export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(), turnHistory = [], currentInning }: BallRackProps) {
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
       number: ballNumber as BallInfo['number'],
@@ -138,16 +138,14 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
           const isLocked = lockedBalls.has(ballNumber);
           
           // Hide balls that were scored/dead in PREVIOUS innings (not current inning)
-          if ((ballState.state === 'scored' || ballState.state === 'dead') && 
-              !ballsScoredThisInning.has(ballNumber)) {
+          const isScoredThisInning = ballState.inning === currentInning;
+          if ((ballState.state === 'scored' || ballState.state === 'dead') && !isScoredThisInning) {
             return (
               <div key={ballNumber} className="w-16 h-16 flex items-center justify-center">
                 {/* Empty space where ball used to be */}
               </div>
             );
           }
-          
-          const isScoredThisInning = ballsScoredThisInning.has(ballNumber);
           
           return (
             <Button

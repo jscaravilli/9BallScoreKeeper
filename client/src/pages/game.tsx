@@ -130,7 +130,7 @@ export default function Game() {
 
 
   const [lockedBalls, setLockedBalls] = useState<Set<number>>(new Set());
-  const [ballsScoredThisInning, setBallsScoredThisInning] = useState<Set<number>>(new Set());
+  const [currentInning, setCurrentInning] = useState<number>(1);
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
     name: string;
@@ -364,12 +364,8 @@ export default function Game() {
       ball.state = 'scored';
       ball.scoredBy = currentMatch.currentPlayer as 1 | 2;
       
-      // Track that this ball was scored during the current inning
-      setBallsScoredThisInning(prev => {
-        const newSet = new Set(prev);
-        newSet.add(ballNumber);
-        return newSet;
-      });
+      // Track the inning when this ball was scored
+      ball.inning = currentInning;
       
 
       
@@ -561,8 +557,8 @@ export default function Game() {
       return newHistory.slice(-maxTurnHistory);
     });
 
-    // Clear balls scored during this inning - they will now disappear
-    setBallsScoredThisInning(new Set());
+    // Increment to next inning
+    setCurrentInning(prev => prev + 1);
 
     // Switch to the other player - locked balls will be updated automatically by useEffect
     updateMatchMutation.mutate({
@@ -647,21 +643,22 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Immediately calculate the correct state based on what we're restoring to
+    // Calculate locked balls based on current player vs ball scorers
     const newLockedBalls = new Set<number>();
-    const newInningBalls = new Set<number>();
     const ballStates = previousState.ballStates;
     
     ballStates.forEach(ball => {
-      if ((ball.state === 'scored' || ball.state === 'dead') && ball.scoredBy) {
-        // All scored/dead balls are part of the current inning until it ends
-        newInningBalls.add(ball.number);
+      if ((ball.state === 'scored' || ball.state === 'dead') && ball.scoredBy && ball.scoredBy !== currentMatch.currentPlayer) {
+        newLockedBalls.add(ball.number);
       }
     });
     
-    // Set the correct states immediately
+    // Set the correct locked balls state
     setLockedBalls(newLockedBalls);
-    setBallsScoredThisInning(newInningBalls);
+    
+    // Reset current inning to match the previous state's inning
+    const maxInning = Math.max(...previousState.ballStates.filter((b: BallInfo) => b.inning).map((b: BallInfo) => b.inning!), 1);
+    setCurrentInning(maxInning);
     
     // Log the undo event
     const undoEvent: MatchEvent = {
@@ -766,6 +763,7 @@ export default function Game() {
     setShowGameWin(false);
     setGameWinner(null);
     setLockedBalls(new Set());
+    setCurrentInning(1);
   };
 
   // Show loading state
@@ -860,7 +858,7 @@ export default function Game() {
         onBallTap={handleBallTap}
         lockedBalls={lockedBalls}
         turnHistory={turnHistory}
-        ballsScoredThisInning={ballsScoredThisInning}
+        currentInning={currentInning}
       />
 
       {/* Game Actions */}

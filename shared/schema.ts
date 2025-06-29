@@ -50,6 +50,7 @@ export interface BallInfo {
   number: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
   state: BallState;
   scoredBy?: 1 | 2; // player who scored it
+  inning?: number; // which inning this ball was scored in
 }
 
 // APA Skill Level type
