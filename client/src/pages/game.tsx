@@ -651,20 +651,27 @@ export default function Game() {
     setLockedBalls(new Set());
     setBallsScoredThisTurn(new Set());
     
-    // Force immediate locked ball recalculation after the mutations complete
+    // Force immediate recalculation after the mutations complete
     const recalculateAfterUndo = () => {
       const newLockedBalls = new Set<number>();
+      const newCurrentTurnBalls = new Set<number>();
       const ballStates = previousState.ballStates;
       const activePlayer = previousState.currentPlayer;
       
       ballStates.forEach(ball => {
-        if ((ball.state === 'scored' || ball.state === 'dead') && 
-            ball.scoredBy && ball.scoredBy !== activePlayer) {
-          newLockedBalls.add(ball.number);
+        if ((ball.state === 'scored' || ball.state === 'dead') && ball.scoredBy) {
+          if (ball.scoredBy !== activePlayer) {
+            // Ball scored by other player - locked
+            newLockedBalls.add(ball.number);
+          } else {
+            // Ball scored by current player - part of current turn
+            newCurrentTurnBalls.add(ball.number);
+          }
         }
       });
       
       setLockedBalls(newLockedBalls);
+      setBallsScoredThisTurn(newCurrentTurnBalls);
     };
     
     // Delay recalculation to ensure all mutations have completed
