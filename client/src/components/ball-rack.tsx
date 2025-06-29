@@ -25,19 +25,35 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
   // Calculate locked balls directly from current game state
   const getLockedBalls = (): Set<number> => {
     const locked = new Set<number>();
+    
+    console.log('BallRack: Calculating locked balls', {
+      currentPlayer,
+      ballStates: ballStates.map(b => ({
+        number: b.number,
+        state: b.state,
+        scoredBy: b.scoredBy
+      }))
+    });
+    
     ballStates.forEach(ball => {
       // CRITICAL: Only lock balls that are CURRENTLY scored/dead by the OTHER player
       // Active balls are NEVER locked, regardless of any scoredBy property
       if (ball.state === 'active') {
         // Active balls are never locked
+        console.log(`Ball ${ball.number}: ACTIVE - never locked`);
         return;
       }
       
       if ((ball.state === 'scored' || ball.state === 'dead') && 
           ball.scoredBy && ball.scoredBy !== currentPlayer) {
         locked.add(ball.number);
+        console.log(`Ball ${ball.number}: LOCKED (state: ${ball.state}, scoredBy: ${ball.scoredBy}, currentPlayer: ${currentPlayer})`);
+      } else {
+        console.log(`Ball ${ball.number}: NOT LOCKED (state: ${ball.state}, scoredBy: ${ball.scoredBy}, currentPlayer: ${currentPlayer})`);
       }
     });
+    
+    console.log('BallRack: Final locked balls:', Array.from(locked));
     return locked;
   };
   
