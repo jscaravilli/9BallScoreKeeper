@@ -640,21 +640,11 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Calculate which balls should be locked based on the restored state
-    // Balls are locked if they were scored/dead by the OTHER player (not the current active player)
-    const restoredLockedBalls = new Set<number>();
-    const activePlayer = previousState.currentPlayer;
+    // CRITICAL FIX: Clear locked balls FIRST to prevent flicker
+    // During undo, we temporarily clear all locks, then recalculate after state is restored
+    setLockedBalls(new Set<number>());
     
-    previousState.ballStates.forEach(ball => {
-      if ((ball.state === 'scored' || ball.state === 'dead') && 
-          ball.scoredBy && ball.scoredBy !== activePlayer) {
-        restoredLockedBalls.add(ball.number);
-      }
-    });
-    
-    // Set locked balls BEFORE updating match state to avoid timing issues
-    setLockedBalls(restoredLockedBalls);
-    console.log('Restored locked balls based on ball states:', Array.from(restoredLockedBalls));
+    console.log('Cleared locked balls to prevent flicker during undo');
     
     // Log the undo event
     const undoEvent: MatchEvent = {
@@ -684,7 +674,7 @@ export default function Game() {
       ballStates: previousState.ballStates,
     });
 
-    // Force immediate locked balls recalculation to prevent gray flicker
+    // Recalculate locked balls after state updates complete
     setTimeout(() => {
       const finalLockedBalls = new Set<number>();
       const activePlayer = previousState.currentPlayer;
@@ -697,7 +687,8 @@ export default function Game() {
       });
       
       setLockedBalls(finalLockedBalls);
-    }, 50);
+      console.log('Final locked balls after undo:', Array.from(finalLockedBalls));
+    }, 100);
 
     // Remove the last state from history
     setTurnHistory(prev => prev.slice(0, -1));
