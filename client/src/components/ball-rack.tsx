@@ -45,7 +45,20 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
     return false;
   };
   const getBallState = (ballNumber: number): BallInfo => {
-    return ballStates.find(b => b.number === ballNumber) || {
+    // Create a completely fresh state lookup to prevent stale references
+    const ballStatesCopy = JSON.parse(JSON.stringify(ballStates));
+    const foundBall = ballStatesCopy.find((b: BallInfo) => b.number === ballNumber);
+    
+    if (foundBall) {
+      return {
+        number: foundBall.number,
+        state: foundBall.state,
+        scoredBy: foundBall.scoredBy,
+        turnScored: foundBall.turnScored
+      };
+    }
+    
+    return {
       number: ballNumber as BallInfo['number'],
       state: 'active' as const,
     };

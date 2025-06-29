@@ -148,7 +148,7 @@ export default function Game() {
   const [undoInProgress, setUndoInProgress] = useState(false);
   const [nineBallUndoInProgress, setNineBallUndoInProgress] = useState(false);
   const [forceUpdateKey, setForceUpdateKey] = useState<string>("");
-  const [ballRackVisible, setBallRackVisible] = useState(true);
+
   const maxTurnHistory = 10; // Keep last 10 turns for undo
 
   // Get current match
@@ -654,13 +654,9 @@ export default function Game() {
         setShowMatchWin(false);
         setUndoInProgress(false);
         
-        // COMPONENT REMOUNT: Hide and show BallRack to force complete recreation
-        setBallRackVisible(false);
-        setTimeout(() => {
-          setBallRackVisible(true);
-          setForceUpdateKey(Date.now().toString() + "-final");
-          queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
-        }, 100);
+        // Simple force update approach
+        setForceUpdateKey(Date.now().toString() + "-final");
+        queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
       }
     });
   };
@@ -818,17 +814,15 @@ export default function Game() {
       />
 
       {/* Ball Rack */}
-      {ballRackVisible && (
-        <BallRack 
-          ballStates={currentMatch.ballStates as BallInfo[] || []}
-          onBallTap={handleBallTap}
-          currentPlayer={currentMatch.currentPlayer as 1 | 2}
-          currentTurn={currentMatch.currentTurn || 1}
-          turnHistory={turnHistory}
-          undoInProgress={undoInProgress}
-          forceUpdateKey={forceUpdateKey}
-        />
-      )}
+      <BallRack 
+        ballStates={currentMatch.ballStates as BallInfo[] || []}
+        onBallTap={handleBallTap}
+        currentPlayer={currentMatch.currentPlayer as 1 | 2}
+        currentTurn={currentMatch.currentTurn || 1}
+        turnHistory={turnHistory}
+        undoInProgress={undoInProgress}
+        forceUpdateKey={forceUpdateKey}
+      />
 
       {/* Game Actions */}
       <section className="p-4 pb-20">
