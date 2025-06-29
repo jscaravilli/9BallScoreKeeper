@@ -180,7 +180,7 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
           
           return (
             <Button
-              key={ballNumber}
+              key={`${ballNumber}-${ballState.state}-${ballState.scoredBy || 'none'}`}
               className={getBallStyles(ballNumber, ballState.state, false)}
               onClick={() => onBallTap(ballNumber)}
               variant="outline"
