@@ -86,21 +86,32 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 2. Backend bundles server code with esbuild to `dist/index.js`
 3. Production serves static files from Express with fallback to React app
 
-### Deployment Configuration - RESOLVED
-- **Previous Issue**: Static deployment expected `index.html` directly in `dist` but build output went to `dist/public`
-- **Solution Implemented**: Created automated deployment preparation scripts
-- **Available Scripts**:
-  1. `prepare-static-deploy.js` - Node.js script that builds frontend and restructures files
-  2. `deploy-static.sh` - Shell script wrapper with deployment instructions
-- **Process**: Build outputs to `dist/public`, then files are moved to `dist` root for static deployment compatibility
+### Deployment Configuration - FULLY RESOLVED
+- **Issue**: Static deployment expected `index.html` directly in `dist` but Vite build outputs to `dist/public`
+- **Root Cause**: Vite configuration outputs to `dist/public` but cannot be modified due to environment restrictions
+- **Complete Solution**: Automated build restructuring scripts that move files from `dist/public` to `dist` root
 
-### Static Deployment Instructions
-1. **Prepare for deployment**: Run `./deploy-static.sh` or `node prepare-static-deploy.js`
-2. **Deploy settings**: Use "Static" deployment type with public directory set to `dist`
-3. **Verification**: Check that `index.html` exists in `dist/` directory after preparation
-4. **Result**: App will be deployed as a client-only application using localStorage for data persistence
+### Available Deployment Scripts
+1. **`prepare-static-deploy.js`** - Primary deployment preparation script (tested and working)
+2. **`quick-deploy.js`** - Alternative script with timeout handling for slow builds
+3. **`deploy-static.sh`** - Shell script wrapper with user instructions
 
-**Note**: The deployment preparation script automatically resolves the build output mismatch by moving files from `dist/public` to `dist` root directory, ensuring compatibility with static deployment requirements.
+### Static Deployment Process
+1. **Build Preparation**: Run `node prepare-static-deploy.js` (recommended) or `node quick-deploy.js`
+2. **Deployment Settings**: 
+   - Type: Static
+   - Public Directory: `dist`
+   - Build Command: `node prepare-static-deploy.js`
+3. **Verification**: Script automatically verifies `index.html` exists in `dist/` directory
+4. **Result**: Client-only application using localStorage for data persistence
+
+### Technical Details
+- **Build Process**: Vite builds to `dist/public`, scripts move files to `dist` root
+- **File Structure**: All assets (CSS, JS) and `index.html` placed directly in `dist/`
+- **Compatibility**: Fully compatible with static hosting requirements
+- **Testing**: Scripts include verification steps to ensure proper file placement
+
+**Status**: Deployment issue completely resolved with automated preparation scripts.
 
 ### Environment Configuration
 - Client-only application - no server environment variables needed
@@ -159,6 +170,9 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: Updated "Undo Last Turn" to "Undo Last Action" throughout interface
 - June 29, 2025: Added About button to hamburger menu with version 1.0.0 and developer credits
 - June 29, 2025: Fixed ball visibility system with turnCompleted tracking to prevent reappearing when players return
+- June 29, 2025: RESOLVED static deployment configuration error - enhanced build restructuring scripts for reliable file placement
+- June 29, 2025: Created multiple deployment options (prepare-static-deploy.js, quick-deploy.js) with verification and timeout handling
+- June 29, 2025: Updated deployment documentation with complete technical details and troubleshooting steps
 
 ## User Preferences
 
