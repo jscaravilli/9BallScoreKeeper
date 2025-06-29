@@ -627,11 +627,12 @@ export default function Game() {
     
     setUndoInProgress(true);
 
-    // Clean up ball states - remove scoredBy for active balls to prevent locking confusion
+    // Clean up ball states - ensure proper state restoration
     const cleanedBallStates = previousState.ballStates.map(ball => ({
       ...ball,
-      // Clear scoredBy for active balls to eliminate any historical locking issues
-      scoredBy: ball.state === 'active' ? undefined : ball.scoredBy
+      // Clear scoredBy and turnScored for active balls to eliminate any historical issues
+      scoredBy: ball.state === 'active' ? undefined : ball.scoredBy,
+      turnScored: ball.state === 'active' ? undefined : ball.turnScored
     }));
 
     // Force immediate state update by triggering React Query refetch
@@ -652,10 +653,14 @@ export default function Game() {
         setTurnHistory(prev => prev.slice(0, -1));
         setMatchWinner(null);
         setShowMatchWin(false);
-        setUndoInProgress(false);
         
-        // Trigger component re-render
+        // Force refresh before clearing undo flag to ensure visual update
         queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
+        
+        // Small delay to ensure visual refresh, then clear undo flag
+        setTimeout(() => {
+          setUndoInProgress(false);
+        }, 100);
       }
     });
   };
