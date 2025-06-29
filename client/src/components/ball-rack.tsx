@@ -24,9 +24,23 @@ const BALL_COLORS = {
 };
 
 export default function BallRack({ ballStates, onBallTap, currentPlayer, currentTurn, turnHistory = [], undoInProgress = false }: BallRackProps) {
-  // SIMPLIFIED APPROACH: Don't hide any balls - let all balls show their current states
+  // IMPROVED TURN-BASED APPROACH: Hide balls from completed innings
   const shouldHideBall = (ballNumber: number): boolean => {
-    // Always show all balls to avoid confusion during undo operations
+    const ball = ballStates.find(b => b.number === ballNumber);
+    
+    if (!ball) return false;
+    
+    // Don't hide any balls during undo operations to show restored states
+    if (undoInProgress) return false;
+    
+    // Hide balls that were scored/dead in previous completed turns
+    // Only hide if the ball's turn is definitively in the past
+    if ((ball.state === 'scored' || ball.state === 'dead') && 
+        ball.turnScored !== undefined && 
+        ball.turnScored < currentTurn) {
+      return true;
+    }
+    
     return false;
   };
   const getBallState = (ballNumber: number): BallInfo => {
