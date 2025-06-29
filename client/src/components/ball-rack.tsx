@@ -24,11 +24,14 @@ const BALL_COLORS = {
 };
 
 export default function BallRack({ ballStates, onBallTap, currentPlayer, currentTurn, turnHistory = [], undoInProgress = false }: BallRackProps) {
-  // TURN-BASED APPROACH: Hide balls from previous turns, keep current turn balls visible
+  // TURN-BASED APPROACH: Hide balls from previous turns, but disable during undo
   const shouldHideBall = (ballNumber: number): boolean => {
     const ball = ballStates.find(b => b.number === ballNumber);
     
     if (!ball) return false;
+    
+    // Don't hide any balls during undo operations to show correct states
+    if (undoInProgress) return false;
     
     // Hide balls that were scored/dead in previous turns (not current turn)
     return (ball.state === 'scored' || ball.state === 'dead') && 

@@ -139,6 +139,7 @@ export default function Game() {
   const [turnHistory, setTurnHistory] = useState<{
     ballStates: BallInfo[];
     currentPlayer: number;
+    currentTurn: number;
     player1Score: number;
     player2Score: number;
     lockedBalls?: number[]; // Optional for backward compatibility
@@ -320,6 +321,7 @@ export default function Game() {
       const currentState = {
         ballStates: (currentMatch.ballStates as BallInfo[] || []).map(b => ({ ...b })),
         currentPlayer: currentMatch.currentPlayer,
+        currentTurn: currentMatch.currentTurn || 1,
         player1Score: currentMatch.player1Score,
         player2Score: currentMatch.player2Score,
       };
@@ -517,6 +519,7 @@ export default function Game() {
     const currentState = {
       ballStates: currentMatch.ballStates as BallInfo[] || [],
       currentPlayer: currentMatch.currentPlayer,
+      currentTurn: currentMatch.currentTurn || 1,
       player1Score: currentMatch.player1Score,
       player2Score: currentMatch.player2Score,
     };
@@ -636,6 +639,7 @@ export default function Game() {
       id: currentMatch.id,
       updates: {
         currentPlayer: previousState.currentPlayer,
+        currentTurn: previousState.currentTurn || 1,
         player1Score: previousState.player1Score,
         player2Score: previousState.player2Score,
         ballStates: cleanedBallStates,
@@ -688,8 +692,8 @@ export default function Game() {
       player1Score: currentMatch.player1Score,
       player2Score: currentMatch.player2Score,
       currentPlayer: currentMatch.currentPlayer,
+      currentTurn: currentMatch.currentTurn || 1,
       ballStates: JSON.parse(JSON.stringify(currentBallStates)),
-      previousBallStates: turnHistory.length > 0 ? turnHistory[turnHistory.length - 1].ballStates : currentBallStates
     };
 
     // Add rerack state to turn history
