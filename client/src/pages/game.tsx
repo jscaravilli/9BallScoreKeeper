@@ -130,6 +130,7 @@ export default function Game() {
 
 
   const [lockedBalls, setLockedBalls] = useState<Set<number>>(new Set());
+  const [ballsScoredThisTurn, setBallsScoredThisTurn] = useState<Set<number>>(new Set());
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
     name: string;
@@ -363,6 +364,13 @@ export default function Game() {
       ball.state = 'scored';
       ball.scoredBy = currentMatch.currentPlayer as 1 | 2;
       
+      // Track that this ball was scored during the current turn
+      setBallsScoredThisTurn(prev => {
+        const newSet = new Set(prev);
+        newSet.add(ballNumber);
+        return newSet;
+      });
+      
 
       
       // Get handicap targets
@@ -553,6 +561,9 @@ export default function Game() {
       return newHistory.slice(-maxTurnHistory);
     });
 
+    // Clear balls scored during this turn - they will now disappear
+    setBallsScoredThisTurn(new Set());
+
     // Switch to the other player - locked balls will be updated automatically by useEffect
     updateMatchMutation.mutate({
       id: currentMatch.id,
@@ -636,8 +647,9 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Clear locked balls immediately, then recalculate after state update
+    // Clear locked balls and current turn balls immediately
     setLockedBalls(new Set());
+    setBallsScoredThisTurn(new Set());
     
     // Force immediate locked ball recalculation after the mutations complete
     const recalculateAfterUndo = () => {
@@ -855,6 +867,7 @@ export default function Game() {
         onBallTap={handleBallTap}
         lockedBalls={lockedBalls}
         turnHistory={turnHistory}
+        ballsScoredThisTurn={ballsScoredThisTurn}
       />
 
       {/* Game Actions */}

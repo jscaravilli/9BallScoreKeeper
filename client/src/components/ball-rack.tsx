@@ -7,6 +7,7 @@ interface BallRackProps {
   onBallTap: (ballNumber: number) => void;
   lockedBalls?: Set<number>;
   turnHistory?: any[]; // Turn history to check if 9-ball can be undone
+  ballsScoredThisTurn?: Set<number>; // Balls scored during current turn
 }
 
 const BALL_COLORS = {
@@ -21,7 +22,7 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(), turnHistory = [] }: BallRackProps) {
+export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(), turnHistory = [], ballsScoredThisTurn = new Set() }: BallRackProps) {
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
       number: ballNumber as BallInfo['number'],
@@ -111,11 +112,14 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
     }
   };
 
-  const getBallStyles = (ballNumber: number, state: BallInfo['state'], isLocked: boolean) => {
+  const getBallStyles = (ballNumber: number, state: BallInfo['state'], isLocked: boolean, isScoredThisTurn: boolean) => {
     const baseStyles = "w-16 h-16 rounded-full border-[0.5px] shadow-lg flex items-center justify-center font-bold text-lg transition-all touch-target";
     
     if (isLocked) {
       return `${baseStyles} bg-gray-300 border-gray-400 opacity-40 cursor-not-allowed`;
+    } else if (isScoredThisTurn && (state === 'scored' || state === 'dead')) {
+      // Balls scored during current turn show as greyed out but visible
+      return `${baseStyles} bg-gray-300 border-green-600 opacity-60 text-gray-600 hover:shadow-xl active:scale-95`;
     } else {
       // All active balls use custom gradients, no background needed here
       return `${baseStyles} bg-transparent border-gray-300 text-white overflow-hidden p-0 hover:shadow-xl active:scale-95`;
@@ -133,8 +137,9 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
           const ballState = getBallState(ballNumber);
           const isLocked = lockedBalls.has(ballNumber);
           
-          // Hide balls that are scored or dead - they disappear from the rack
-          if (ballState.state === 'scored' || ballState.state === 'dead') {
+          // Hide balls that were scored/dead in PREVIOUS turns (not current turn)
+          if ((ballState.state === 'scored' || ballState.state === 'dead') && 
+              !ballsScoredThisTurn.has(ballNumber)) {
             return (
               <div key={ballNumber} className="w-16 h-16 flex items-center justify-center">
                 {/* Empty space where ball used to be */}
@@ -142,16 +147,22 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
             );
           }
           
+          const isScoredThisTurn = ballsScoredThisTurn.has(ballNumber);
+          
           return (
             <Button
               key={ballNumber}
-              className={getBallStyles(ballNumber, ballState.state, isLocked)}
+              className={getBallStyles(ballNumber, ballState.state, isLocked, isScoredThisTurn)}
               onClick={() => !isLocked && onBallTap(ballNumber)}
               variant="outline"
               disabled={isLocked}
             >
               {isLocked ? (
                 <span className="text-gray-500 font-bold">{ballNumber}</span>
+              ) : isScoredThisTurn && (ballState.state === 'scored' || ballState.state === 'dead') ? (
+                ballState.state === 'scored' ? 
+                  <Check className="h-6 w-6 text-green-600" /> : 
+                  <X className="h-6 w-6 text-red-500" />
               ) : (
                 renderBallContent(ballNumber, ballState.state)
               )}
