@@ -5,7 +5,7 @@ import type { BallInfo } from "@shared/schema";
 interface BallRackProps {
   ballStates: BallInfo[];
   onBallTap: (ballNumber: number) => void;
-  lockedBalls?: Set<number>;
+  currentPlayer: 1 | 2;
   turnHistory?: any[]; // Turn history to check if 9-ball can be undone
 }
 
@@ -21,7 +21,20 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(), turnHistory = [] }: BallRackProps) {
+export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [] }: BallRackProps) {
+  // Calculate locked balls directly from current game state
+  const getLockedBalls = (): Set<number> => {
+    const locked = new Set<number>();
+    ballStates.forEach(ball => {
+      if ((ball.state === 'scored' || ball.state === 'dead') && 
+          ball.scoredBy && ball.scoredBy !== currentPlayer) {
+        locked.add(ball.number);
+      }
+    });
+    return locked;
+  };
+  
+  const lockedBalls = getLockedBalls();
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
       number: ballNumber as BallInfo['number'],

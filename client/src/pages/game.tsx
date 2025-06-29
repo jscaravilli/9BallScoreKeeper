@@ -129,7 +129,7 @@ export default function Game() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
 
-  const [lockedBalls, setLockedBalls] = useState<Set<number>>(new Set());
+
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
     name: string;
@@ -153,28 +153,7 @@ export default function Game() {
     queryKey: ["/api/match/current"],
   });
 
-  // Force locked ball recalculation function
-  const recalculateLockedBalls = useCallback((match: Match) => {
-    const newLockedBalls = new Set<number>();
-    const ballStates = match.ballStates as BallInfo[] || [];
-    const activePlayer = match.currentPlayer;
-    
-    // Lock balls that were scored/dead by the OTHER player
-    ballStates.forEach(ball => {
-      if ((ball.state === 'scored' || ball.state === 'dead') && 
-          ball.scoredBy && ball.scoredBy !== activePlayer) {
-        newLockedBalls.add(ball.number);
-      }
-    });
-    
-    setLockedBalls(newLockedBalls);
-  }, []);
 
-  // Update locked balls whenever match data changes
-  useEffect(() => {
-    if (!currentMatch) return;
-    recalculateLockedBalls(currentMatch);
-  }, [currentMatch, recalculateLockedBalls]);
 
   // Create new match mutation
   const createMatchMutation = useMutation({
@@ -203,13 +182,7 @@ export default function Game() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
-      // Force immediate locked ball recalculation after ball state update
-      setTimeout(() => {
-        const updatedMatch = queryClient.getQueryData<Match | null>(["/api/match/current"]);
-        if (updatedMatch) {
-          recalculateLockedBalls(updatedMatch);
-        }
-      }, 50);
+
     },
   });
 
@@ -262,19 +235,7 @@ export default function Game() {
           const nineBallIndex = ballStates.findIndex(b => b.number === 9);
           ballStates[nineBallIndex] = { number: 9, state: 'scored', scoredBy: lastStateNineBall.scoredBy };
           
-          // Restore locked balls from before the rerack
-          // Find balls that were scored/dead by non-current players in the previous state
-          const newLockedBalls = new Set<number>();
-          const currentPlayer = currentMatch.currentPlayer;
-          
-          lastState.ballStates.forEach(ball => {
-            if ((ball.state === 'scored' || ball.state === 'dead') && 
-                ball.scoredBy && ball.scoredBy !== currentPlayer) {
-              newLockedBalls.add(ball.number);
-            }
-          });
-          
-          setLockedBalls(newLockedBalls);
+          // Ball locking handled in BallRack component
           
           // Deduct 2 points from the player who scored it
           const scoringPlayer = lastStateNineBall.scoredBy;
@@ -336,9 +297,7 @@ export default function Game() {
     }
     
     // Check if ball is locked (pocketed/marked dead in previous turn)
-    if (lockedBalls.has(ballNumber)) {
-      return; // Don't allow interaction with locked balls
-    }
+    // Ball locking is now handled in BallRack component
     
     setIsProcessing(true);
     
@@ -647,13 +606,7 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Immediately calculate locked balls based on the previous state we're restoring to
-    const tempMatch = {
-      ...currentMatch,
-      ballStates: previousState.ballStates,
-      currentPlayer: previousState.currentPlayer
-    };
-    recalculateLockedBalls(tempMatch);
+    // Ball locking is now handled directly in BallRack component
     
     // Log the undo event
     const undoEvent: MatchEvent = {
@@ -681,16 +634,6 @@ export default function Game() {
     updateBallsMutation.mutate({
       id: currentMatch.id,
       ballStates: previousState.ballStates,
-    }, {
-      onSuccess: () => {
-        // Force immediate locked ball recalculation with previous state
-        const tempMatch = {
-          ...currentMatch,
-          ballStates: previousState.ballStates,
-          currentPlayer: previousState.currentPlayer
-        };
-        recalculateLockedBalls(tempMatch);
-      }
     });
 
     // Remove the last state from history
@@ -767,7 +710,6 @@ export default function Game() {
 
     setShowGameWin(false);
     setGameWinner(null);
-    setLockedBalls(new Set());
   };
 
   // Show loading state
@@ -860,7 +802,7 @@ export default function Game() {
       <BallRack 
         ballStates={currentMatch.ballStates as BallInfo[] || []}
         onBallTap={handleBallTap}
-        lockedBalls={lockedBalls}
+        currentPlayer={currentMatch.currentPlayer as 1 | 2}
         turnHistory={turnHistory}
       />
 
