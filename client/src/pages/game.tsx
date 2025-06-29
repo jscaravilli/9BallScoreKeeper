@@ -647,35 +647,27 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Clear locked balls and current turn balls immediately
-    setLockedBalls(new Set());
-    setBallsScoredThisTurn(new Set());
+    // Immediately calculate the correct state based on what we're restoring to
+    const newLockedBalls = new Set<number>();
+    const newCurrentTurnBalls = new Set<number>();
+    const ballStates = previousState.ballStates;
+    const activePlayer = previousState.currentPlayer;
     
-    // Force immediate recalculation after the mutations complete
-    const recalculateAfterUndo = () => {
-      const newLockedBalls = new Set<number>();
-      const newCurrentTurnBalls = new Set<number>();
-      const ballStates = previousState.ballStates;
-      const activePlayer = previousState.currentPlayer;
-      
-      ballStates.forEach(ball => {
-        if ((ball.state === 'scored' || ball.state === 'dead') && ball.scoredBy) {
-          if (ball.scoredBy !== activePlayer) {
-            // Ball scored by other player - locked
-            newLockedBalls.add(ball.number);
-          } else {
-            // Ball scored by current player - part of current turn
-            newCurrentTurnBalls.add(ball.number);
-          }
+    ballStates.forEach(ball => {
+      if ((ball.state === 'scored' || ball.state === 'dead') && ball.scoredBy) {
+        if (ball.scoredBy !== activePlayer) {
+          // Ball scored by other player - locked
+          newLockedBalls.add(ball.number);
+        } else {
+          // Ball scored by current player - part of current turn
+          newCurrentTurnBalls.add(ball.number);
         }
-      });
-      
-      setLockedBalls(newLockedBalls);
-      setBallsScoredThisTurn(newCurrentTurnBalls);
-    };
+      }
+    });
     
-    // Delay recalculation to ensure all mutations have completed
-    setTimeout(recalculateAfterUndo, 200);
+    // Set the correct states immediately
+    setLockedBalls(newLockedBalls);
+    setBallsScoredThisTurn(newCurrentTurnBalls);
     
     // Log the undo event
     const undoEvent: MatchEvent = {
