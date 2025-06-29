@@ -6,7 +6,8 @@ interface BallRackProps {
   ballStates: BallInfo[];
   onBallTap: (ballNumber: number) => void;
   currentPlayer: 1 | 2;
-  turnHistory?: any[]; // Turn history to check if 9-ball can be undone
+  turnHistory?: any[];
+  undoInProgress?: boolean; // Add undo state to prevent visual glitches
 }
 
 const BALL_COLORS = {
