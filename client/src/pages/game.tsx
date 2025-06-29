@@ -228,6 +228,8 @@ export default function Game() {
       winnerId: null,
     });
     setShowPlayerSetup(false);
+    // Reset inning count for new match
+    setCurrentInning(1);
   };
 
   const handleBallTap = (ballNumber: number) => {
@@ -352,11 +354,7 @@ export default function Game() {
         player2Score: currentMatch.player2Score,
       };
       
-      console.log('Recording state before ball scoring:', {
-        ballNumber,
-        currentState: currentState.ballStates,
-        currentPlayer: currentState.currentPlayer
-      });
+
       
       // Add to turn history, keeping only the last maxTurnHistory turns
       setTurnHistory(prev => {
@@ -502,11 +500,7 @@ export default function Game() {
         player2Score: currentMatch.player2Score,
       };
       
-      console.log('Recording state before marking ball dead:', {
-        ballNumber,
-        currentState: currentState.ballStates,
-        currentPlayer: currentState.currentPlayer
-      });
+
       
       // Add to turn history
       setTurnHistory(prev => {
@@ -724,6 +718,8 @@ export default function Game() {
     setShowMatchWin(false);
     setShowNewGameConfirm(false);
     setShowPlayerSetup(true);
+    // Reset inning count for new match
+    setCurrentInning(1);
     
     // Invalidate current match query to clear the data
     queryClient.setQueryData(["/api/match/current"], null);
@@ -776,7 +772,7 @@ export default function Game() {
     setShowGameWin(false);
     setGameWinner(null);
     // Locked balls are now calculated dynamically
-    setCurrentInning(1);
+    // Note: Innings continue across games within same match
   };
 
   // Show loading state
@@ -815,7 +811,7 @@ export default function Game() {
             </button>
             <div>
               <h1 className="text-lg font-bold text-white">Joseph's Unofficial APA 9 Ball Scorekeeper</h1>
-              <p className="text-green-200 text-sm">Game {currentMatch.currentGame}</p>
+              <p className="text-green-200 text-sm">Game {currentMatch.currentGame} • Inning {currentInning}</p>
             </div>
           </div>
           <span className="bg-green-800/50 text-green-100 px-3 py-1 rounded-full text-sm font-medium">
