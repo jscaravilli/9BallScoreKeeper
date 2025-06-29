@@ -138,6 +138,16 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
           const ballState = getBallState(ballNumber);
           const isLocked = lockedBalls.has(ballNumber);
           
+          // Debug logging for locked balls
+          if (isLocked) {
+            console.log(`Ball ${ballNumber} is locked:`, {
+              ballState: ballState.state,
+              scoredBy: ballState.scoredBy,
+              inning: ballState.inning,
+              turnCompleted: ballState.turnCompleted
+            });
+          }
+          
           // Show balls based on turn-based visibility
           const isScoredThisInning = ballState.inning === currentInning;
           

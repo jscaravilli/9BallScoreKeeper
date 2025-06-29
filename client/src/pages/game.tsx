@@ -209,6 +209,12 @@ export default function Game() {
       // Lock dead balls that are from previous innings OR from current inning but turn completed
       if (ball.state === 'dead' && ball.inning && 
           (ball.inning < currentInning || (ball.inning === currentInning && ball.turnCompleted))) {
+        console.log(`Locking dead ball ${ball.number}:`, {
+          ballInning: ball.inning,
+          currentInning,
+          turnCompleted: ball.turnCompleted,
+          scoredBy: ball.scoredBy
+        });
         lockedBalls.add(ball.number);
       }
     });
@@ -592,6 +598,12 @@ export default function Game() {
       if ((ball.state === 'scored' || ball.state === 'dead') && 
           ball.scoredBy === currentMatch.currentPlayer && 
           !ball.turnCompleted) {
+        console.log(`Marking ball ${ball.number} as turnCompleted:`, {
+          state: ball.state,
+          scoredBy: ball.scoredBy,
+          currentPlayer: currentMatch.currentPlayer,
+          inning: ball.inning
+        });
         ball.turnCompleted = true;
         ballStatesChanged = true;
       }
