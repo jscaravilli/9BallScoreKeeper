@@ -641,9 +641,7 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Locked balls are now calculated dynamically from ball states
-    
-    // Reset current inning to match the previous state's inning
+    // Calculate current inning from the restored state (clean slate)
     const maxInning = Math.max(...previousState.ballStates.filter((b: BallInfo) => b.inning).map((b: BallInfo) => b.inning!), 1);
     setCurrentInning(maxInning);
     
@@ -670,9 +668,11 @@ export default function Game() {
       }
     });
 
+    // Ensure completely clean ball state restoration - deep clone to avoid any references
+    const cleanBallStates = JSON.parse(JSON.stringify(previousState.ballStates));
     updateBallsMutation.mutate({
       id: currentMatch.id,
-      ballStates: previousState.ballStates,
+      ballStates: cleanBallStates,
     });
 
     // Remove the last state from history

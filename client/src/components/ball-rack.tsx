@@ -137,9 +137,12 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
           const ballState = getBallState(ballNumber);
           const isLocked = lockedBalls.has(ballNumber);
           
-          // Hide balls that were scored/dead in PREVIOUS innings (not current inning)
+          // Show balls based purely on current state and inning
           const isScoredThisInning = ballState.inning === currentInning;
-          if ((ballState.state === 'scored' || ballState.state === 'dead') && !isScoredThisInning) {
+          
+          // Hide balls that were scored/dead in previous innings only
+          if ((ballState.state === 'scored' || ballState.state === 'dead') && 
+              ballState.inning && ballState.inning < currentInning) {
             return (
               <div key={ballNumber} className="w-16 h-16 flex items-center justify-center">
                 {/* Empty space where ball used to be */}
