@@ -34,8 +34,34 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
       console.log('FORCE REFRESH TRIGGERED:', forceUpdateKey);
       setComponentKey(prev => prev + 1);
       
-      // NUCLEAR COMPONENT RESET: Force complete re-creation
-      console.log('NUCLEAR RESET: Component will completely rebuild');
+      // CSS-LEVEL VISUAL RESET: Force clear checkmarks at DOM level
+      console.log('CSS-LEVEL RESET: Clearing all visual checkmarks');
+      setTimeout(() => {
+        // Target all ball elements and force clear checkmark symbols
+        const ballElements = document.querySelectorAll('[data-ball-number]');
+        ballElements.forEach(element => {
+          const htmlElement = element as HTMLElement;
+          
+          // Multiple approaches to force clear checkmarks
+          // 1. Hide any Check/X icons inside the ball
+          const icons = htmlElement.querySelectorAll('svg');
+          icons.forEach(icon => {
+            icon.style.display = 'none';
+            setTimeout(() => icon.style.display = '', 100);
+          });
+          
+          // 2. Force opacity reset
+          htmlElement.style.opacity = '0.98';
+          setTimeout(() => htmlElement.style.opacity = '', 100);
+          
+          // 3. Force content reset by temporarily changing innerHTML
+          const originalContent = htmlElement.innerHTML;
+          htmlElement.innerHTML = '';
+          setTimeout(() => {
+            htmlElement.innerHTML = originalContent;
+          }, 50);
+        });
+      }, 150);
     }
   }, [forceUpdateKey]);
 
@@ -244,6 +270,7 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
           return (
             <div
               key={`ball-${ballNumber}-${freshState}-${freshBallState.scoredBy || 'none'}-${freshBallState.turnScored || 0}-${forceUpdateKey || ''}-${componentKey}-div`}
+              data-ball-number={ballNumber}
               className={getBallStyles(ballNumber, freshState, false)}
               onClick={() => onBallTap(ballNumber)}
               role="button"
