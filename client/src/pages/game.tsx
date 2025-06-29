@@ -1018,14 +1018,8 @@ export default function Game() {
       <Dialog open={showControls} onOpenChange={setShowControls}>
         <DialogContent className="max-w-md mx-auto">
           <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4">
               <h2 className="text-xl font-bold text-gray-800">Ball Controls</h2>
-              <button 
-                onClick={() => setShowControls(false)}
-                className="p-1 hover:bg-gray-100 rounded"
-              >
-                <X className="h-5 w-5 text-gray-500" />
-              </button>
             </div>
             
             <div className="space-y-4 text-sm text-gray-700">
