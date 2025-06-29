@@ -1,6 +1,5 @@
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
 import type { BallInfo } from "@shared/schema";
 
 interface BallRackProps {
@@ -26,45 +25,6 @@ const BALL_COLORS = {
 };
 
 export default function BallRack({ ballStates, onBallTap, currentPlayer, currentTurn, turnHistory = [], undoInProgress = false, forceUpdateKey }: BallRackProps) {
-  const [componentKey, setComponentKey] = useState(0);
-
-  // FORCE IMMEDIATE RE-RENDER: Watch for forceUpdateKey changes and trigger complete refresh
-  useEffect(() => {
-    if (forceUpdateKey) {
-      console.log('FORCE REFRESH TRIGGERED:', forceUpdateKey);
-      setComponentKey(prev => prev + 1);
-      
-      // CSS-LEVEL VISUAL RESET: Force clear checkmarks at DOM level
-      console.log('CSS-LEVEL RESET: Clearing all visual checkmarks');
-      setTimeout(() => {
-        // Target all ball elements and force clear checkmark symbols
-        const ballElements = document.querySelectorAll('[data-ball-number]');
-        ballElements.forEach(element => {
-          const htmlElement = element as HTMLElement;
-          
-          // Multiple approaches to force clear checkmarks
-          // 1. Hide any Check/X icons inside the ball
-          const icons = htmlElement.querySelectorAll('svg');
-          icons.forEach(icon => {
-            icon.style.display = 'none';
-            setTimeout(() => icon.style.display = '', 100);
-          });
-          
-          // 2. Force opacity reset
-          htmlElement.style.opacity = '0.98';
-          setTimeout(() => htmlElement.style.opacity = '', 100);
-          
-          // 3. Force content reset by temporarily changing innerHTML
-          const originalContent = htmlElement.innerHTML;
-          htmlElement.innerHTML = '';
-          setTimeout(() => {
-            htmlElement.innerHTML = originalContent;
-          }, 50);
-        });
-      }, 150);
-    }
-  }, [forceUpdateKey]);
-
   // IMPROVED TURN-BASED APPROACH: Hide balls from completed innings
   const shouldHideBall = (ballNumber: number): boolean => {
     const ball = ballStates.find(b => b.number === ballNumber);
@@ -269,8 +229,7 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
           
           return (
             <div
-              key={`ball-${ballNumber}-${freshState}-${freshBallState.scoredBy || 'none'}-${freshBallState.turnScored || 0}-${forceUpdateKey || ''}-${componentKey}-div`}
-              data-ball-number={ballNumber}
+              key={`ball-${ballNumber}-${freshState}-${freshBallState.scoredBy || 'none'}-${freshBallState.turnScored || 0}-${forceUpdateKey || ''}-div`}
               className={getBallStyles(ballNumber, freshState, false)}
               onClick={() => onBallTap(ballNumber)}
               role="button"

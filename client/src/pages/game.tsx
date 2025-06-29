@@ -149,8 +149,6 @@ export default function Game() {
   const [nineBallUndoInProgress, setNineBallUndoInProgress] = useState(false);
   const [forceUpdateKey, setForceUpdateKey] = useState<string>("");
   const [ballRackKey, setBallRackKey] = useState<string>("initial");
-  const [previousPlayer, setPreviousPlayer] = useState<number | null>(null);
-  const [playerChangeKey, setPlayerChangeKey] = useState<string>("initial");
 
   const maxTurnHistory = 10; // Keep last 10 turns for undo
 
@@ -158,29 +156,6 @@ export default function Game() {
   const { data: currentMatch, isLoading } = useQuery<Match | null>({
     queryKey: ["/api/match/current"],
   });
-
-  // NUCLEAR OPTION: Completely unmount/remount BallRack on cross-player changes
-  useEffect(() => {
-    if (currentMatch && currentMatch.currentPlayer !== previousPlayer) {
-      if (previousPlayer !== null) {
-        console.log(`PLAYER CHANGE DETECTED: ${previousPlayer} → ${currentMatch.currentPlayer} - NUCLEAR RESET`);
-        
-        // NUCLEAR RESET: Completely unmount BallRack component
-        setBallRackKey(`UNMOUNT`);
-        setPlayerChangeKey(`UNMOUNT`);
-        
-        // Then remount with fresh keys after a delay
-        setTimeout(() => {
-          const changeTimestamp = Date.now();
-          setPlayerChangeKey(`REMOUNT-${changeTimestamp}`);
-          setBallRackKey(`REMOUNT-${changeTimestamp}`);
-          setForceUpdateKey(`NUCLEAR-${changeTimestamp}`);
-          queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
-        }, 200);
-      }
-      setPreviousPlayer(currentMatch.currentPlayer);
-    }
-  }, [currentMatch?.currentPlayer, previousPlayer, queryClient]);
 
 
 
@@ -356,10 +331,8 @@ export default function Game() {
       
       // Add to turn history, keeping only the last maxTurnHistory turns
       console.log('Saving turn history - ball states BEFORE scoring:', currentState.ballStates);
-      console.log(`Saving turn history for ball ${ballNumber} scoring by player ${currentMatch.currentPlayer}`);
       setTurnHistory(prev => {
         const newHistory = [...prev, currentState];
-        console.log('New turn history length:', newHistory.length);
         return newHistory.slice(-maxTurnHistory);
       });
 
@@ -662,40 +635,7 @@ export default function Game() {
     const updateKey = Date.now().toString();
     setForceUpdateKey(updateKey);
 
-    // CROSS-PLAYER BALL TRACKING: Ensure all ball states are correctly restored
-    const sanitizedBallStates = previousState.ballStates.map((ball: BallInfo) => ({
-      number: ball.number,
-      state: ball.state,
-      scoredBy: ball.scoredBy,
-      turnScored: ball.turnScored
-    }));
-    
-    console.log('CROSS-PLAYER UNDO: Restoring sanitized ball states:', sanitizedBallStates);
-    
-    // DETECT CROSS-PLAYER BALL CHANGES: Check if any balls are changing from scored back to active
-    const currentBalls = currentMatch.ballStates as BallInfo[];
-    const hasCrossPlayerChanges = sanitizedBallStates.some((newBall, index) => {
-      const currentBall = currentBalls[index];
-      // Detect balls going from scored/dead back to active (undo scenario)
-      const isUndoingScored = currentBall.state === 'scored' && newBall.state === 'active';
-      const isUndoingDead = currentBall.state === 'dead' && newBall.state === 'active';
-      return isUndoingScored || isUndoingDead;
-    });
-    
-    if (hasCrossPlayerChanges) {
-      console.log('CROSS-PLAYER BALL CHANGES DETECTED - Triggering nuclear reset');
-      // Force nuclear reset even if player doesn't change
-      setBallRackKey(`UNMOUNT`);
-      setPlayerChangeKey(`UNMOUNT`);
-      
-      setTimeout(() => {
-        const timestamp = Date.now();
-        setBallRackKey(`CROSS-PLAYER-RESET-${timestamp}`);
-        setPlayerChangeKey(`CROSS-PLAYER-RESET-${timestamp}`);
-        setForceUpdateKey(`CROSS-PLAYER-FORCE-${timestamp}`);
-      }, 300);
-    }
-    
+    // INSTANTANEOUS RESET: Directly update to correct state with force key change
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
@@ -703,7 +643,7 @@ export default function Game() {
         currentTurn: previousState.currentTurn || 1,
         player1Score: previousState.player1Score,
         player2Score: previousState.player2Score,
-        ballStates: sanitizedBallStates,
+        ballStates: previousState.ballStates,
         isComplete: false,
         winnerId: null,
       }
@@ -715,25 +655,10 @@ export default function Game() {
         setShowMatchWin(false);
         setUndoInProgress(false);
         
-        // IMMEDIATE VISUAL REFRESH: Force instant component reset
-        const resetTimestamp = Date.now();
-        setBallRackKey(`reset-${resetTimestamp}`);
-        setForceUpdateKey(`final-${resetTimestamp}`);
-        setPlayerChangeKey(`undo-change-${resetTimestamp}`);
-        
-        // Force previous player reset to trigger detection on next render
-        setPreviousPlayer(null);
-        
-        // IMMEDIATE QUERY REFRESH: No delay, instant visual update
+        // COMPLETE COMPONENT RESET: Change BallRack key to force total remount
+        setBallRackKey(Date.now().toString());
+        setForceUpdateKey(Date.now().toString() + "-final");
         queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
-        
-        // Force a second refresh after state settles to ensure visual sync
-        setTimeout(() => {
-          const secondRefresh = Date.now();
-          setBallRackKey(`refresh-${secondRefresh}`);
-          setPlayerChangeKey(`refresh-${secondRefresh}`);
-          queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
-        }, 100);
       }
     });
   };
@@ -890,28 +815,17 @@ export default function Game() {
         } : undefined}
       />
 
-      {/* Ball Rack - Conditional Rendering for Nuclear Reset */}
-      {ballRackKey !== "UNMOUNT" && playerChangeKey !== "UNMOUNT" ? (
-        <BallRack 
-          key={`${ballRackKey}-${playerChangeKey}`}
-          ballStates={currentMatch.ballStates as BallInfo[] || []}
-          onBallTap={handleBallTap}
-          currentPlayer={currentMatch.currentPlayer as 1 | 2}
-          currentTurn={currentMatch.currentTurn || 1}
-          turnHistory={turnHistory}
-          undoInProgress={undoInProgress}
-          forceUpdateKey={`${forceUpdateKey}-${playerChangeKey}`}
-        />
-      ) : (
-        <div className="p-4">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">Rack</h2>
-          <div className="grid grid-cols-3 gap-4 justify-items-center max-w-xs mx-auto">
-            {Array.from({ length: 9 }, (_, i) => (
-              <div key={i} className="w-16 h-16 opacity-0" />
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Ball Rack */}
+      <BallRack 
+        key={ballRackKey}
+        ballStates={currentMatch.ballStates as BallInfo[] || []}
+        onBallTap={handleBallTap}
+        currentPlayer={currentMatch.currentPlayer as 1 | 2}
+        currentTurn={currentMatch.currentTurn || 1}
+        turnHistory={turnHistory}
+        undoInProgress={undoInProgress}
+        forceUpdateKey={forceUpdateKey}
+      />
 
       {/* Game Actions */}
       <section className="p-4 pb-20">
