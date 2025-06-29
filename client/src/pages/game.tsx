@@ -652,6 +652,7 @@ export default function Game() {
       }
     });
     
+    // Set locked balls BEFORE updating match state to avoid timing issues
     setLockedBalls(restoredLockedBalls);
     console.log('Restored locked balls based on ball states:', Array.from(restoredLockedBalls));
     
@@ -682,6 +683,21 @@ export default function Game() {
       id: currentMatch.id,
       ballStates: previousState.ballStates,
     });
+
+    // Force immediate locked balls recalculation to prevent gray flicker
+    setTimeout(() => {
+      const finalLockedBalls = new Set<number>();
+      const activePlayer = previousState.currentPlayer;
+      
+      previousState.ballStates.forEach(ball => {
+        if ((ball.state === 'scored' || ball.state === 'dead') && 
+            ball.scoredBy && ball.scoredBy !== activePlayer) {
+          finalLockedBalls.add(ball.number);
+        }
+      });
+      
+      setLockedBalls(finalLockedBalls);
+    }, 50);
 
     // Remove the last state from history
     setTurnHistory(prev => prev.slice(0, -1));
