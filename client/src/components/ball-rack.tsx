@@ -69,6 +69,9 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
   };
 
   const renderBallContent = (ballNumber: number, state: BallInfo['state']) => {
+    // Debug logging to track state issues
+    console.log(`Rendering ball ${ballNumber} with state: ${state}`);
+    
     // Handle scored state - simple green checkmark for all balls
     if (state === 'scored') {
       return <Check className="h-6 w-6 text-green-600" />;
