@@ -672,6 +672,30 @@ export default function Game() {
     
     console.log('CROSS-PLAYER UNDO: Restoring sanitized ball states:', sanitizedBallStates);
     
+    // DETECT CROSS-PLAYER BALL CHANGES: Check if any balls are changing from scored back to active
+    const currentBalls = currentMatch.ballStates as BallInfo[];
+    const hasCrossPlayerChanges = sanitizedBallStates.some((newBall, index) => {
+      const currentBall = currentBalls[index];
+      // Detect balls going from scored/dead back to active (undo scenario)
+      const isUndoingScored = currentBall.state === 'scored' && newBall.state === 'active';
+      const isUndoingDead = currentBall.state === 'dead' && newBall.state === 'active';
+      return isUndoingScored || isUndoingDead;
+    });
+    
+    if (hasCrossPlayerChanges) {
+      console.log('CROSS-PLAYER BALL CHANGES DETECTED - Triggering nuclear reset');
+      // Force nuclear reset even if player doesn't change
+      setBallRackKey(`UNMOUNT`);
+      setPlayerChangeKey(`UNMOUNT`);
+      
+      setTimeout(() => {
+        const timestamp = Date.now();
+        setBallRackKey(`CROSS-PLAYER-RESET-${timestamp}`);
+        setPlayerChangeKey(`CROSS-PLAYER-RESET-${timestamp}`);
+        setForceUpdateKey(`CROSS-PLAYER-FORCE-${timestamp}`);
+      }, 300);
+    }
+    
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
