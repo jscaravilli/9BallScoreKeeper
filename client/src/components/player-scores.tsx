@@ -1,9 +1,5 @@
-import { useState } from "react";
-import type { Match, BallInfo } from "@shared/schema";
+import type { Match } from "@shared/schema";
 import { getPointsToWin, getProgressPercentage } from "@/lib/apa-handicaps";
-import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
-import ScoreEditModal from "./score-edit-modal";
 
 interface PlayerScoresProps {
   match: Match;
@@ -11,12 +7,9 @@ interface PlayerScoresProps {
     player1Score?: number;
     player2Score?: number;
   };
-  onScoreUpdate?: (newScore: number, ballChanges: BallInfo[], playerNumber: 1 | 2) => void;
 }
 
-export default function PlayerScores({ match, overrideScores, onScoreUpdate }: PlayerScoresProps) {
-  const [editingPlayer, setEditingPlayer] = useState<1 | 2 | null>(null);
-  
+export default function PlayerScores({ match, overrideScores }: PlayerScoresProps) {
   const player1Score = overrideScores?.player1Score ?? match.player1Score;
   const player2Score = overrideScores?.player2Score ?? match.player2Score;
   
@@ -24,13 +17,6 @@ export default function PlayerScores({ match, overrideScores, onScoreUpdate }: P
   const player2Target = getPointsToWin(match.player2SkillLevel as any);
   const player1Progress = getProgressPercentage(player1Score, match.player1SkillLevel as any);
   const player2Progress = getProgressPercentage(player2Score, match.player2SkillLevel as any);
-
-  const handleScoreUpdate = (newScore: number, ballChanges: BallInfo[], playerNumber: 1 | 2) => {
-    if (onScoreUpdate) {
-      onScoreUpdate(newScore, ballChanges, playerNumber);
-    }
-    setEditingPlayer(null);
-  };
 
   return (
     <section className="p-4 bg-gray-100">
@@ -44,19 +30,7 @@ export default function PlayerScores({ match, overrideScores, onScoreUpdate }: P
             <div className="text-xs text-gray-600 mb-2">
               Skill Level {match.player1SkillLevel}
             </div>
-            <div className="flex items-center justify-center gap-2">
-              <div className="text-2xl font-bold text-green-600">{player1Score}</div>
-              {onScoreUpdate && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setEditingPlayer(1)}
-                  className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
-                >
-                  <Edit className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
+            <div className="text-2xl font-bold text-green-600">{player1Score}</div>
             <div className="text-xs text-gray-500">
               of {player1Target} points
             </div>
@@ -79,22 +53,10 @@ export default function PlayerScores({ match, overrideScores, onScoreUpdate }: P
             <div className="text-xs text-gray-600 mb-2">
               Skill Level {match.player2SkillLevel}
             </div>
-            <div className="flex items-center justify-center gap-2">
-              <div className={`text-2xl font-bold ${
-                match.currentPlayer === 2 ? 'text-green-600' : 'text-gray-700'
-              }`}>
-                {player2Score}
-              </div>
-              {onScoreUpdate && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setEditingPlayer(2)}
-                  className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
-                >
-                  <Edit className="h-3 w-3" />
-                </Button>
-              )}
+            <div className={`text-2xl font-bold ${
+              match.currentPlayer === 2 ? 'text-green-600' : 'text-gray-700'
+            }`}>
+              {player2Score}
             </div>
             <div className="text-xs text-gray-500">
               of {player2Target} points
@@ -111,17 +73,6 @@ export default function PlayerScores({ match, overrideScores, onScoreUpdate }: P
           </div>
         </div>
       </div>
-
-      {/* Score Edit Modals */}
-      {editingPlayer && (
-        <ScoreEditModal
-          open={editingPlayer !== null}
-          onClose={() => setEditingPlayer(null)}
-          match={match}
-          playerNumber={editingPlayer}
-          onUpdateScore={handleScoreUpdate}
-        />
-      )}
     </section>
   );
 }
