@@ -142,6 +142,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 28, 2025: Updated UI terminology - changed "Ball Rack" to "Rack" and removed "Player Setup" from hamburger menu
 - June 28, 2025: FIXED SSL mixed content error by removing Replit development banner script from production builds
 - June 28, 2025: Added Safari compatibility fixes - improved touch handling, localStorage checks, and iOS-specific meta tags
+- June 29, 2025: FIXED 9-ball scoring bug after rerack - now correctly awards 2 points instead of deducting them
+- June 29, 2025: Updated undo logic to only trigger when 9-ball is already scored, not when active after rerack
 
 ## User Preferences
 
