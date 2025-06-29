@@ -331,8 +331,10 @@ export default function Game() {
       
       // Add to turn history, keeping only the last maxTurnHistory turns
       console.log('Saving turn history - ball states BEFORE scoring:', currentState.ballStates);
+      console.log(`Saving turn history for ball ${ballNumber} scoring by player ${currentMatch.currentPlayer}`);
       setTurnHistory(prev => {
         const newHistory = [...prev, currentState];
+        console.log('New turn history length:', newHistory.length);
         return newHistory.slice(-maxTurnHistory);
       });
 
@@ -635,7 +637,16 @@ export default function Game() {
     const updateKey = Date.now().toString();
     setForceUpdateKey(updateKey);
 
-    // INSTANTANEOUS RESET: Directly update to correct state with force key change
+    // CROSS-PLAYER BALL TRACKING: Ensure all ball states are correctly restored
+    const sanitizedBallStates = previousState.ballStates.map((ball: BallInfo) => ({
+      number: ball.number,
+      state: ball.state,
+      scoredBy: ball.scoredBy,
+      turnScored: ball.turnScored
+    }));
+    
+    console.log('CROSS-PLAYER UNDO: Restoring sanitized ball states:', sanitizedBallStates);
+    
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
@@ -643,7 +654,7 @@ export default function Game() {
         currentTurn: previousState.currentTurn || 1,
         player1Score: previousState.player1Score,
         player2Score: previousState.player2Score,
-        ballStates: previousState.ballStates,
+        ballStates: sanitizedBallStates,
         isComplete: false,
         winnerId: null,
       }
@@ -655,10 +666,14 @@ export default function Game() {
         setShowMatchWin(false);
         setUndoInProgress(false);
         
-        // COMPLETE COMPONENT RESET: Change BallRack key to force total remount
-        setBallRackKey(Date.now().toString());
-        setForceUpdateKey(Date.now().toString() + "-final");
-        queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
+        // FORCE COMPLETE RESET: Multiple approaches for cross-player tracking
+        setBallRackKey(`reset-${Date.now()}`);
+        setForceUpdateKey(`final-${Date.now()}`);
+        
+        // Delay query invalidation to ensure state is fully set
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
+        }, 50);
       }
     });
   };

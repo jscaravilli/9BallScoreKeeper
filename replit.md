@@ -157,9 +157,11 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: Balls now disappear completely when scored/dead and reappear only during undo operations to previous innings
 - June 29, 2025: SIMPLIFIED ball display system - removed complex turn-based hiding to ensure all balls show correct states during undo operations
 - June 29, 2025: Fixed undo operations to properly restore ball visual states including checkmarks for scored balls
-- June 29, 2025: IDENTIFIED persistent visual state issue - React component rendering cache prevents ball checkmarks from clearing during undo operations despite correct data restoration
-- June 29, 2025: Attempted multiple solutions: force keys, component remounting, deep cloning, atomic updates, fresh state lookups - visual persistence remains unresolved
-- June 29, 2025: Current limitation: Ball visual states may show checkmarks after undo operations even when data is correctly restored to active state
+- June 29, 2025: IDENTIFIED cross-player ball tracking issue - visual state persistence during undo operations across player changes
+- June 29, 2025: Attempted comprehensive solutions: React force keys, component remounting, deep state cloning, atomic updates, fresh state lookups, Button to div conversion
+- June 29, 2025: Issue confirmed: Data restoration works correctly (debug logs show accurate active states) but visual checkmarks persist in DOM
+- June 29, 2025: Root cause: React component visual state caching prevents proper re-rendering when balls transition from scored back to active during cross-player undo operations
+- June 29, 2025: WORKAROUND: Users can continue playing - game logic and scoring work correctly, only visual persistence of checkmarks remains
 
 ## User Preferences
 
