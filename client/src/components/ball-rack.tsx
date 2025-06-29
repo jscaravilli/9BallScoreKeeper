@@ -86,16 +86,7 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
     const currentBallState = getBallState(ballNumber);
     const actualState = currentBallState.state;
     
-    // Debug specific visual issues
-    if (ballNumber <= 3) {
-      console.log(`Ball ${ballNumber} RENDER DEBUG:`, {
-        passedState: state,
-        actualState: actualState,
-        willShowCheckmark: actualState === 'scored',
-        willShowX: actualState === 'dead',
-        willShowBallDesign: actualState === 'active'
-      });
-    }
+    // Single ball state instance ensures consistent visual rendering
     
     // EXPLICIT STATE CHECK: Only show icons for non-active states
     if (actualState === 'scored') {
@@ -220,67 +211,15 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
           
           // Single ball state instance - no dual state management
           
-          // Force complete DOM rebuild for state changes
-          const domResetKey = `ball-${ballNumber}-state-${freshState}-${Date.now()}-${forceUpdateKey}`;
-          
           return (
             <div
-              key={domResetKey}
+              key={`ball-${ballNumber}-${freshState}-${freshBallState.scoredBy || 'none'}-${freshBallState.turnScored || 0}-${forceUpdateKey || ''}-div`}
               className={getBallStyles(ballNumber, freshState, false)}
               onClick={() => onBallTap(ballNumber)}
               role="button"
               tabIndex={0}
-              style={{ 
-                // Force DOM reset
-                transform: freshState === 'active' ? 'translateZ(0)' : undefined 
-              }}
             >
-              {/* Force content reset with conditional rendering */}
-              {freshState === 'scored' && <Check className="h-6 w-6 text-green-600" />}
-              {freshState === 'dead' && <X className="h-6 w-6 text-red-500" />}
-              {freshState === 'active' && (
-                ballNumber === 9 ? (
-                  // 9-ball design
-                  <div className="relative w-full h-full rounded-full overflow-hidden">
-                    <div 
-                      className="absolute inset-0 rounded-full"
-                      style={{ background: getBallGradient(9) }}
-                    ></div>
-                    <div 
-                      className="absolute rounded-full"
-                      style={{
-                        top: '10%',
-                        left: '20%',
-                        width: '35%',
-                        height: '35%',
-                        background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 40%, transparent 70%)',
-                      }}
-                    ></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center border border-gray-400 shadow-sm">
-                        <span className="font-bold text-base text-black">9</span>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  // Balls 1-8 design
-                  <div 
-                    className={`ball-${ballNumber} w-full h-full rounded-full overflow-hidden relative`}
-                    data-number={ballNumber}
-                  >
-                    <div 
-                      className="absolute rounded-full"
-                      style={{
-                        top: '10%',
-                        left: '20%',
-                        width: '35%',
-                        height: '35%',
-                        background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 40%, transparent 70%)',
-                      }}
-                    ></div>
-                  </div>
-                )
-              )}
+              {renderBallContent(ballNumber, freshState)}
             </div>
           );
         })}
