@@ -137,12 +137,9 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
           const ballState = getBallState(ballNumber);
           const isLocked = lockedBalls.has(ballNumber);
           
-          // Balls are visible if they are active OR if they were scored/dead in the current inning
-          // This ensures balls remain visible throughout the entire inning regardless of player changes
+          // Hide balls that were scored/dead in PREVIOUS innings (not current inning)
           const isScoredThisInning = ballState.inning === currentInning;
-          const isActive = ballState.state === 'active';
-          
-          if (!isActive && !isScoredThisInning) {
+          if ((ballState.state === 'scored' || ballState.state === 'dead') && !isScoredThisInning) {
             return (
               <div key={ballNumber} className="w-16 h-16 flex items-center justify-center">
                 {/* Empty space where ball used to be */}

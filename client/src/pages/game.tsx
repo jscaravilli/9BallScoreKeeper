@@ -656,8 +656,9 @@ export default function Game() {
     // Set the correct locked balls state
     setLockedBalls(newLockedBalls);
     
-    // Keep current inning unchanged during undo to maintain ball visibility
-    // Balls scored in the current inning should remain visible during undo operations
+    // Reset current inning to match the previous state's inning
+    const maxInning = Math.max(...previousState.ballStates.filter((b: BallInfo) => b.inning).map((b: BallInfo) => b.inning!), 1);
+    setCurrentInning(maxInning);
     
     // Log the undo event
     const undoEvent: MatchEvent = {
