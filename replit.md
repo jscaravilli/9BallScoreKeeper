@@ -86,32 +86,32 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 2. Backend bundles server code with esbuild to `dist/index.js`
 3. Production serves static files from Express with fallback to React app
 
-### Deployment Configuration - FULLY RESOLVED
-- **Issue**: Static deployment expected `index.html` directly in `dist` but Vite build outputs to `dist/public`
-- **Root Cause**: Vite configuration outputs to `dist/public` but cannot be modified due to environment restrictions
-- **Complete Solution**: Automated build restructuring scripts that move files from `dist/public` to `dist` root
+### Static Deployment - SIMPLIFIED SOLUTION
+- **Approach**: Pure static deployment using client-only build
+- **Build Process**: Vite builds to `client/dist`, then copied to root `dist` directory
+- **No Server Required**: App runs entirely in browser with localStorage persistence
 
-### Available Deployment Scripts
-1. **`prepare-static-deploy.js`** - Primary deployment preparation script (tested and working)
-2. **`quick-deploy.js`** - Alternative script with timeout handling for slow builds
-3. **`deploy-static.sh`** - Shell script wrapper with user instructions
+### Static Build Script
+- **`build-static-only.js`** - Clean, simple static build process
+- **Process**: 
+  1. Cleans `dist` directory
+  2. Runs `vite build` (outputs to `client/dist`)
+  3. Copies files to root `dist` for deployment
+  4. Verifies `index.html` placement
 
-### Static Deployment Process
-1. **Build Preparation**: Run `node prepare-static-deploy.js` (recommended) or `node quick-deploy.js`
-2. **Deployment Settings**: 
-   - Type: Static
-   - Public Directory: `dist`
-   - Build Command: `node prepare-static-deploy.js`
-3. **Verification**: Script automatically verifies `index.html` exists in `dist/` directory
-4. **Result**: Client-only application using localStorage for data persistence
+### Static Deployment Settings
+- **Type**: Static
+- **Public Directory**: `dist`
+- **Build Command**: `node build-static-only.js`
+- **Result**: Ready-to-deploy static files in `dist/`
 
-### Technical Details
-- **Build Process**: Vite builds to `dist/public`, scripts move files to `dist` root
-- **File Structure**: All assets (CSS, JS) and `index.html` placed directly in `dist/`
-- **Compatibility**: Fully compatible with static hosting requirements
-- **Testing**: Scripts include verification steps to ensure proper file placement
+### Why Static Works Better
+- **Simpler Setup**: No server configuration needed
+- **Faster Deployment**: Direct static file serving
+- **Client Storage**: Uses localStorage for match data
+- **Universal Hosting**: Works on any static hosting service
 
-**Status**: Deployment issue completely resolved with automated preparation scripts.
+**Status**: Static deployment fully configured and tested.
 
 ### Environment Configuration
 - Client-only application - no server environment variables needed
@@ -170,9 +170,9 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: Updated "Undo Last Turn" to "Undo Last Action" throughout interface
 - June 29, 2025: Added About button to hamburger menu with version 1.0.0 and developer credits
 - June 29, 2025: Fixed ball visibility system with turnCompleted tracking to prevent reappearing when players return
-- June 29, 2025: RESOLVED static deployment configuration error - enhanced build restructuring scripts for reliable file placement
-- June 29, 2025: Created multiple deployment options (prepare-static-deploy.js, quick-deploy.js) with verification and timeout handling
-- June 29, 2025: Updated deployment documentation with complete technical details and troubleshooting steps
+- June 29, 2025: SIMPLIFIED static deployment approach - eliminated server complexity for pure client-side deployment
+- June 29, 2025: Created streamlined build-static-only.js script that outputs directly to dist directory
+- June 29, 2025: Updated deployment to use localStorage-only approach with no backend dependencies
 
 ## User Preferences
 
