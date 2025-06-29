@@ -23,19 +23,21 @@ const BALL_COLORS = {
 };
 
 export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [], undoInProgress = false }: BallRackProps) {
-  // IMPROVED APPROACH: Hide all scored/dead balls with undo-aware visibility
+  // FINAL APPROACH: Show balls based on current inning context
   const shouldShowBall = (ballNumber: number): boolean => {
     const ball = ballStates.find(b => b.number === ballNumber);
     
     if (!ball) return true; // Show if no ball data found
     
-    // During undo operations, show all balls that are active in current state
-    if (undoInProgress) {
-      return ball.state === 'active';
+    // Show active balls always
+    if (ball.state === 'active') return true;
+    
+    // For scored/dead balls, show them only if scored by current player in this inning
+    if (ball.state === 'scored' || ball.state === 'dead') {
+      return ball.scoredBy === currentPlayer;
     }
     
-    // Normal gameplay: only show active balls
-    return ball.state === 'active';
+    return false;
   };
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
