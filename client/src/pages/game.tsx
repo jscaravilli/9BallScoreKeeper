@@ -653,11 +653,12 @@ export default function Game() {
         setShowMatchWin(false);
         setUndoInProgress(false);
         
-        // Force a complete component re-render by updating the key again
-        setForceUpdateKey(Date.now().toString() + "-final");
-        
-        // Trigger component re-render
-        queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
+        // Force complete component re-render by clearing and restoring the entire component
+        setForceUpdateKey("");
+        setTimeout(() => {
+          setForceUpdateKey(Date.now().toString() + "-final");
+          queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
+        }, 50);
       }
     });
   };
