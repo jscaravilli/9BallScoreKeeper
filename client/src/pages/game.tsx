@@ -1062,7 +1062,7 @@ export default function Game() {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-800">Match History</h2>
-              <div className="mr-8">
+              <div className="mr-16">
                 <button 
                   onClick={() => {
                     if (confirm('Clear all match history? This cannot be undone.')) {
