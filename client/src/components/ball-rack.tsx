@@ -118,10 +118,10 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
     if (isLocked) {
       return `${baseStyles} bg-gray-300 border-gray-400 opacity-40 cursor-not-allowed`;
     } else if (isScoredThisInning && (state === 'scored' || state === 'dead')) {
-      // Balls scored during current inning show as greyed out but visible
-      return `${baseStyles} bg-gray-300 border-green-600 opacity-60 text-gray-600 hover:shadow-xl active:scale-95`;
+      // Balls scored during current inning show with greyed background for check marks
+      return `${baseStyles} bg-gray-100 border-green-600 text-gray-600 hover:shadow-xl active:scale-95`;
     } else {
-      // All active balls use custom gradients, no background needed here
+      // All active balls use custom gradients
       return `${baseStyles} bg-transparent border-gray-300 text-white overflow-hidden p-0 hover:shadow-xl active:scale-95`;
     }
   };

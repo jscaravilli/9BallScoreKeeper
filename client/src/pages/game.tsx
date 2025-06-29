@@ -129,7 +129,6 @@ export default function Game() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
 
-  const [lockedBalls, setLockedBalls] = useState<Set<number>>(new Set());
   const [currentInning, setCurrentInning] = useState<number>(1);
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
@@ -154,24 +153,7 @@ export default function Game() {
     queryKey: ["/api/match/current"],
   });
 
-  // Update locked balls whenever match data changes
-  useEffect(() => {
-    if (!currentMatch) return;
-    
-    const newLockedBalls = new Set<number>();
-    const ballStates = currentMatch.ballStates as BallInfo[] || [];
-    const activePlayer = currentMatch.currentPlayer;
-    
-    // Lock balls that were scored/dead by the OTHER player
-    ballStates.forEach(ball => {
-      if ((ball.state === 'scored' || ball.state === 'dead') && 
-          ball.scoredBy && ball.scoredBy !== activePlayer) {
-        newLockedBalls.add(ball.number);
-      }
-    });
-    
-    setLockedBalls(newLockedBalls);
-  }, [currentMatch]);
+
 
   // Create new match mutation
   const createMatchMutation = useMutation({
@@ -209,6 +191,22 @@ export default function Game() {
       setShowPlayerSetup(true);
     }
   }, [isLoading, currentMatch]);
+
+  // Calculate locked balls directly from ball states (single source of truth)
+  const getLockedBalls = (): Set<number> => {
+    if (!currentMatch) return new Set();
+    
+    const lockedBalls = new Set<number>();
+    const ballStates = currentMatch.ballStates as BallInfo[];
+    
+    ballStates.forEach(ball => {
+      if ((ball.state === 'scored' || ball.state === 'dead') && ball.scoredBy && ball.scoredBy !== currentMatch.currentPlayer) {
+        lockedBalls.add(ball.number);
+      }
+    });
+    
+    return lockedBalls;
+  };
 
   const handlePlayerSetupSave = (player1Name: string, player1SkillLevel: number, player2Name: string, player2SkillLevel: number) => {
     const initialBallStates: BallInfo[] = Array.from({ length: 9 }, (_, i) => ({
@@ -264,7 +262,7 @@ export default function Game() {
             }
           });
           
-          setLockedBalls(newLockedBalls);
+          // Locked balls are now calculated dynamically
           
           // Deduct 2 points from the player who scored it
           const scoringPlayer = lastStateNineBall.scoredBy;
@@ -325,8 +323,8 @@ export default function Game() {
       }
     }
     
-    // Check if ball is locked (pocketed/marked dead in previous turn)
-    if (lockedBalls.has(ballNumber)) {
+    // Check if ball is locked (pocketed/marked dead by other player)
+    if (getLockedBalls().has(ballNumber)) {
       return; // Don't allow interaction with locked balls
     }
     
@@ -643,18 +641,7 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Calculate locked balls based on current player vs ball scorers
-    const newLockedBalls = new Set<number>();
-    const ballStates = previousState.ballStates;
-    
-    ballStates.forEach(ball => {
-      if ((ball.state === 'scored' || ball.state === 'dead') && ball.scoredBy && ball.scoredBy !== currentMatch.currentPlayer) {
-        newLockedBalls.add(ball.number);
-      }
-    });
-    
-    // Set the correct locked balls state
-    setLockedBalls(newLockedBalls);
+    // Locked balls are now calculated dynamically from ball states
     
     // Reset current inning to match the previous state's inning
     const maxInning = Math.max(...previousState.ballStates.filter((b: BallInfo) => b.inning).map((b: BallInfo) => b.inning!), 1);
@@ -762,7 +749,7 @@ export default function Game() {
 
     setShowGameWin(false);
     setGameWinner(null);
-    setLockedBalls(new Set());
+    // Locked balls are now calculated dynamically
     setCurrentInning(1);
   };
 
@@ -856,7 +843,7 @@ export default function Game() {
       <BallRack 
         ballStates={currentMatch.ballStates as BallInfo[] || []}
         onBallTap={handleBallTap}
-        lockedBalls={lockedBalls}
+        lockedBalls={getLockedBalls()}
         turnHistory={turnHistory}
         currentInning={currentInning}
       />
