@@ -86,7 +86,16 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
     const currentBallState = getBallState(ballNumber);
     const actualState = currentBallState.state;
     
-    // Single ball state instance ensures consistent visual rendering
+    // Debug specific visual issues
+    if (ballNumber <= 3) {
+      console.log(`Ball ${ballNumber} RENDER DEBUG:`, {
+        passedState: state,
+        actualState: actualState,
+        willShowCheckmark: actualState === 'scored',
+        willShowX: actualState === 'dead',
+        willShowBallDesign: actualState === 'active'
+      });
+    }
     
     // EXPLICIT STATE CHECK: Only show icons for non-active states
     if (actualState === 'scored') {
