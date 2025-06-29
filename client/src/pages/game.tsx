@@ -336,6 +336,11 @@ export default function Game() {
       };
       
       // Add to turn history, keeping only the last maxTurnHistory turns
+      console.log('Debug - saving turn history during ball scoring:', {
+        lockedBalls: Array.from(lockedBalls),
+        currentState
+      });
+      
       setTurnHistory(prev => {
         const newHistory = [...prev, currentState];
         return newHistory.slice(-maxTurnHistory);
@@ -635,12 +640,20 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Restore the historical locked balls state from when this turn was originally played
-    // This prevents balls from incorrectly becoming gray during multi-turn undos
-    const historicalLockedBalls = new Set<number>((previousState as any).lockedBalls || []);
-    setLockedBalls(historicalLockedBalls);
+    // Calculate which balls should be locked based on the restored state
+    // Balls are locked if they were scored/dead by the OTHER player (not the current active player)
+    const restoredLockedBalls = new Set<number>();
+    const activePlayer = previousState.currentPlayer;
     
-    console.log('Restored locked balls:', Array.from(historicalLockedBalls));
+    previousState.ballStates.forEach(ball => {
+      if ((ball.state === 'scored' || ball.state === 'dead') && 
+          ball.scoredBy && ball.scoredBy !== activePlayer) {
+        restoredLockedBalls.add(ball.number);
+      }
+    });
+    
+    setLockedBalls(restoredLockedBalls);
+    console.log('Restored locked balls based on ball states:', Array.from(restoredLockedBalls));
     
     // Log the undo event
     const undoEvent: MatchEvent = {
