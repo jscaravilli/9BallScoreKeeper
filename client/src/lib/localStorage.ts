@@ -63,6 +63,7 @@ export class LocalStorageAPI {
       player2Score: 0,
       currentPlayer: 1,
       currentGame: 1,
+      currentTurn: 1,
       ballStates: matchData.ballStates || [],
       isComplete: false,
       winnerId: null,

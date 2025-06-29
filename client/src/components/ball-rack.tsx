@@ -6,6 +6,7 @@ interface BallRackProps {
   ballStates: BallInfo[];
   onBallTap: (ballNumber: number) => void;
   currentPlayer: 1 | 2;
+  currentTurn: number;
   turnHistory?: any[];
   undoInProgress?: boolean; // Add undo state to prevent visual glitches
 }
@@ -22,17 +23,17 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [], undoInProgress = false }: BallRackProps) {
-  // REFINED APPROACH: Hide balls from previous turns, but keep current turn balls visible
+export default function BallRack({ ballStates, onBallTap, currentPlayer, currentTurn, turnHistory = [], undoInProgress = false }: BallRackProps) {
+  // TURN-BASED APPROACH: Hide balls from previous turns, keep current turn balls visible
   const shouldHideBall = (ballNumber: number): boolean => {
     const ball = ballStates.find(b => b.number === ballNumber);
     
     if (!ball) return false;
     
-    // Hide balls that were scored/dead by the OTHER player from previous turns
+    // Hide balls that were scored/dead in previous turns (not current turn)
     return (ball.state === 'scored' || ball.state === 'dead') && 
-           ball.scoredBy !== undefined && 
-           ball.scoredBy !== currentPlayer;
+           ball.turnScored !== undefined && 
+           ball.turnScored < currentTurn;
   };
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {

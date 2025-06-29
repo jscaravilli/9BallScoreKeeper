@@ -208,6 +208,7 @@ export default function Game() {
       player2Score: 0,
       currentPlayer: 1,
       currentGame: 1,
+      currentTurn: 1,
       ballStates: initialBallStates,
       isComplete: false,
       winnerId: null,
@@ -332,6 +333,7 @@ export default function Game() {
       // First tap - score the ball
       ball.state = 'scored';
       ball.scoredBy = currentMatch.currentPlayer as 1 | 2;
+      ball.turnScored = currentMatch.currentTurn || 1;
       
 
       
@@ -487,7 +489,8 @@ export default function Game() {
       }
       
       ball.state = 'dead';
-      ball.scoredBy = undefined;
+      ball.scoredBy = currentMatch.currentPlayer as 1 | 2;
+      ball.turnScored = currentMatch.currentTurn || 1;
       
       // Update ball states
       updateBallsMutation.mutate({
@@ -523,11 +526,12 @@ export default function Game() {
       return newHistory.slice(-maxTurnHistory);
     });
 
-    // Switch to the other player - locked balls will be updated automatically by useEffect
+    // Switch to the other player and increment turn counter
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
         currentPlayer: currentMatch.currentPlayer === 1 ? 2 : 1,
+        currentTurn: (currentMatch.currentTurn || 1) + 1,
       }
     });
   };
@@ -809,6 +813,7 @@ export default function Game() {
         ballStates={currentMatch.ballStates as BallInfo[] || []}
         onBallTap={handleBallTap}
         currentPlayer={currentMatch.currentPlayer as 1 | 2}
+        currentTurn={currentMatch.currentTurn || 1}
         turnHistory={turnHistory}
         undoInProgress={undoInProgress}
       />
