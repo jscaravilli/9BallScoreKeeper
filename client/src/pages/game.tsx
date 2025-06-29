@@ -153,21 +153,25 @@ export default function Game() {
     queryKey: ["/api/match/current"],
   });
 
-  // Update locked balls whenever match data changes
-  useEffect(() => {
-    if (!currentMatch) return;
-    
+  // Calculate locked balls based on current state
+  const calculateLockedBalls = (ballStates: BallInfo[], activePlayer: number) => {
     const newLockedBalls = new Set<number>();
-    const ballStates = currentMatch.ballStates as BallInfo[] || [];
-    const activePlayer = currentMatch.currentPlayer;
-    
-    // Lock balls that were scored/dead by the OTHER player
     ballStates.forEach(ball => {
       if ((ball.state === 'scored' || ball.state === 'dead') && 
           ball.scoredBy && ball.scoredBy !== activePlayer) {
         newLockedBalls.add(ball.number);
       }
     });
+    return newLockedBalls;
+  };
+
+  // Update locked balls whenever match data changes
+  useEffect(() => {
+    if (!currentMatch) return;
+    
+    const ballStates = currentMatch.ballStates as BallInfo[] || [];
+    const activePlayer = currentMatch.currentPlayer;
+    const newLockedBalls = calculateLockedBalls(ballStates, activePlayer);
     
     setLockedBalls(newLockedBalls);
   }, [currentMatch]);
@@ -636,27 +640,9 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Clear locked balls immediately, then recalculate after state update
-    setLockedBalls(new Set());
-    
-    // Force immediate locked ball recalculation after the mutations complete
-    const recalculateAfterUndo = () => {
-      const newLockedBalls = new Set<number>();
-      const ballStates = previousState.ballStates;
-      const activePlayer = previousState.currentPlayer;
-      
-      ballStates.forEach(ball => {
-        if ((ball.state === 'scored' || ball.state === 'dead') && 
-            ball.scoredBy && ball.scoredBy !== activePlayer) {
-          newLockedBalls.add(ball.number);
-        }
-      });
-      
-      setLockedBalls(newLockedBalls);
-    };
-    
-    // Delay recalculation to ensure all mutations have completed
-    setTimeout(recalculateAfterUndo, 200);
+    // Update locked balls immediately based on the state we're restoring to
+    const newLockedBalls = calculateLockedBalls(previousState.ballStates, previousState.currentPlayer);
+    setLockedBalls(newLockedBalls);
     
     // Log the undo event
     const undoEvent: MatchEvent = {
