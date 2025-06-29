@@ -130,7 +130,7 @@ export default function Game() {
 
 
   const [lockedBalls, setLockedBalls] = useState<Set<number>>(new Set());
-  const [ballsScoredThisTurn, setBallsScoredThisTurn] = useState<Set<number>>(new Set());
+  const [ballsScoredThisInning, setBallsScoredThisInning] = useState<Set<number>>(new Set());
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
     name: string;
@@ -364,8 +364,8 @@ export default function Game() {
       ball.state = 'scored';
       ball.scoredBy = currentMatch.currentPlayer as 1 | 2;
       
-      // Track that this ball was scored during the current turn
-      setBallsScoredThisTurn(prev => {
+      // Track that this ball was scored during the current inning
+      setBallsScoredThisInning(prev => {
         const newSet = new Set(prev);
         newSet.add(ballNumber);
         return newSet;
@@ -561,8 +561,8 @@ export default function Game() {
       return newHistory.slice(-maxTurnHistory);
     });
 
-    // Clear balls scored during this turn - they will now disappear
-    setBallsScoredThisTurn(new Set());
+    // Clear balls scored during this inning - they will now disappear
+    setBallsScoredThisInning(new Set());
 
     // Switch to the other player - locked balls will be updated automatically by useEffect
     updateMatchMutation.mutate({
@@ -649,25 +649,19 @@ export default function Game() {
     
     // Immediately calculate the correct state based on what we're restoring to
     const newLockedBalls = new Set<number>();
-    const newCurrentTurnBalls = new Set<number>();
+    const newInningBalls = new Set<number>();
     const ballStates = previousState.ballStates;
-    const activePlayer = previousState.currentPlayer;
     
     ballStates.forEach(ball => {
       if ((ball.state === 'scored' || ball.state === 'dead') && ball.scoredBy) {
-        if (ball.scoredBy !== activePlayer) {
-          // Ball scored by other player - locked
-          newLockedBalls.add(ball.number);
-        } else {
-          // Ball scored by current player - part of current turn
-          newCurrentTurnBalls.add(ball.number);
-        }
+        // All scored/dead balls are part of the current inning until it ends
+        newInningBalls.add(ball.number);
       }
     });
     
     // Set the correct states immediately
     setLockedBalls(newLockedBalls);
-    setBallsScoredThisTurn(newCurrentTurnBalls);
+    setBallsScoredThisInning(newInningBalls);
     
     // Log the undo event
     const undoEvent: MatchEvent = {
@@ -866,7 +860,7 @@ export default function Game() {
         onBallTap={handleBallTap}
         lockedBalls={lockedBalls}
         turnHistory={turnHistory}
-        ballsScoredThisTurn={ballsScoredThisTurn}
+        ballsScoredThisInning={ballsScoredThisInning}
       />
 
       {/* Game Actions */}
