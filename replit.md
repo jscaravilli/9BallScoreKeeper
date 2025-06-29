@@ -149,6 +149,12 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: Made orange ball (ball 5) more saturated and darker for better visibility
 - June 29, 2025: Widened yellow stripe on 9-ball and matched ball 1 yellow to 9-ball color
 - June 29, 2025: Refined ball borders to ultra-thin 0.5px for cleaner appearance
+- June 29, 2025: FIXED ball locking visual bug during multi-turn undo operations - active balls now never appear locked
+- June 29, 2025: Enhanced ball rendering logic to prioritize ball state over locking flags for visual consistency
+- June 29, 2025: Implemented atomic state updates to prevent React rendering race conditions during undo operations
+- June 29, 2025: Rewrote ball locking logic with function-based approach for more deterministic behavior
+- June 29, 2025: RESOLVED ball locking visual issues by implementing ball hiding system instead of locking
+- June 29, 2025: Balls now disappear completely when scored/dead and reappear only during undo operations to previous innings
 
 ## User Preferences
 
