@@ -636,8 +636,27 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Simple approach: clear locked balls during undo to let useEffect recalculate
+    // Clear locked balls immediately, then recalculate after state update
     setLockedBalls(new Set());
+    
+    // Force immediate locked ball recalculation after the mutations complete
+    const recalculateAfterUndo = () => {
+      const newLockedBalls = new Set<number>();
+      const ballStates = previousState.ballStates;
+      const activePlayer = previousState.currentPlayer;
+      
+      ballStates.forEach(ball => {
+        if ((ball.state === 'scored' || ball.state === 'dead') && 
+            ball.scoredBy && ball.scoredBy !== activePlayer) {
+          newLockedBalls.add(ball.number);
+        }
+      });
+      
+      setLockedBalls(newLockedBalls);
+    };
+    
+    // Delay recalculation to ensure all mutations have completed
+    setTimeout(recalculateAfterUndo, 200);
     
     // Log the undo event
     const undoEvent: MatchEvent = {
