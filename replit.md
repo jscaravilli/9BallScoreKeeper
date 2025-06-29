@@ -145,6 +145,10 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: FIXED 9-ball scoring bug after rerack - now correctly awards 2 points instead of deducting them
 - June 29, 2025: Updated undo logic to only trigger when 9-ball is already scored, not when active after rerack
 - June 29, 2025: Reverted complex ball locking system back to simple useEffect-based approach for stability
+- June 29, 2025: Enhanced ball visual design with white circles and black numbers for balls 1-8
+- June 29, 2025: Made orange ball (ball 5) more saturated and darker for better visibility
+- June 29, 2025: Widened yellow stripe on 9-ball and matched ball 1 yellow to 9-ball color
+- June 29, 2025: Refined ball borders to ultra-thin 0.5px for cleaner appearance
 
 ## User Preferences
 
