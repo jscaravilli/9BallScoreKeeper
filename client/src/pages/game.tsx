@@ -169,24 +169,25 @@ export default function Game() {
     },
   });
 
-  // Update match mutation
+  // Update match mutation - no automatic invalidation to prevent flashing
   const updateMatchMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: number; updates: any }) => {
       return clientMutation(() => clientQueryFunctions.updateMatch(id, updates));
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
+      // Optimistic update - set cache directly instead of invalidating
+      queryClient.setQueryData(["/api/match/current"], data);
     },
   });
 
-  // Update ball states mutation
+  // Update ball states mutation - no automatic invalidation to prevent flashing
   const updateBallsMutation = useMutation({
     mutationFn: async ({ id, ballStates }: { id: number; ballStates: BallInfo[] }) => {
       return clientMutation(() => clientQueryFunctions.updateBallStates(id, ballStates));
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
-
+    onSuccess: (data) => {
+      // Optimistic update - set cache directly instead of invalidating
+      queryClient.setQueryData(["/api/match/current"], data);
     },
   });
 
