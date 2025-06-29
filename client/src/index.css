@@ -187,3 +187,13 @@ button {
     min-width: 44px;
   }
 }
+
+/* Force visual refresh - prevents component visual state caching */
+.force-refresh {
+  animation: refreshVisual 0.01s ease-out;
+}
+
+@keyframes refreshVisual {
+  0% { transform: translateZ(0) scale(0.999); }
+  100% { transform: translateZ(0) scale(1); }
+}

@@ -214,10 +214,12 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
           return (
             <div
               key={`ball-${ballNumber}-${freshState}-${freshBallState.scoredBy || 'none'}-${freshBallState.turnScored || 0}-${forceUpdateKey || ''}-div`}
-              className={getBallStyles(ballNumber, freshState, false)}
+              className={`${getBallStyles(ballNumber, freshState, false)} ${forceUpdateKey ? 'force-refresh' : ''}`}
               onClick={() => onBallTap(ballNumber)}
               role="button"
               tabIndex={0}
+              data-state={freshState}
+              data-force-key={forceUpdateKey}
             >
               {renderBallContent(ballNumber, freshState)}
             </div>
