@@ -319,7 +319,7 @@ export default function Game() {
       // Store current state for undo functionality BEFORE modifying the ball
       // Deep clone the ball states to prevent reference issues
       const currentState = {
-        ballStates: (currentMatch.ballStates as BallInfo[] || []).map(b => ({ ...b })),
+        ballStates: JSON.parse(JSON.stringify(currentMatch.ballStates as BallInfo[] || [])),
         currentPlayer: currentMatch.currentPlayer,
         currentTurn: currentMatch.currentTurn || 1,
         player1Score: currentMatch.player1Score,
@@ -327,6 +327,7 @@ export default function Game() {
       };
       
       // Add to turn history, keeping only the last maxTurnHistory turns
+      console.log('Saving turn history - ball states BEFORE scoring:', currentState.ballStates);
       setTurnHistory(prev => {
         const newHistory = [...prev, currentState];
         return newHistory.slice(-maxTurnHistory);
