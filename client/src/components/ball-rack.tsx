@@ -208,15 +208,26 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
           
           // Get fresh state for accurate visual rendering
           const freshBallState = getBallState(ballNumber);
+          const freshState = freshBallState.state;
+          
+          // Debug logging for visual state issues
+          if (ballNumber <= 3) {
+            console.log(`Ball ${ballNumber} full render:`, {
+              freshState,
+              freshBallState,
+              stylesState: freshState,
+              contentState: freshState
+            });
+          }
           
           return (
             <Button
-              key={`ball-${ballNumber}-${freshBallState.state}-${freshBallState.scoredBy || 'none'}-${freshBallState.turnScored || 0}-${forceUpdateKey || ''}`}
-              className={getBallStyles(ballNumber, freshBallState.state, false)}
+              key={`ball-${ballNumber}-${freshState}-${freshBallState.scoredBy || 'none'}-${freshBallState.turnScored || 0}-${forceUpdateKey || ''}`}
+              className={getBallStyles(ballNumber, freshState, false)}
               onClick={() => onBallTap(ballNumber)}
               variant="outline"
             >
-              {renderBallContent(ballNumber, freshBallState.state)}
+              {renderBallContent(ballNumber, freshState)}
             </Button>
           );
         })}
