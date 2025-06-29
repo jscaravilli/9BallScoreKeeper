@@ -7,7 +7,6 @@ interface BallRackProps {
   onBallTap: (ballNumber: number) => void;
   currentPlayer: 1 | 2;
   turnHistory?: any[]; // Turn history to check if 9-ball can be undone
-  undoInProgress?: boolean; // Flag to indicate if undo operation is happening
 }
 
 const BALL_COLORS = {
@@ -22,29 +21,39 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [], undoInProgress = false }: BallRackProps) {
-  // OPTION 2: Unlock balls only during undo operations
+export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [] }: BallRackProps) {
+  // Calculate locked balls directly from current game state
   const getLockedBalls = (): Set<number> => {
-    // If undo is in progress, unlock all balls for maximum flexibility
-    if (undoInProgress) {
-      return new Set<number>();
-    }
-    
-    // During normal play, lock balls scored by the opponent
     const locked = new Set<number>();
+    
+    console.log('BallRack: Calculating locked balls', {
+      currentPlayer,
+      ballStates: ballStates.map(b => ({
+        number: b.number,
+        state: b.state,
+        scoredBy: b.scoredBy
+      }))
+    });
+    
     ballStates.forEach(ball => {
-      // Active balls are never locked
+      // CRITICAL: Only lock balls that are CURRENTLY scored/dead by the OTHER player
+      // Active balls are NEVER locked, regardless of any scoredBy property
       if (ball.state === 'active') {
+        // Active balls are never locked
+        console.log(`Ball ${ball.number}: ACTIVE - never locked`);
         return;
       }
       
-      // Lock balls scored/marked dead by the other player
       if ((ball.state === 'scored' || ball.state === 'dead') && 
           ball.scoredBy && ball.scoredBy !== currentPlayer) {
         locked.add(ball.number);
+        console.log(`Ball ${ball.number}: LOCKED (state: ${ball.state}, scoredBy: ${ball.scoredBy}, currentPlayer: ${currentPlayer})`);
+      } else {
+        console.log(`Ball ${ball.number}: NOT LOCKED (state: ${ball.state}, scoredBy: ${ball.scoredBy}, currentPlayer: ${currentPlayer})`);
       }
     });
     
+    console.log('BallRack: Final locked balls:', Array.from(locked));
     return locked;
   };
   
