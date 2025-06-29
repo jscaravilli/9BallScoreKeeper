@@ -142,9 +142,8 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
           const isScoredThisInning = ballState.inning === currentInning;
           
           // Hide balls that have completed their turn cycle
-          // Once a ball is scored and the scoring player's turn ends, it stays hidden
-          const shouldHideBall = (ballState.state === 'scored' || ballState.state === 'dead') && 
-                                ballState.turnCompleted;
+          // Scored balls disappear after turn ends, but dead balls stay visible until new rack
+          const shouldHideBall = ballState.state === 'scored' && ballState.turnCompleted;
           
           if (shouldHideBall) {
             return (

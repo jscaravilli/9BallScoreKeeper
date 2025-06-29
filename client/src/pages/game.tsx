@@ -201,7 +201,9 @@ export default function Game() {
     const ballStates = currentMatch.ballStates as BallInfo[];
     
     ballStates.forEach(ball => {
-      if ((ball.state === 'scored' || ball.state === 'dead') && ball.scoredBy && ball.scoredBy !== currentMatch.currentPlayer) {
+      // Only lock scored balls from other players, not dead balls
+      // Dead balls should remain interactable by any player until new rack
+      if (ball.state === 'scored' && ball.scoredBy && ball.scoredBy !== currentMatch.currentPlayer) {
         lockedBalls.add(ball.number);
       }
     });
