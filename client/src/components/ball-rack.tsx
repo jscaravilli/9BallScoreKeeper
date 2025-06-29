@@ -22,26 +22,29 @@ const BALL_COLORS = {
 };
 
 export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [] }: BallRackProps) {
-  // Calculate locked balls with ZERO tolerance for active ball locking
-  const getLockedBalls = (): Set<number> => {
-    const locked = new Set<number>();
-    
-    ballStates.forEach(ball => {
-      // ABSOLUTE RULE: Only balls that are CURRENTLY scored or dead can EVER be locked
-      // This completely eliminates any possibility of active balls appearing locked
-      if (ball.state === 'scored' || ball.state === 'dead') {
-        // Only lock if scored/dead by the OTHER player
-        if (ball.scoredBy && ball.scoredBy !== currentPlayer) {
-          locked.add(ball.number);
-        }
-      }
-      // Active balls are COMPLETELY IGNORED - they can never be locked under any circumstances
-    });
-    
-    return locked;
+  // COMPLETELY REWRITTEN: Zero-tolerance ball locking with active state override
+  const isActiveBall = (ballNumber: number): boolean => {
+    const ball = ballStates.find(b => b.number === ballNumber);
+    return ball?.state === 'active';
   };
   
-  const lockedBalls = getLockedBalls();
+  const isLockedBall = (ballNumber: number): boolean => {
+    const ball = ballStates.find(b => b.number === ballNumber);
+    
+    // RULE 1: Active balls are NEVER locked, period
+    if (!ball || ball.state === 'active') {
+      console.log(`Ball ${ballNumber}: ACTIVE - never locked (state: ${ball?.state})`);
+      return false;
+    }
+    
+    // RULE 2: Only scored/dead balls by other player can be locked
+    const shouldLock = (ball.state === 'scored' || ball.state === 'dead') && 
+                       ball.scoredBy !== undefined && 
+                       ball.scoredBy !== currentPlayer;
+    
+    console.log(`Ball ${ballNumber}: ${shouldLock ? 'LOCKED' : 'NOT LOCKED'} (state: ${ball.state}, scoredBy: ${ball.scoredBy}, current: ${currentPlayer})`);
+    return shouldLock;
+  };
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
       number: ballNumber as BallInfo['number'],
@@ -165,25 +168,19 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
         {Array.from({ length: 9 }, (_, i) => {
           const ballNumber = i + 1;
           const ballState = getBallState(ballNumber);
-          const isLocked = lockedBalls.has(ballNumber);
           
-          // ULTIMATE FIX: Never show active balls as locked, EVER
-          // This is the final line of defense against any timing or state issues
-          const shouldShowAsLocked = ballState.state !== 'active' && isLocked;
-          
-          // ABSOLUTE FINAL FIX: Check ball state directly in render to override any locking issues
-          const isBallActive = ballState.state === 'active';
-          const finalShouldShowAsLocked = !isBallActive && shouldShowAsLocked;
+          // ULTIMATE SOLUTION: Use direct ball-by-ball checking with active state priority
+          const shouldShowAsLocked = isLockedBall(ballNumber);
           
           return (
             <Button
               key={ballNumber}
-              className={getBallStyles(ballNumber, ballState.state, finalShouldShowAsLocked)}
-              onClick={() => !finalShouldShowAsLocked && onBallTap(ballNumber)}
+              className={getBallStyles(ballNumber, ballState.state, shouldShowAsLocked)}
+              onClick={() => !shouldShowAsLocked && onBallTap(ballNumber)}
               variant="outline"
-              disabled={finalShouldShowAsLocked}
+              disabled={shouldShowAsLocked}
             >
-              {finalShouldShowAsLocked ? (
+              {shouldShowAsLocked ? (
                 <span className="text-gray-500 font-bold">{ballNumber}</span>
               ) : (
                 renderBallContent(ballNumber, ballState.state)
