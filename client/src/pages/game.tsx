@@ -344,13 +344,19 @@ export default function Game() {
     
     if (ball.state === 'active') {
       // Store current state for undo functionality BEFORE modifying the ball
-      // Deep clone the ball states to prevent reference issues
+      // Deep clone the ball states to prevent any reference issues
       const currentState = {
-        ballStates: (currentMatch.ballStates as BallInfo[] || []).map(b => ({ ...b })),
+        ballStates: JSON.parse(JSON.stringify(currentMatch.ballStates as BallInfo[] || [])),
         currentPlayer: currentMatch.currentPlayer,
         player1Score: currentMatch.player1Score,
         player2Score: currentMatch.player2Score,
       };
+      
+      console.log('Recording state before ball scoring:', {
+        ballNumber,
+        currentState: currentState.ballStates,
+        currentPlayer: currentState.currentPlayer
+      });
       
       // Add to turn history, keeping only the last maxTurnHistory turns
       setTurnHistory(prev => {
@@ -488,6 +494,26 @@ export default function Game() {
         return; // 9-ball cannot be marked dead
       }
       
+      // Store current state for undo functionality BEFORE marking ball as dead
+      const currentState = {
+        ballStates: JSON.parse(JSON.stringify(currentMatch.ballStates as BallInfo[] || [])),
+        currentPlayer: currentMatch.currentPlayer,
+        player1Score: currentMatch.player1Score,
+        player2Score: currentMatch.player2Score,
+      };
+      
+      console.log('Recording state before marking ball dead:', {
+        ballNumber,
+        currentState: currentState.ballStates,
+        currentPlayer: currentState.currentPlayer
+      });
+      
+      // Add to turn history
+      setTurnHistory(prev => {
+        const newHistory = [...prev, currentState];
+        return newHistory.slice(-maxTurnHistory);
+      });
+      
       // Second tap on scored ball - mark as dead and deduct points
       const currentPlayerScore = ball.scoredBy === currentMatch.currentPlayer 
         ? (ball.scoredBy === 1 ? currentMatch.player1Score : currentMatch.player2Score)
@@ -544,7 +570,7 @@ export default function Game() {
 
     // Save current state before switching turns
     const currentState = {
-      ballStates: currentMatch.ballStates as BallInfo[] || [],
+      ballStates: JSON.parse(JSON.stringify(currentMatch.ballStates as BallInfo[] || [])),
       currentPlayer: currentMatch.currentPlayer,
       player1Score: currentMatch.player1Score,
       player2Score: currentMatch.player2Score,
