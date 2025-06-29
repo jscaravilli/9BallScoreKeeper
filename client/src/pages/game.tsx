@@ -627,25 +627,29 @@ export default function Game() {
       scoredBy: ball.state === 'active' ? undefined : ball.scoredBy
     }));
 
-    // Synchronous localStorage update to eliminate React state timing issues
-    const updatedMatch = {
-      ...currentMatch,
-      currentPlayer: previousState.currentPlayer,
-      player1Score: previousState.player1Score,
-      player2Score: previousState.player2Score,
-      ballStates: cleanedBallStates,
-      isComplete: false,
-      winnerId: null,
-    };
-    
-    // Update localStorage immediately
-    localStorageAPI.updateMatch(currentMatch.id, updatedMatch);
-
-    // Remove the last state from history
-    setTurnHistory(prev => prev.slice(0, -1));
-    setMatchWinner(null);
-    setShowMatchWin(false);
-    setUndoInProgress(false);
+    // Force immediate state update by triggering React Query refetch
+    updateMatchMutation.mutate({
+      id: currentMatch.id,
+      updates: {
+        currentPlayer: previousState.currentPlayer,
+        player1Score: previousState.player1Score,
+        player2Score: previousState.player2Score,
+        ballStates: cleanedBallStates,
+        isComplete: false,
+        winnerId: null,
+      }
+    }, {
+      onSuccess: () => {
+        // Remove the last state from history
+        setTurnHistory(prev => prev.slice(0, -1));
+        setMatchWinner(null);
+        setShowMatchWin(false);
+        setUndoInProgress(false);
+        
+        // Trigger component re-render
+        queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
+      }
+    });
   };
 
 

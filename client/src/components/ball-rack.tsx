@@ -23,26 +23,18 @@ const BALL_COLORS = {
 };
 
 export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [], undoInProgress = false }: BallRackProps) {
-  // COMPLETELY REWRITTEN: Zero-tolerance ball locking with active state override
-  const isActiveBall = (ballNumber: number): boolean => {
-    const ball = ballStates.find(b => b.number === ballNumber);
-    return ball?.state === 'active';
-  };
-  
+  // FINAL SOLUTION: Simple, reliable ball locking logic
   const isLockedBall = (ballNumber: number): boolean => {
     const ball = ballStates.find(b => b.number === ballNumber);
     
-    // BULLETPROOF LOGIC: Check active state first and foremost
-    if (!ball) return false;
-    if (ball.state === 'active') return false;
-    if (undoInProgress) return false;
+    // Never lock active balls or during undo
+    if (!ball || ball.state === 'active' || undoInProgress) {
+      return false;
+    }
     
-    // Only allow locking for scored/dead balls by other player
-    if (ball.state !== 'scored' && ball.state !== 'dead') return false;
-    if (!ball.scoredBy) return false;
-    if (ball.scoredBy === currentPlayer) return false;
-    
-    return true;
+    // Only lock scored/dead balls made by the other player
+    return (ball.state === 'scored' || ball.state === 'dead') && 
+           ball.scoredBy !== currentPlayer;
   };
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
