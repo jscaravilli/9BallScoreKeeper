@@ -122,7 +122,7 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
   };
 
   const getBallStyles = (ballNumber: number, state: BallInfo['state'], isLocked: boolean) => {
-    const baseStyles = "w-16 h-16 rounded-full border shadow-lg flex items-center justify-center font-bold text-lg transition-all touch-target";
+    const baseStyles = "w-16 h-16 rounded-full border-[1px] shadow-lg flex items-center justify-center font-bold text-lg transition-all touch-target";
     
     if (isLocked) {
       return `${baseStyles} bg-gray-300 border-gray-400 opacity-40 cursor-not-allowed`;

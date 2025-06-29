@@ -176,7 +176,7 @@ button {
   color: black;
   font-weight: bold;
   font-size: 1rem;
-  border: 1px solid #9ca3af;
+  border: 0.5px solid #9ca3af;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
