@@ -84,8 +84,8 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
           <div 
             className="absolute left-0 right-0"
             style={{ 
-              top: '28%',
-              height: '44%',
+              top: '22%',
+              height: '56%',
               background: 'linear-gradient(to bottom, #eab308, #fbbf24, #eab308)'
             }}
           ></div>
