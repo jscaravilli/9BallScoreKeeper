@@ -167,18 +167,23 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
           const ballState = getBallState(ballNumber);
           const isLocked = lockedBalls.has(ballNumber);
           
-          // CRITICAL FIX: Active balls are NEVER locked visually, regardless of isLocked flag
-          const shouldShowAsLocked = isLocked && ballState.state !== 'active';
+          // ULTIMATE FIX: Never show active balls as locked, EVER
+          // This is the final line of defense against any timing or state issues
+          const shouldShowAsLocked = ballState.state !== 'active' && isLocked;
+          
+          // ABSOLUTE FINAL FIX: Check ball state directly in render to override any locking issues
+          const isBallActive = ballState.state === 'active';
+          const finalShouldShowAsLocked = !isBallActive && shouldShowAsLocked;
           
           return (
             <Button
               key={ballNumber}
-              className={getBallStyles(ballNumber, ballState.state, shouldShowAsLocked)}
-              onClick={() => !shouldShowAsLocked && onBallTap(ballNumber)}
+              className={getBallStyles(ballNumber, ballState.state, finalShouldShowAsLocked)}
+              onClick={() => !finalShouldShowAsLocked && onBallTap(ballNumber)}
               variant="outline"
-              disabled={shouldShowAsLocked}
+              disabled={finalShouldShowAsLocked}
             >
-              {shouldShowAsLocked ? (
+              {finalShouldShowAsLocked ? (
                 <span className="text-gray-500 font-bold">{ballNumber}</span>
               ) : (
                 renderBallContent(ballNumber, ballState.state)

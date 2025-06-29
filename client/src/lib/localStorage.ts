@@ -86,7 +86,14 @@ export class LocalStorageAPI {
   }
 
   updateBallStates(matchId: number, ballStates: BallInfo[]): Match | null {
-    return this.updateMatch(matchId, { ballStates });
+    // Clean up ball states to prevent locking issues during undo operations
+    const cleanedBallStates = ballStates.map(ball => ({
+      ...ball,
+      // Clear scoredBy for active balls to eliminate historical locking conflicts
+      scoredBy: ball.state === 'active' ? undefined : ball.scoredBy
+    }));
+    
+    return this.updateMatch(matchId, { ballStates: cleanedBallStates });
   }
 
   clearCurrentMatch(): void {
