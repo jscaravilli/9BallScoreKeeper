@@ -153,6 +153,25 @@ export default function Game() {
     queryKey: ["/api/match/current"],
   });
 
+  // Update locked balls whenever current player or ball states change
+  useEffect(() => {
+    if (!currentMatch) return;
+    
+    const newLockedBalls = new Set<number>();
+    const ballStates = currentMatch.ballStates as BallInfo[] || [];
+    const activePlayer = currentMatch.currentPlayer;
+    
+    // Lock balls that were scored/dead by the OTHER player
+    ballStates.forEach(ball => {
+      if ((ball.state === 'scored' || ball.state === 'dead') && 
+          ball.scoredBy && ball.scoredBy !== activePlayer) {
+        newLockedBalls.add(ball.number);
+      }
+    });
+    
+    setLockedBalls(newLockedBalls);
+  }, [currentMatch?.currentPlayer, currentMatch?.ballStates]);
+
   // Create new match mutation
   const createMatchMutation = useMutation({
     mutationFn: async (matchData: any) => {
@@ -332,15 +351,9 @@ export default function Game() {
         currentPlayer: currentMatch.currentPlayer,
         player1Score: currentMatch.player1Score,
         player2Score: currentMatch.player2Score,
-        lockedBalls: Array.from(lockedBalls), // Save current locked balls
       };
       
       // Add to turn history, keeping only the last maxTurnHistory turns
-      console.log('Debug - saving turn history during ball scoring:', {
-        lockedBalls: Array.from(lockedBalls),
-        currentState
-      });
-      
       setTurnHistory(prev => {
         const newHistory = [...prev, currentState];
         return newHistory.slice(-maxTurnHistory);
@@ -527,29 +540,12 @@ export default function Game() {
   const handleEndTurn = () => {
     if (!currentMatch) return;
 
-    // Find balls that were modified in the current turn (scored or dead by current player)
-    const ballStates = currentMatch.ballStates as BallInfo[];
-    const modifiedBalls: number[] = [];
-    
-    ballStates.forEach(ball => {
-      if ((ball.state === 'scored' || ball.state === 'dead') && 
-          ball.scoredBy === currentMatch.currentPlayer) {
-        modifiedBalls.push(ball.number);
-      }
-    });
-    
-    // Add these balls to the locked set
-    const newLockedBalls = new Set(lockedBalls);
-    modifiedBalls.forEach(ballNum => newLockedBalls.add(ballNum));
-    setLockedBalls(newLockedBalls);
-
-    // Save current state before switching turns (including locked balls state)
+    // Save current state before switching turns
     const currentState = {
       ballStates: currentMatch.ballStates as BallInfo[] || [],
       currentPlayer: currentMatch.currentPlayer,
       player1Score: currentMatch.player1Score,
       player2Score: currentMatch.player2Score,
-      lockedBalls: Array.from(lockedBalls), // Save current locked balls
     };
     
     setTurnHistory(prev => {
@@ -557,7 +553,7 @@ export default function Game() {
       return newHistory.slice(-maxTurnHistory);
     });
 
-    // Switch to the other player
+    // Switch to the other player - locked balls will be updated automatically by useEffect
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
@@ -640,20 +636,7 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Calculate which balls should be locked based on the restored state
-    // Balls are locked if they were scored/dead by the OTHER player (not the current active player)
-    const restoredLockedBalls = new Set<number>();
-    const activePlayer = previousState.currentPlayer;
-    
-    previousState.ballStates.forEach(ball => {
-      if ((ball.state === 'scored' || ball.state === 'dead') && 
-          ball.scoredBy && ball.scoredBy !== activePlayer) {
-        restoredLockedBalls.add(ball.number);
-      }
-    });
-    
-    setLockedBalls(restoredLockedBalls);
-    console.log('Restored locked balls based on ball states:', Array.from(restoredLockedBalls));
+    // Locked balls will be updated after the match state is restored via updateLockedBalls effect
     
     // Log the undo event
     const undoEvent: MatchEvent = {
