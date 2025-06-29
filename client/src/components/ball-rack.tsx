@@ -86,6 +86,16 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
     const currentBallState = getBallState(ballNumber);
     const actualState = currentBallState.state;
     
+    // Debug logging for visual state tracking
+    if (ballNumber <= 3) { // Only log first 3 balls to avoid spam
+      console.log(`Ball ${ballNumber} render:`, {
+        passedState: state,
+        actualState: actualState,
+        ballData: currentBallState,
+        forceKey: forceUpdateKey
+      });
+    }
+    
     // Handle scored state - simple green checkmark for all balls
     if (actualState === 'scored') {
       return <Check className="h-6 w-6 text-green-600" />;
