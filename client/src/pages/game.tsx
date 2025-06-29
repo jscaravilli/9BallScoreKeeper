@@ -129,7 +129,7 @@ export default function Game() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
 
-
+  const [lockedBalls, setLockedBalls] = useState<Set<number>>(new Set());
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
     name: string;
@@ -141,7 +141,7 @@ export default function Game() {
     currentPlayer: number;
     player1Score: number;
     player2Score: number;
-
+    lockedBalls?: number[]; // Optional for backward compatibility
   }[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [undoInProgress, setUndoInProgress] = useState(false);
@@ -153,22 +153,24 @@ export default function Game() {
     queryKey: ["/api/match/current"],
   });
 
-  // Calculate locked balls based on current state
-  const calculateLockedBalls = (ballStates: BallInfo[], activePlayer: number) => {
+  // Update locked balls whenever match data changes
+  useEffect(() => {
+    if (!currentMatch) return;
+    
     const newLockedBalls = new Set<number>();
+    const ballStates = currentMatch.ballStates as BallInfo[] || [];
+    const activePlayer = currentMatch.currentPlayer;
+    
+    // Lock balls that were scored/dead by the OTHER player
     ballStates.forEach(ball => {
       if ((ball.state === 'scored' || ball.state === 'dead') && 
           ball.scoredBy && ball.scoredBy !== activePlayer) {
         newLockedBalls.add(ball.number);
       }
     });
-    return newLockedBalls;
-  };
-
-  // Real-time locked balls calculation - no state persistence needed
-  const currentLockedBalls = currentMatch ? 
-    calculateLockedBalls(currentMatch.ballStates as BallInfo[] || [], currentMatch.currentPlayer) : 
-    new Set<number>();
+    
+    setLockedBalls(newLockedBalls);
+  }, [currentMatch]);
 
   // Create new match mutation
   const createMatchMutation = useMutation({
@@ -261,7 +263,7 @@ export default function Game() {
             }
           });
           
-          // Locked balls will be calculated automatically in real-time
+          setLockedBalls(newLockedBalls);
           
           // Deduct 2 points from the player who scored it
           const scoringPlayer = lastStateNineBall.scoredBy;
@@ -322,8 +324,8 @@ export default function Game() {
       }
     }
     
-    // Check if ball is locked (pocketed/marked dead by other player)
-    if (currentLockedBalls.has(ballNumber)) {
+    // Check if ball is locked (pocketed/marked dead in previous turn)
+    if (lockedBalls.has(ballNumber)) {
       return; // Don't allow interaction with locked balls
     }
     
@@ -634,7 +636,27 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Locked balls will be recalculated automatically after state restoration
+    // Clear locked balls immediately, then recalculate after state update
+    setLockedBalls(new Set());
+    
+    // Force immediate locked ball recalculation after the mutations complete
+    const recalculateAfterUndo = () => {
+      const newLockedBalls = new Set<number>();
+      const ballStates = previousState.ballStates;
+      const activePlayer = previousState.currentPlayer;
+      
+      ballStates.forEach(ball => {
+        if ((ball.state === 'scored' || ball.state === 'dead') && 
+            ball.scoredBy && ball.scoredBy !== activePlayer) {
+          newLockedBalls.add(ball.number);
+        }
+      });
+      
+      setLockedBalls(newLockedBalls);
+    };
+    
+    // Delay recalculation to ensure all mutations have completed
+    setTimeout(recalculateAfterUndo, 200);
     
     // Log the undo event
     const undoEvent: MatchEvent = {
@@ -738,7 +760,7 @@ export default function Game() {
 
     setShowGameWin(false);
     setGameWinner(null);
-    // Locked balls will be calculated automatically in real-time
+    setLockedBalls(new Set());
   };
 
   // Show loading state
@@ -831,7 +853,7 @@ export default function Game() {
       <BallRack 
         ballStates={currentMatch.ballStates as BallInfo[] || []}
         onBallTap={handleBallTap}
-        lockedBalls={currentLockedBalls}
+        lockedBalls={lockedBalls}
         turnHistory={turnHistory}
       />
 
