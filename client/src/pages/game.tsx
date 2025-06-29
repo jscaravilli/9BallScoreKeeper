@@ -128,6 +128,8 @@ export default function Game() {
   const [gameWinner, setGameWinner] = useState<1 | 2 | null>(null);
   const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showCacheClearConfirm, setShowCacheClearConfirm] = useState(false);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
 
 
   const [currentInning, setCurrentInning] = useState<number>(1);
@@ -657,7 +659,40 @@ export default function Game() {
     setShowResetConfirm(false);
     // Reset innings to 1 for match reset
     setCurrentInning(1);
+  }
+
+  // Cache clear functions
+  const handleVersionLongPressStart = () => {
+    const timer = setTimeout(() => {
+      setShowCacheClearConfirm(true);
+    }, 1000); // 1 second long press
+    setLongPressTimer(timer);
   };
+
+  const handleVersionLongPressEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+  };
+
+  const confirmCacheClear = () => {
+    // Clear browser cache
+    if ('caches' in window) {
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+      }).then(() => {
+        // Force reload to get fresh content
+        window.location.href = window.location.href;
+      });
+    } else {
+      // Fallback: Force reload with cache bypass
+      window.location.href = window.location.href;
+    }
+    setShowCacheClearConfirm(false);
+  };;
 
   const handleUndoTurn = () => {
     console.log('ENHANCED handleUndoTurn called', { 
@@ -1142,7 +1177,17 @@ export default function Game() {
             <div className="space-y-3">
               <div>
                 <h3 className="font-semibold text-gray-700">Joseph's Unofficial APA 9 Ball Scorekeeper</h3>
-                <p className="text-sm text-gray-600">Version 1.0.0</p>
+                <p 
+                  className="text-sm text-gray-600 cursor-pointer select-none"
+                  onMouseDown={handleVersionLongPressStart}
+                  onMouseUp={handleVersionLongPressEnd}
+                  onMouseLeave={handleVersionLongPressEnd}
+                  onTouchStart={handleVersionLongPressStart}
+                  onTouchEnd={handleVersionLongPressEnd}
+                  title="Long press to clear app cache"
+                >
+                  Version 1.0.0
+                </p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">
@@ -1157,6 +1202,29 @@ export default function Game() {
             >
               Close
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cache Clear Confirmation Dialog */}
+      <Dialog open={showCacheClearConfirm} onOpenChange={setShowCacheClearConfirm}>
+        <DialogContent className="max-w-sm mx-auto">
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Clear App Cache?</h2>
+            <p className="text-gray-600 mb-6">
+              This will clear the app cache and reload to get the latest updates. Your current match data will be preserved.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" onClick={() => setShowCacheClearConfirm(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={confirmCacheClear}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Clear Cache
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
