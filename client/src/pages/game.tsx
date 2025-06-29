@@ -148,6 +148,7 @@ export default function Game() {
   const [undoInProgress, setUndoInProgress] = useState(false);
   const [nineBallUndoInProgress, setNineBallUndoInProgress] = useState(false);
   const [forceUpdateKey, setForceUpdateKey] = useState<string>("");
+  const [ballRackKey, setBallRackKey] = useState<string>("initial");
 
   const maxTurnHistory = 10; // Keep last 10 turns for undo
 
@@ -654,7 +655,8 @@ export default function Game() {
         setShowMatchWin(false);
         setUndoInProgress(false);
         
-        // Simple force update approach
+        // COMPLETE COMPONENT RESET: Change BallRack key to force total remount
+        setBallRackKey(Date.now().toString());
         setForceUpdateKey(Date.now().toString() + "-final");
         queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
       }
@@ -815,6 +817,7 @@ export default function Game() {
 
       {/* Ball Rack */}
       <BallRack 
+        key={ballRackKey}
         ballStates={currentMatch.ballStates as BallInfo[] || []}
         onBallTap={handleBallTap}
         currentPlayer={currentMatch.currentPlayer as 1 | 2}
