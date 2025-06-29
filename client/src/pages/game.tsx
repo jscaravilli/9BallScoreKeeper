@@ -620,17 +620,6 @@ export default function Game() {
     
     setUndoInProgress(true);
 
-    updateMatchMutation.mutate({
-      id: currentMatch.id,
-      updates: {
-        currentPlayer: previousState.currentPlayer,
-        player1Score: previousState.player1Score,
-        player2Score: previousState.player2Score,
-        isComplete: false,
-        winnerId: null,
-      }
-    });
-
     // Clean up ball states - remove scoredBy for active balls to prevent locking confusion
     const cleanedBallStates = previousState.ballStates.map(ball => ({
       ...ball,
@@ -638,9 +627,17 @@ export default function Game() {
       scoredBy: ball.state === 'active' ? undefined : ball.scoredBy
     }));
 
-    updateBallsMutation.mutate({
+    // ATOMIC UPDATE: Update both player and ball states together to prevent race conditions
+    updateMatchMutation.mutate({
       id: currentMatch.id,
-      ballStates: cleanedBallStates,
+      updates: {
+        currentPlayer: previousState.currentPlayer,
+        player1Score: previousState.player1Score,
+        player2Score: previousState.player2Score,
+        ballStates: cleanedBallStates,
+        isComplete: false,
+        winnerId: null,
+      }
     });
 
     // Remove the last state from history

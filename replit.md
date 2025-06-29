@@ -151,6 +151,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: Refined ball borders to ultra-thin 0.5px for cleaner appearance
 - June 29, 2025: FIXED ball locking visual bug during multi-turn undo operations - active balls now never appear locked
 - June 29, 2025: Enhanced ball rendering logic to prioritize ball state over locking flags for visual consistency
+- June 29, 2025: Implemented atomic state updates to prevent React rendering race conditions during undo operations
+- June 29, 2025: Rewrote ball locking logic with function-based approach for more deterministic behavior
 
 ## User Preferences
 

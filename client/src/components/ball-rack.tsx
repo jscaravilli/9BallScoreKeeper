@@ -33,17 +33,13 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
     
     // RULE 1: Active balls are NEVER locked, period
     if (!ball || ball.state === 'active') {
-      console.log(`Ball ${ballNumber}: ACTIVE - never locked (state: ${ball?.state})`);
       return false;
     }
     
     // RULE 2: Only scored/dead balls by other player can be locked
-    const shouldLock = (ball.state === 'scored' || ball.state === 'dead') && 
-                       ball.scoredBy !== undefined && 
-                       ball.scoredBy !== currentPlayer;
-    
-    console.log(`Ball ${ballNumber}: ${shouldLock ? 'LOCKED' : 'NOT LOCKED'} (state: ${ball.state}, scoredBy: ${ball.scoredBy}, current: ${currentPlayer})`);
-    return shouldLock;
+    return (ball.state === 'scored' || ball.state === 'dead') && 
+           ball.scoredBy !== undefined && 
+           ball.scoredBy !== currentPlayer;
   };
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
