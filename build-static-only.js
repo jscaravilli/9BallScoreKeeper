@@ -22,8 +22,23 @@ async function buildStaticOnly() {
     await execAsync('cp -r client/dist/* dist/');
     console.log('✓ Copied to dist directory');
     
-    // Verify index.html is in the right place
-    const stats = await fs.stat('dist/index.html');
+    // Add cache-busting timestamp to index.html
+    const indexPath = 'dist/index.html';
+    let htmlContent = await fs.readFile(indexPath, 'utf8');
+    const timestamp = Date.now();
+    
+    // Add build timestamp meta tag for cache busting
+    htmlContent = htmlContent.replace(
+      '<meta http-equiv="Expires" content="0" />',
+      `<meta http-equiv="Expires" content="0" />
+    <meta name="build-timestamp" content="${timestamp}" />`
+    );
+    
+    await fs.writeFile(indexPath, htmlContent);
+    console.log(`✓ Added cache-busting timestamp: ${timestamp}`);
+    
+    // Verify index.html is ready
+    const stats = await fs.stat(indexPath);
     console.log(`✓ index.html ready (${(stats.size / 1024).toFixed(1)}KB)`);
     
     // Count assets
