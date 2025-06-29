@@ -7,10 +7,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="format-detection" content="telephone=no" />
     
-    <!-- Cache busting headers -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <!-- Cache busting for static assets only (preserves localStorage) -->
+    <meta http-equiv="Cache-Control" content="no-cache" />
     <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
     
     <title>Joseph's Unofficial APA 9 Ball Scorekeeper</title>
     <meta name="description" content="Track your APA 9-ball pool matches with skill-based handicap scoring. Independent games for each player with localStorage persistence." />
