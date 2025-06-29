@@ -129,7 +129,8 @@ export default function Game() {
   const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showCacheClearConfirm, setShowCacheClearConfirm] = useState(false);
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [tapCount, setTapCount] = useState(0);
+  const [tapTimer, setTapTimer] = useState<NodeJS.Timeout | null>(null);
 
 
   const [currentInning, setCurrentInning] = useState<number>(1);
@@ -661,18 +662,28 @@ export default function Game() {
     setCurrentInning(1);
   }
 
-  // Cache clear functions
-  const handleVersionLongPressStart = () => {
-    const timer = setTimeout(() => {
+  // Cache clear functions - 5 quick taps
+  const handleVersionTap = () => {
+    const newTapCount = tapCount + 1;
+    setTapCount(newTapCount);
+    
+    // Clear existing timer
+    if (tapTimer) {
+      clearTimeout(tapTimer);
+    }
+    
+    // Check if we've reached 5 taps
+    if (newTapCount >= 5) {
       setShowCacheClearConfirm(true);
-    }, 1000); // 1 second long press
-    setLongPressTimer(timer);
-  };
-
-  const handleVersionLongPressEnd = () => {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
+      setTapCount(0);
+      setTapTimer(null);
+    } else {
+      // Reset counter after 1 second of inactivity
+      const timer = setTimeout(() => {
+        setTapCount(0);
+        setTapTimer(null);
+      }, 1000);
+      setTapTimer(timer);
     }
   };
 
@@ -692,7 +703,7 @@ export default function Game() {
       window.location.href = window.location.href;
     }
     setShowCacheClearConfirm(false);
-  };;
+  };
 
   const handleUndoTurn = () => {
     console.log('ENHANCED handleUndoTurn called', { 
@@ -1179,14 +1190,10 @@ export default function Game() {
                 <h3 className="font-semibold text-gray-700">Joseph's Unofficial APA 9 Ball Scorekeeper</h3>
                 <p 
                   className="text-sm text-gray-600 cursor-pointer select-none"
-                  onMouseDown={handleVersionLongPressStart}
-                  onMouseUp={handleVersionLongPressEnd}
-                  onMouseLeave={handleVersionLongPressEnd}
-                  onTouchStart={handleVersionLongPressStart}
-                  onTouchEnd={handleVersionLongPressEnd}
-                  title="Long press to clear app cache"
+                  onClick={handleVersionTap}
+                  title="Tap 5 times quickly to clear app cache"
                 >
-                  Version 1.0.0
+                  Version 1.0.0 {tapCount > 0 && `(${tapCount}/5)`}
                 </p>
               </div>
               <div>
