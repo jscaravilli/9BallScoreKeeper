@@ -120,6 +120,65 @@ button {
   background-color: var(--ball-black);
 }
 
+/* Ball colors with white circles for numbers 1-8 */
+.ball-1 { 
+  background: #FFD700; 
+  position: relative;
+}
+.ball-2 { 
+  background: #0000FF; 
+  position: relative;
+}
+.ball-3 { 
+  background: #FF0000; 
+  position: relative;
+}
+.ball-4 { 
+  background: #800080; 
+  position: relative;
+}
+.ball-5 { 
+  background: #FFA500; 
+  position: relative;
+}
+.ball-6 { 
+  background: #008000; 
+  position: relative;
+}
+.ball-7 { 
+  background: #8B4513; 
+  position: relative;
+}
+.ball-8 { 
+  background: #000000; 
+  position: relative;
+}
+.ball-9 { 
+  background: linear-gradient(45deg, #FFD700 50%, #FFFFFF 50%); 
+  position: relative;
+}
+
+/* White circle with black number for balls 1-8 */
+.ball-1::after, .ball-2::after, .ball-3::after, .ball-4::after,
+.ball-5::after, .ball-6::after, .ball-7::after, .ball-8::after {
+  content: attr(data-number);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  font-weight: bold;
+  font-size: 0.7em;
+  border: 1px solid #ccc;
+}
+
 /* Touch optimization */
 @media (hover: none) and (pointer: coarse) {
   .touch-target {

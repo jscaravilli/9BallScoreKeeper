@@ -99,14 +99,12 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
         </div>
       );
     } else {
+      // For balls 1-8, use CSS-based design with white circles and black numbers
       return (
-        <div className="relative w-full h-full rounded-full overflow-hidden">
-          {/* Base gradient */}
-          <div 
-            className="absolute inset-0 rounded-full"
-            style={{ background: getBallGradient(ballNumber) }}
-          ></div>
-          
+        <div 
+          className={`ball-${ballNumber} w-full h-full rounded-full overflow-hidden relative`}
+          data-number={ballNumber}
+        >
           {/* Glossy highlight effect */}
           <div 
             className="absolute rounded-full"
@@ -118,13 +116,6 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
               background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 40%, transparent 70%)',
             }}
           ></div>
-          
-          {/* Number */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className={`font-bold text-lg ${ballNumber === 1 ? 'text-black' : 'text-white'} drop-shadow-sm`}>
-              {ballNumber}
-            </span>
-          </div>
         </div>
       );
     }
