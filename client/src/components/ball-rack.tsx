@@ -23,14 +23,16 @@ const BALL_COLORS = {
 };
 
 export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [], undoInProgress = false }: BallRackProps) {
-  // NEW APPROACH: Hide all scored/dead balls regardless of who scored them
+  // REFINED APPROACH: Hide balls from previous turns, but keep current turn balls visible
   const shouldHideBall = (ballNumber: number): boolean => {
     const ball = ballStates.find(b => b.number === ballNumber);
     
     if (!ball) return false;
     
-    // Hide all balls that are scored or dead (regardless of player)
-    return ball.state === 'scored' || ball.state === 'dead';
+    // Hide balls that were scored/dead by the OTHER player from previous turns
+    return (ball.state === 'scored' || ball.state === 'dead') && 
+           ball.scoredBy !== undefined && 
+           ball.scoredBy !== currentPlayer;
   };
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
