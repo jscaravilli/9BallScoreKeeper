@@ -952,16 +952,7 @@ export default function Game() {
                 <span className="font-medium">Match History</span>
               </button>
               
-              <button
-                onClick={() => {
-                  setShowMenu(false);
-                  setShowPlayerSetup(true);
-                }}
-                className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
-              >
-                <Users className="h-5 w-5 text-green-600" />
-                <span className="font-medium">Player Setup</span>
-              </button>
+
             </div>
           </div>
         </DialogContent>
