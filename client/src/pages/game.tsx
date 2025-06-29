@@ -149,6 +149,8 @@ export default function Game() {
   const [nineBallUndoInProgress, setNineBallUndoInProgress] = useState(false);
   const [forceUpdateKey, setForceUpdateKey] = useState<string>("");
   const [ballRackKey, setBallRackKey] = useState<string>("initial");
+  const [previousPlayer, setPreviousPlayer] = useState<number | null>(null);
+  const [playerChangeKey, setPlayerChangeKey] = useState<string>("initial");
 
   const maxTurnHistory = 10; // Keep last 10 turns for undo
 
@@ -156,6 +158,27 @@ export default function Game() {
   const { data: currentMatch, isLoading } = useQuery<Match | null>({
     queryKey: ["/api/match/current"],
   });
+
+  // PLAYER CHANGE DETECTION: Force complete visual refresh when player changes
+  useEffect(() => {
+    if (currentMatch && currentMatch.currentPlayer !== previousPlayer) {
+      if (previousPlayer !== null) {
+        console.log(`PLAYER CHANGE DETECTED: ${previousPlayer} → ${currentMatch.currentPlayer}`);
+        
+        // Force complete visual reset with new keys
+        const changeTimestamp = Date.now();
+        setPlayerChangeKey(`player-change-${changeTimestamp}`);
+        setBallRackKey(`rack-reset-${changeTimestamp}`);
+        setForceUpdateKey(`force-${changeTimestamp}`);
+        
+        // Small delay to ensure DOM updates
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
+        }, 100);
+      }
+      setPreviousPlayer(currentMatch.currentPlayer);
+    }
+  }, [currentMatch?.currentPlayer, previousPlayer, queryClient]);
 
 
 
@@ -666,9 +689,14 @@ export default function Game() {
         setShowMatchWin(false);
         setUndoInProgress(false);
         
-        // FORCE COMPLETE RESET: Multiple approaches for cross-player tracking
-        setBallRackKey(`reset-${Date.now()}`);
-        setForceUpdateKey(`final-${Date.now()}`);
+        // FORCE COMPLETE RESET: Trigger player change detection system
+        const resetTimestamp = Date.now();
+        setBallRackKey(`reset-${resetTimestamp}`);
+        setForceUpdateKey(`final-${resetTimestamp}`);
+        setPlayerChangeKey(`undo-change-${resetTimestamp}`);
+        
+        // Force previous player reset to trigger detection on next render
+        setPreviousPlayer(null);
         
         // Delay query invalidation to ensure state is fully set
         setTimeout(() => {
@@ -832,14 +860,14 @@ export default function Game() {
 
       {/* Ball Rack */}
       <BallRack 
-        key={ballRackKey}
+        key={`${ballRackKey}-${playerChangeKey}`}
         ballStates={currentMatch.ballStates as BallInfo[] || []}
         onBallTap={handleBallTap}
         currentPlayer={currentMatch.currentPlayer as 1 | 2}
         currentTurn={currentMatch.currentTurn || 1}
         turnHistory={turnHistory}
         undoInProgress={undoInProgress}
-        forceUpdateKey={forceUpdateKey}
+        forceUpdateKey={`${forceUpdateKey}-${playerChangeKey}`}
       />
 
       {/* Game Actions */}
