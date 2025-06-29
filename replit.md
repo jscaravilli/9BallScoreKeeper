@@ -151,15 +151,6 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: Refined ball borders to ultra-thin 0.5px for cleaner appearance
 - June 29, 2025: FIXED ball locking visual bug during multi-turn undo operations - active balls now never appear locked
 - June 29, 2025: Enhanced ball rendering logic to prioritize ball state over locking flags for visual consistency
-- June 29, 2025: Implemented atomic state updates to prevent React rendering race conditions during undo operations
-- June 29, 2025: Rewrote ball locking logic with function-based approach for more deterministic behavior
-- June 29, 2025: RESOLVED ball locking visual issues by implementing ball hiding system instead of locking
-- June 29, 2025: Balls now disappear completely when scored/dead and reappear only during undo operations to previous innings
-- June 29, 2025: SIMPLIFIED ball display system - removed complex turn-based hiding to ensure all balls show correct states during undo operations
-- June 29, 2025: Fixed undo operations to properly restore ball visual states including checkmarks for scored balls
-- June 29, 2025: IDENTIFIED persistent visual state issue - React component rendering cache prevents ball checkmarks from clearing during undo operations despite correct data restoration
-- June 29, 2025: Attempted multiple solutions: force keys, component remounting, deep cloning, atomic updates, fresh state lookups - visual persistence remains unresolved
-- June 29, 2025: Current limitation: Ball visual states may show checkmarks after undo operations even when data is correctly restored to active state
 
 ## User Preferences
 
