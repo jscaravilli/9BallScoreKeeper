@@ -9,6 +9,7 @@ interface BallRackProps {
   currentTurn: number;
   turnHistory?: any[];
   undoInProgress?: boolean; // Add undo state to prevent visual glitches
+  forceUpdateKey?: string; // Add key to force component updates
 }
 
 const BALL_COLORS = {
@@ -23,7 +24,7 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap, currentPlayer, currentTurn, turnHistory = [], undoInProgress = false }: BallRackProps) {
+export default function BallRack({ ballStates, onBallTap, currentPlayer, currentTurn, turnHistory = [], undoInProgress = false, forceUpdateKey }: BallRackProps) {
   // IMPROVED TURN-BASED APPROACH: Hide balls from completed innings
   const shouldHideBall = (ballNumber: number): boolean => {
     const ball = ballStates.find(b => b.number === ballNumber);
@@ -180,7 +181,7 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
           
           return (
             <Button
-              key={`${ballNumber}-${ballState.state}-${ballState.scoredBy || 'none'}`}
+              key={`${ballNumber}-${ballState.state}-${ballState.scoredBy || 'none'}-${forceUpdateKey || ''}`}
               className={getBallStyles(ballNumber, ballState.state, false)}
               onClick={() => onBallTap(ballNumber)}
               variant="outline"

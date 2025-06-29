@@ -147,6 +147,7 @@ export default function Game() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [undoInProgress, setUndoInProgress] = useState(false);
   const [nineBallUndoInProgress, setNineBallUndoInProgress] = useState(false);
+  const [forceUpdateKey, setForceUpdateKey] = useState<string>("");
   const maxTurnHistory = 10; // Keep last 10 turns for undo
 
   // Get current match
@@ -627,6 +628,10 @@ export default function Game() {
     localStorageAPI.addMatchEvent(undoEvent);
     
     setUndoInProgress(true);
+    
+    // Generate unique key to force ball component re-rendering
+    const updateKey = Date.now().toString();
+    setForceUpdateKey(updateKey);
 
     // Use exact previous state without modification to avoid state corruption
     updateMatchMutation.mutate({
@@ -819,6 +824,7 @@ export default function Game() {
         currentTurn={currentMatch.currentTurn || 1}
         turnHistory={turnHistory}
         undoInProgress={undoInProgress}
+        forceUpdateKey={forceUpdateKey}
       />
 
       {/* Game Actions */}
