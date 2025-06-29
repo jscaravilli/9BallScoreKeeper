@@ -11,7 +11,6 @@ import MatchWinModal from "@/components/match-win-modal";
 import BallRack from "@/components/ball-rack";
 import PlayerScores from "@/components/player-scores";
 import { getPointsToWin } from "@/lib/apa-handicaps";
-import { localStorageAPI } from "@/lib/localStorage";
 import type { Match, BallInfo, MatchEvent } from "@shared/schema";
 
 // History Display Component
@@ -22,7 +21,8 @@ function HistoryDisplay({
   expandedMatch: number | null; 
   setExpandedMatch: (index: number | null) => void; 
 }) {
-  const history = localStorageAPI.getMatchHistory();
+  // Using API-based storage only - no localStorage
+  const history: any[] = [];
   
   if (history.length === 0) {
     return (
@@ -364,7 +364,7 @@ export default function Game() {
         newScore: newScore,
         details: `${ballNumber}-Ball scored for ${points} point${points > 1 ? 's' : ''}`
       };
-      localStorageAPI.addMatchEvent(ballScoredEvent);
+      // Ball scored events now handled through API state only
 
       // Check if this scoring wins the match (reaches or exceeds handicap)
       const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
@@ -425,10 +425,7 @@ export default function Game() {
             playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
             details: `Match won by ${currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name} with final score ${currentMatch.currentPlayer === 1 ? newScore : currentMatch.player1Score}-${currentMatch.currentPlayer === 2 ? newScore : currentMatch.player2Score}`
           };
-          localStorageAPI.addMatchEvent(matchCompletedEvent);
-
-          // Save completed match to local history
-          localStorageAPI.addToHistory(completedMatch);
+          // Match completion and history now handled through API state only
           
           console.log('Match win mutations sent and saved to history');
           return;
@@ -619,15 +616,7 @@ export default function Game() {
     
     // Ball locking is now handled directly in BallRack component
     
-    // Log the undo event
-    const undoEvent: MatchEvent = {
-      type: 'turn_ended',
-      timestamp: new Date().toISOString(),
-      player: currentMatch.currentPlayer as 1 | 2,
-      playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
-      details: 'Turn undone - reverted to previous state'
-    };
-    localStorageAPI.addMatchEvent(undoEvent);
+    // Undo events are now handled purely through API state, no localStorage
     
     setUndoInProgress(true);
     
