@@ -1062,18 +1062,20 @@ export default function Game() {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-800">Match History</h2>
-              <button 
-                onClick={() => {
-                  if (confirm('Clear all match history? This cannot be undone.')) {
-                    localStorageAPI.clearHistory();
-                    setShowHistory(false);
-                  }
-                }}
-                className="p-1 hover:bg-red-100 rounded text-red-600"
-                title="Clear History"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              <div className="mr-8">
+                <button 
+                  onClick={() => {
+                    if (confirm('Clear all match history? This cannot be undone.')) {
+                      localStorageAPI.clearHistory();
+                      setShowHistory(false);
+                    }
+                  }}
+                  className="p-1 hover:bg-red-100 rounded text-red-600"
+                  title="Clear History"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
             
             <HistoryDisplay 
