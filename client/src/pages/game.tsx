@@ -206,8 +206,9 @@ export default function Game() {
         lockedBalls.add(ball.number);
       }
       
-      // Lock dead balls that are from previous innings (not current inning)
-      if (ball.state === 'dead' && ball.inning && ball.inning < currentInning) {
+      // Lock dead balls that are from previous innings OR from current inning but turn completed
+      if (ball.state === 'dead' && ball.inning && 
+          (ball.inning < currentInning || (ball.inning === currentInning && ball.turnCompleted))) {
         lockedBalls.add(ball.number);
       }
     });
