@@ -12,7 +12,7 @@ import BallRack from "@/components/ball-rack";
 import PlayerScores from "@/components/player-scores";
 import { getPointsToWin } from "@/lib/apa-handicaps";
 import { localStorageAPI } from "@/lib/localStorage";
-import type { Match, BallInfo, MatchEvent } from "@shared/schema";
+import type { Match, BallInfo, MatchEvent, GameState } from "@shared/schema";
 
 // History Display Component
 function HistoryDisplay({ 
@@ -130,19 +130,16 @@ export default function Game() {
 
 
   const [currentInning, setCurrentInning] = useState<number>(1);
+  const [completedInnings, setCompletedInnings] = useState<number>(0);
+  const [player1HasPlayed, setPlayer1HasPlayed] = useState<boolean>(false);
+  const [player2HasPlayed, setPlayer2HasPlayed] = useState<boolean>(false);
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
     name: string;
     finalScore1: number;
     finalScore2: number;
   } | null>(null);
-  const [turnHistory, setTurnHistory] = useState<{
-    ballStates: BallInfo[];
-    currentPlayer: number;
-    player1Score: number;
-    player2Score: number;
-    lockedBalls?: number[]; // Optional for backward compatibility
-  }[]>([]);
+  const [turnHistory, setTurnHistory] = useState<GameState[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [undoInProgress, setUndoInProgress] = useState(false);
   const [nineBallUndoInProgress, setNineBallUndoInProgress] = useState(false);
@@ -228,6 +225,12 @@ export default function Game() {
       winnerId: null,
     });
     setShowPlayerSetup(false);
+    
+    // Reset inning tracking for new match
+    setCurrentInning(1);
+    setCompletedInnings(0);
+    setPlayer1HasPlayed(false);
+    setPlayer2HasPlayed(false);
   };
 
   const handleBallTap = (ballNumber: number) => {
@@ -370,6 +373,13 @@ export default function Game() {
       
       // Track the inning when this ball was scored
       ball.inning = currentInning;
+      
+      // Mark that current player has played this inning
+      if (currentMatch.currentPlayer === 1) {
+        setPlayer1HasPlayed(true);
+      } else {
+        setPlayer2HasPlayed(true);
+      }
       
 
       
@@ -581,8 +591,17 @@ export default function Game() {
       return newHistory.slice(-maxTurnHistory);
     });
 
-    // Increment to next inning
-    setCurrentInning(prev => prev + 1);
+    // Check if both players have played this inning
+    const bothPlayersPlayed = (currentMatch.currentPlayer === 1 && player2HasPlayed) || 
+                             (currentMatch.currentPlayer === 2 && player1HasPlayed);
+    
+    if (bothPlayersPlayed) {
+      // Complete the current inning and start a new one
+      setCompletedInnings(prev => prev + 1);
+      setCurrentInning(prev => prev + 1);
+      setPlayer1HasPlayed(false);
+      setPlayer2HasPlayed(false);
+    }
 
     // Switch to the other player - locked balls will be updated automatically by useEffect
     updateMatchMutation.mutate({
@@ -725,6 +744,12 @@ export default function Game() {
     setShowNewGameConfirm(false);
     setShowPlayerSetup(true);
     
+    // Reset inning tracking for new match
+    setCurrentInning(1);
+    setCompletedInnings(0);
+    setPlayer1HasPlayed(false);
+    setPlayer2HasPlayed(false);
+    
     // Invalidate current match query to clear the data
     queryClient.setQueryData(["/api/match/current"], null);
   };
@@ -815,7 +840,7 @@ export default function Game() {
             </button>
             <div>
               <h1 className="text-lg font-bold text-white">Joseph's Unofficial APA 9 Ball Scorekeeper</h1>
-              <p className="text-green-200 text-sm">Game {currentMatch.currentGame}</p>
+              <p className="text-green-200 text-sm">Game {currentMatch.currentGame} - Inning: {completedInnings + 1}</p>
             </div>
           </div>
           <span className="bg-green-800/50 text-green-100 px-3 py-1 rounded-full text-sm font-medium">

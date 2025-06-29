@@ -151,6 +151,10 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: Refined ball borders to ultra-thin 0.5px for cleaner appearance
 - June 29, 2025: Implemented turn-based ball visibility system - balls disappear after turn ends, not immediately
 - June 29, 2025: Fixed undo operation visual bugs by synchronizing ball state calculations with immediate updates
+- June 29, 2025: Added complete inning tracking system with proper counting of completed innings (both players have played)
+- June 29, 2025: Implemented GameState type definition in shared schema for cleaner state management architecture
+- June 29, 2025: Enhanced header display to show current inning number in green bar for better game progression tracking
+- June 29, 2025: Completed single-source-of-truth ball state architecture eliminating all visual inconsistencies between components
 
 ## User Preferences
 

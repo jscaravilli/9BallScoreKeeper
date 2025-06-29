@@ -161,9 +161,15 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
               {isLocked ? (
                 <span className="text-gray-500 font-bold">{ballNumber}</span>
               ) : isScoredThisInning && (ballState.state === 'scored' || ballState.state === 'dead') ? (
-                ballState.state === 'scored' ? 
-                  <Check className="h-6 w-6 text-green-600" /> : 
-                  <X className="h-6 w-6 text-red-500" />
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {renderBallContent(ballNumber, 'active')}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {ballState.state === 'scored' ? 
+                      <Check className="h-6 w-6 text-green-600 opacity-70 drop-shadow-lg" /> : 
+                      <X className="h-6 w-6 text-red-500 opacity-70 drop-shadow-lg" />
+                    }
+                  </div>
+                </div>
               ) : (
                 renderBallContent(ballNumber, ballState.state)
               )}
