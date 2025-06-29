@@ -12,7 +12,6 @@ export const matches = pgTable("matches", {
   player2Score: integer("player2_score").notNull().default(0),
   currentPlayer: integer("current_player").notNull().default(1), // 1 or 2
   currentGame: integer("current_game").notNull().default(1),
-  currentTurn: integer("current_turn").notNull().default(1), // track which turn we're on
   ballStates: jsonb("ball_states").notNull().default([]), // Array of ball state objects
   isComplete: boolean("is_complete").notNull().default(false),
   winnerId: integer("winner_id"),
@@ -51,7 +50,6 @@ export interface BallInfo {
   number: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
   state: BallState;
   scoredBy?: 1 | 2; // player who scored it
-  turnScored?: number; // which turn this ball was scored/marked dead
 }
 
 // APA Skill Level type

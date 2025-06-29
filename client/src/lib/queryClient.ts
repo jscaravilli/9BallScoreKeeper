@@ -1,82 +1,57 @@
 import { QueryClient } from "@tanstack/react-query";
+import { localStorageAPI } from "./localStorage";
 import type { Match, BallInfo } from "@shared/schema";
 
-// API-based query functions - single source of truth
+// Client-side query functions using localStorage
 export const clientQueryFunctions = {
-  getCurrentMatch: async (): Promise<Match | null> => {
-    const response = await fetch('/api/match/current');
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error('Failed to get current match');
-    }
-    return response.json();
+  getCurrentMatch: (): Match | null => {
+    return localStorageAPI.getCurrentMatch();
   },
   
-  createMatch: async (matchData: {
+  createMatch: (matchData: {
     player1Name: string;
     player1SkillLevel: number;
     player2Name: string;
     player2SkillLevel: number;
     ballStates?: BallInfo[];
-  }): Promise<Match> => {
-    const response = await fetch('/api/match', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(matchData)
-    });
-    if (!response.ok) throw new Error('Failed to create match');
-    return response.json();
+  }): Match => {
+    return localStorageAPI.createMatch(matchData);
   },
   
-  updateMatch: async (matchId: number, updates: Partial<Match>): Promise<Match | null> => {
-    const response = await fetch(`/api/match/${matchId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates)
-    });
-    if (!response.ok) throw new Error('Failed to update match');
-    return response.json();
+  updateMatch: (matchId: number, updates: Partial<Match>): Match | null => {
+    return localStorageAPI.updateMatch(matchId, updates);
   },
   
-  updateBallStates: async (matchId: number, ballStates: BallInfo[]): Promise<Match | null> => {
-    const response = await fetch(`/api/match/${matchId}/balls`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ballStates })
-    });
-    if (!response.ok) throw new Error('Failed to update ball states');
-    return response.json();
+  updateBallStates: (matchId: number, ballStates: BallInfo[]): Match | null => {
+    return localStorageAPI.updateBallStates(matchId, ballStates);
   }
 };
 
-// Custom query function for API operations
+// Custom query function for client-side operations
 const getQueryFn = (context: { queryKey: readonly unknown[] }) => {
   const [endpoint] = context.queryKey as string[];
   
   switch (endpoint) {
     case '/api/match/current':
-      return clientQueryFunctions.getCurrentMatch();
+      return Promise.resolve(clientQueryFunctions.getCurrentMatch());
     default:
       throw new Error(`Unknown query endpoint: ${endpoint}`);
   }
 };
 
-// API mutation helper
+// Client-side mutation helper
 export function clientMutation<T>(
-  mutationFn: () => Promise<T>
+  mutationFn: () => T
 ): Promise<T> {
-  return mutationFn();
+  return Promise.resolve(mutationFn());
 }
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn,
-      staleTime: Infinity, // Never consider stale to prevent automatic refetches
-      gcTime: Infinity, // Keep cache forever (replaces cacheTime in v5)
+      staleTime: 0, // Always fresh for localStorage
       refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
       retry: false,
     },
     mutations: {

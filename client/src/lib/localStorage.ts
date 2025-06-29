@@ -63,7 +63,6 @@ export class LocalStorageAPI {
       player2Score: 0,
       currentPlayer: 1,
       currentGame: 1,
-      currentTurn: 1,
       ballStates: matchData.ballStates || [],
       isComplete: false,
       winnerId: null,
@@ -87,14 +86,7 @@ export class LocalStorageAPI {
   }
 
   updateBallStates(matchId: number, ballStates: BallInfo[]): Match | null {
-    // Clean up ball states to prevent locking issues during undo operations
-    const cleanedBallStates = ballStates.map(ball => ({
-      ...ball,
-      // Clear scoredBy for active balls to eliminate historical locking conflicts
-      scoredBy: ball.state === 'active' ? undefined : ball.scoredBy
-    }));
-    
-    return this.updateMatch(matchId, { ballStates: cleanedBallStates });
+    return this.updateMatch(matchId, { ballStates });
   }
 
   clearCurrentMatch(): void {

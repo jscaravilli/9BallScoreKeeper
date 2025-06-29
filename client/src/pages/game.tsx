@@ -11,6 +11,7 @@ import MatchWinModal from "@/components/match-win-modal";
 import BallRack from "@/components/ball-rack";
 import PlayerScores from "@/components/player-scores";
 import { getPointsToWin } from "@/lib/apa-handicaps";
+import { localStorageAPI } from "@/lib/localStorage";
 import type { Match, BallInfo, MatchEvent } from "@shared/schema";
 
 // History Display Component
@@ -21,8 +22,7 @@ function HistoryDisplay({
   expandedMatch: number | null; 
   setExpandedMatch: (index: number | null) => void; 
 }) {
-  // Using API-based storage only - no localStorage
-  const history: any[] = [];
+  const history = localStorageAPI.getMatchHistory();
   
   if (history.length === 0) {
     return (
@@ -129,7 +129,7 @@ export default function Game() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
 
-
+  const [lockedBalls, setLockedBalls] = useState<Set<number>>(new Set());
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
     name: string;
@@ -139,7 +139,6 @@ export default function Game() {
   const [turnHistory, setTurnHistory] = useState<{
     ballStates: BallInfo[];
     currentPlayer: number;
-    currentTurn: number;
     player1Score: number;
     player2Score: number;
     lockedBalls?: number[]; // Optional for backward compatibility
@@ -147,9 +146,6 @@ export default function Game() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [undoInProgress, setUndoInProgress] = useState(false);
   const [nineBallUndoInProgress, setNineBallUndoInProgress] = useState(false);
-  const [forceUpdateKey, setForceUpdateKey] = useState<string>("");
-  const [ballRackKey, setBallRackKey] = useState<string>("initial");
-
   const maxTurnHistory = 10; // Keep last 10 turns for undo
 
   // Get current match
@@ -157,7 +153,28 @@ export default function Game() {
     queryKey: ["/api/match/current"],
   });
 
+  // Force locked ball recalculation function
+  const recalculateLockedBalls = useCallback((match: Match) => {
+    const newLockedBalls = new Set<number>();
+    const ballStates = match.ballStates as BallInfo[] || [];
+    const activePlayer = match.currentPlayer;
+    
+    // Lock balls that were scored/dead by the OTHER player
+    ballStates.forEach(ball => {
+      if ((ball.state === 'scored' || ball.state === 'dead') && 
+          ball.scoredBy && ball.scoredBy !== activePlayer) {
+        newLockedBalls.add(ball.number);
+      }
+    });
+    
+    setLockedBalls(newLockedBalls);
+  }, []);
 
+  // Update locked balls whenever match data changes
+  useEffect(() => {
+    if (!currentMatch) return;
+    recalculateLockedBalls(currentMatch);
+  }, [currentMatch, currentMatch?.currentPlayer, currentMatch?.ballStates, recalculateLockedBalls]);
 
   // Create new match mutation
   const createMatchMutation = useMutation({
@@ -169,34 +186,31 @@ export default function Game() {
     },
   });
 
-  // Update match mutation - direct API calls without React Query reactivity
+  // Update match mutation
   const updateMatchMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: number; updates: any }) => {
-      const result = await clientMutation(() => clientQueryFunctions.updateMatch(id, updates));
-      // Directly update the cache without triggering observers
-      queryClient.getQueryCache().find({ queryKey: ["/api/match/current"] })?.setState({
-        data: result,
-        status: 'success',
-        dataUpdatedAt: Date.now(),
-      });
-      return result;
+      return clientMutation(() => clientQueryFunctions.updateMatch(id, updates));
     },
-    // No onSuccess callback to prevent automatic re-renders
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
+    },
   });
 
-  // Update ball states mutation - direct API calls without React Query reactivity
+  // Update ball states mutation
   const updateBallsMutation = useMutation({
     mutationFn: async ({ id, ballStates }: { id: number; ballStates: BallInfo[] }) => {
-      const result = await clientMutation(() => clientQueryFunctions.updateBallStates(id, ballStates));
-      // Directly update the cache without triggering observers
-      queryClient.getQueryCache().find({ queryKey: ["/api/match/current"] })?.setState({
-        data: result,
-        status: 'success',
-        dataUpdatedAt: Date.now(),
-      });
-      return result;
+      return clientMutation(() => clientQueryFunctions.updateBallStates(id, ballStates));
     },
-    // No onSuccess callback to prevent automatic re-renders
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
+      // Force immediate locked ball recalculation after ball state update
+      setTimeout(() => {
+        const updatedMatch = queryClient.getQueryData<Match | null>(["/api/match/current"]);
+        if (updatedMatch) {
+          recalculateLockedBalls(updatedMatch);
+        }
+      }, 50);
+    },
   });
 
   // Always show player setup modal when there's no current match
@@ -221,7 +235,6 @@ export default function Game() {
       player2Score: 0,
       currentPlayer: 1,
       currentGame: 1,
-      currentTurn: 1,
       ballStates: initialBallStates,
       isComplete: false,
       winnerId: null,
@@ -249,7 +262,19 @@ export default function Game() {
           const nineBallIndex = ballStates.findIndex(b => b.number === 9);
           ballStates[nineBallIndex] = { number: 9, state: 'scored', scoredBy: lastStateNineBall.scoredBy };
           
-          // Ball locking handled in BallRack component
+          // Restore locked balls from before the rerack
+          // Find balls that were scored/dead by non-current players in the previous state
+          const newLockedBalls = new Set<number>();
+          const currentPlayer = currentMatch.currentPlayer;
+          
+          lastState.ballStates.forEach(ball => {
+            if ((ball.state === 'scored' || ball.state === 'dead') && 
+                ball.scoredBy && ball.scoredBy !== currentPlayer) {
+              newLockedBalls.add(ball.number);
+            }
+          });
+          
+          setLockedBalls(newLockedBalls);
           
           // Deduct 2 points from the player who scored it
           const scoringPlayer = lastStateNineBall.scoredBy;
@@ -311,7 +336,9 @@ export default function Game() {
     }
     
     // Check if ball is locked (pocketed/marked dead in previous turn)
-    // Ball locking is now handled in BallRack component
+    if (lockedBalls.has(ballNumber)) {
+      return; // Don't allow interaction with locked balls
+    }
     
     setIsProcessing(true);
     
@@ -331,15 +358,13 @@ export default function Game() {
       // Store current state for undo functionality BEFORE modifying the ball
       // Deep clone the ball states to prevent reference issues
       const currentState = {
-        ballStates: JSON.parse(JSON.stringify(currentMatch.ballStates as BallInfo[] || [])),
+        ballStates: (currentMatch.ballStates as BallInfo[] || []).map(b => ({ ...b })),
         currentPlayer: currentMatch.currentPlayer,
-        currentTurn: currentMatch.currentTurn || 1,
         player1Score: currentMatch.player1Score,
         player2Score: currentMatch.player2Score,
       };
       
       // Add to turn history, keeping only the last maxTurnHistory turns
-      console.log('Saving turn history - ball states BEFORE scoring:', currentState.ballStates);
       setTurnHistory(prev => {
         const newHistory = [...prev, currentState];
         return newHistory.slice(-maxTurnHistory);
@@ -348,7 +373,6 @@ export default function Game() {
       // First tap - score the ball
       ball.state = 'scored';
       ball.scoredBy = currentMatch.currentPlayer as 1 | 2;
-      ball.turnScored = currentMatch.currentTurn || 1;
       
 
       
@@ -373,7 +397,7 @@ export default function Game() {
         newScore: newScore,
         details: `${ballNumber}-Ball scored for ${points} point${points > 1 ? 's' : ''}`
       };
-      // Ball scored events now handled through API state only
+      localStorageAPI.addMatchEvent(ballScoredEvent);
 
       // Check if this scoring wins the match (reaches or exceeds handicap)
       const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
@@ -434,7 +458,10 @@ export default function Game() {
             playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
             details: `Match won by ${currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name} with final score ${currentMatch.currentPlayer === 1 ? newScore : currentMatch.player1Score}-${currentMatch.currentPlayer === 2 ? newScore : currentMatch.player2Score}`
           };
-          // Match completion and history now handled through API state only
+          localStorageAPI.addMatchEvent(matchCompletedEvent);
+
+          // Save completed match to local history
+          localStorageAPI.addToHistory(completedMatch);
           
           console.log('Match win mutations sent and saved to history');
           return;
@@ -443,13 +470,18 @@ export default function Game() {
         }
       }
 
-      // Single API call to update both score and ball states
+      // Update match with new score (not winning yet)
       updateMatchMutation.mutate({
         id: currentMatch.id,
         updates: {
           [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: newScore,
-          ballStates: ballStates
         }
+      });
+
+      // Update ball states first
+      updateBallsMutation.mutate({
+        id: currentMatch.id,
+        ballStates,
       });
 
       // Check for special 9-ball win (9-ball pocketed during game)
@@ -487,34 +519,31 @@ export default function Game() {
         };
         localStorageAPI.addMatchEvent(ballDeadEvent);
 
-        // Single API call to update both score and ball states for dead ball
         updateMatchMutation.mutate({
           id: currentMatch.id,
           updates: {
             [ball.scoredBy === 1 ? 'player1Score' : 'player2Score']: newScore,
-            ballStates: ballStates
-          }
-        });
-      } else {
-        // Update ball states only for dead ball without score change
-        updateMatchMutation.mutate({
-          id: currentMatch.id,
-          updates: {
-            ballStates: ballStates
           }
         });
       }
+      
+      ball.state = 'dead';
+      ball.scoredBy = undefined;
+      
+      // Update ball states
+      updateBallsMutation.mutate({
+        id: currentMatch.id,
+        ballStates,
+      });
     } else {
       // Third tap - reset to active
       ball.state = 'active';
       ball.scoredBy = undefined;
       
-      // Single API call to reset ball state
-      updateMatchMutation.mutate({
+      // Update ball states
+      updateBallsMutation.mutate({
         id: currentMatch.id,
-        updates: {
-          ballStates: ballStates
-        }
+        ballStates,
       });
     }
   };
@@ -526,7 +555,6 @@ export default function Game() {
     const currentState = {
       ballStates: currentMatch.ballStates as BallInfo[] || [],
       currentPlayer: currentMatch.currentPlayer,
-      currentTurn: currentMatch.currentTurn || 1,
       player1Score: currentMatch.player1Score,
       player2Score: currentMatch.player2Score,
     };
@@ -536,12 +564,11 @@ export default function Game() {
       return newHistory.slice(-maxTurnHistory);
     });
 
-    // Switch to the other player and increment turn counter
+    // Switch to the other player - locked balls will be updated automatically by useEffect
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
         currentPlayer: currentMatch.currentPlayer === 1 ? 2 : 1,
-        currentTurn: (currentMatch.currentTurn || 1) + 1,
       }
     });
   };
@@ -558,7 +585,6 @@ export default function Game() {
       state: 'active' as const,
     }));
 
-    // Single API call to reset game completely
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
@@ -567,8 +593,12 @@ export default function Game() {
         player2Score: 0,
         isComplete: false,
         winnerId: null,
-        ballStates: initialBallStates,
       }
+    });
+
+    updateBallsMutation.mutate({
+      id: currentMatch.id,
+      ballStates: initialBallStates,
     });
 
     setTurnHistory([]);
@@ -617,40 +647,55 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Ball locking is now handled directly in BallRack component
+    // Clear locked balls immediately, then recalculate after mutations complete
+    setLockedBalls(new Set());
     
-    // Undo events are now handled purely through API state, no localStorage
+    // Force immediate recalculation with the previous state
+    setTimeout(() => {
+      const matchWithPreviousState = {
+        ...currentMatch,
+        ballStates: previousState.ballStates,
+        currentPlayer: previousState.currentPlayer
+      };
+      recalculateLockedBalls(matchWithPreviousState);
+    }, 100);
+    
+    // Log the undo event
+    const undoEvent: MatchEvent = {
+      type: 'turn_ended',
+      timestamp: new Date().toISOString(),
+      player: currentMatch.currentPlayer as 1 | 2,
+      playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+      details: 'Turn undone - reverted to previous state'
+    };
+    localStorageAPI.addMatchEvent(undoEvent);
     
     setUndoInProgress(true);
-    
-    // Generate unique key to force ball component re-rendering
-    const updateKey = Date.now().toString();
-    setForceUpdateKey(updateKey);
 
-    // Single API call for undo operation to prevent flashing
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
         currentPlayer: previousState.currentPlayer,
-        currentTurn: previousState.currentTurn || 1,
         player1Score: previousState.player1Score,
         player2Score: previousState.player2Score,
-        ballStates: previousState.ballStates,
         isComplete: false,
         winnerId: null,
       }
-    }, {
-      onSuccess: () => {
-        // Remove the last state from history
-        setTurnHistory(prev => prev.slice(0, -1));
-        setMatchWinner(null);
-        setShowMatchWin(false);
-        setUndoInProgress(false);
-        
-        // Minimal updates to prevent flashing
-        setForceUpdateKey(Date.now().toString() + "-final");
-      }
     });
+
+    updateBallsMutation.mutate({
+      id: currentMatch.id,
+      ballStates: previousState.ballStates,
+    });
+
+    // Remove the last state from history
+    setTurnHistory(prev => prev.slice(0, -1));
+    setMatchWinner(null);
+    setShowMatchWin(false);
+    
+    setTimeout(() => {
+      setUndoInProgress(false);
+    }, 500);
   };
 
 
@@ -685,8 +730,8 @@ export default function Game() {
       player1Score: currentMatch.player1Score,
       player2Score: currentMatch.player2Score,
       currentPlayer: currentMatch.currentPlayer,
-      currentTurn: currentMatch.currentTurn || 1,
       ballStates: JSON.parse(JSON.stringify(currentBallStates)),
+      previousBallStates: turnHistory.length > 0 ? turnHistory[turnHistory.length - 1].ballStates : currentBallStates
     };
 
     // Add rerack state to turn history
@@ -717,6 +762,7 @@ export default function Game() {
 
     setShowGameWin(false);
     setGameWinner(null);
+    setLockedBalls(new Set());
   };
 
   // Show loading state
@@ -807,14 +853,10 @@ export default function Game() {
 
       {/* Ball Rack */}
       <BallRack 
-        key={ballRackKey}
         ballStates={currentMatch.ballStates as BallInfo[] || []}
         onBallTap={handleBallTap}
-        currentPlayer={currentMatch.currentPlayer as 1 | 2}
-        currentTurn={currentMatch.currentTurn || 1}
+        lockedBalls={lockedBalls}
         turnHistory={turnHistory}
-        undoInProgress={undoInProgress}
-        forceUpdateKey={forceUpdateKey}
       />
 
       {/* Game Actions */}

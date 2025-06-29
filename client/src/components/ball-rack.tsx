@@ -5,11 +5,8 @@ import type { BallInfo } from "@shared/schema";
 interface BallRackProps {
   ballStates: BallInfo[];
   onBallTap: (ballNumber: number) => void;
-  currentPlayer: 1 | 2;
-  currentTurn: number;
-  turnHistory?: any[];
-  undoInProgress?: boolean; // Add undo state to prevent visual glitches
-  forceUpdateKey?: string; // Add key to force component updates
+  lockedBalls?: Set<number>;
+  turnHistory?: any[]; // Turn history to check if 9-ball can be undone
 }
 
 const BALL_COLORS = {
@@ -24,41 +21,9 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap, currentPlayer, currentTurn, turnHistory = [], undoInProgress = false, forceUpdateKey }: BallRackProps) {
-  // IMPROVED TURN-BASED APPROACH: Hide balls from completed innings
-  const shouldHideBall = (ballNumber: number): boolean => {
-    const ball = ballStates.find(b => b.number === ballNumber);
-    
-    if (!ball) return false;
-    
-    // Don't hide any balls during undo operations to show restored states
-    if (undoInProgress) return false;
-    
-    // Hide balls that were scored/dead in previous completed turns
-    // Only hide if the ball's turn is definitively in the past
-    if ((ball.state === 'scored' || ball.state === 'dead') && 
-        ball.turnScored !== undefined && 
-        ball.turnScored < currentTurn) {
-      return true;
-    }
-    
-    return false;
-  };
+export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(), turnHistory = [] }: BallRackProps) {
   const getBallState = (ballNumber: number): BallInfo => {
-    // Create a completely fresh state lookup to prevent stale references
-    const ballStatesCopy = JSON.parse(JSON.stringify(ballStates));
-    const foundBall = ballStatesCopy.find((b: BallInfo) => b.number === ballNumber);
-    
-    if (foundBall) {
-      return {
-        number: foundBall.number,
-        state: foundBall.state,
-        scoredBy: foundBall.scoredBy,
-        turnScored: foundBall.turnScored
-      };
-    }
-    
-    return {
+    return ballStates.find(b => b.number === ballNumber) || {
       number: ballNumber as BallInfo['number'],
       state: 'active' as const,
     };
@@ -82,31 +47,18 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
   };
 
   const renderBallContent = (ballNumber: number, state: BallInfo['state']) => {
-    // FORCE CORRECT STATE: Double-check the current ball state to prevent stale visuals
-    const currentBallState = getBallState(ballNumber);
-    const actualState = currentBallState.state;
-    
-    // Optimistic rendering with direct cache updates prevents flashing
-    
-    // EXPLICIT STATE CHECK: Only show icons for non-active states
-    if (actualState === 'scored') {
+    // Handle scored state - simple green checkmark for all balls
+    if (state === 'scored') {
       return <Check className="h-6 w-6 text-green-600" />;
     }
     
-    if (actualState === 'dead') {
+    // Handle dead state
+    if (state === 'dead') {
       return <X className="h-6 w-6 text-red-500" />;
     }
     
-    // FORCE ACTIVE STATE RENDERING: Explicitly handle active state
-    if (actualState === 'active') {
-      // Continue to ball design rendering below
-    } else {
-      // Fallback: any other state should also render as active
-      console.warn(`Unexpected ball state: ${actualState} for ball ${ballNumber}`);
-    }
-    
     // Only render special ball designs for active balls
-    if (ballNumber === 9 && actualState === 'active') {
+    if (ballNumber === 9 && state === 'active') {
       // CSS-based 9-ball design with gradient effect
       return (
         <div className="relative w-full h-full rounded-full overflow-hidden">
@@ -193,34 +145,22 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
         {Array.from({ length: 9 }, (_, i) => {
           const ballNumber = i + 1;
           const ballState = getBallState(ballNumber);
-          const hidden = shouldHideBall(ballNumber);
-          
-          // Hide balls scored by other player instead of showing them as locked
-          if (hidden) {
-            return (
-              <div
-                key={ballNumber}
-                className="w-16 h-16 opacity-0 pointer-events-none"
-              />
-            );
-          }
-          
-          // Get fresh state for accurate visual rendering
-          const freshBallState = getBallState(ballNumber);
-          const freshState = freshBallState.state;
-          
-          // Single ball state instance - no dual state management
+          const isLocked = lockedBalls.has(ballNumber);
           
           return (
-            <div
-              key={`ball-${ballNumber}-${freshState}-${freshBallState.scoredBy || 'none'}-${freshBallState.turnScored || 0}-${forceUpdateKey || ''}-div`}
-              className={getBallStyles(ballNumber, freshState, false)}
-              onClick={() => onBallTap(ballNumber)}
-              role="button"
-              tabIndex={0}
+            <Button
+              key={ballNumber}
+              className={getBallStyles(ballNumber, ballState.state, isLocked)}
+              onClick={() => !isLocked && onBallTap(ballNumber)}
+              variant="outline"
+              disabled={isLocked}
             >
-              {renderBallContent(ballNumber, freshState)}
-            </div>
+              {isLocked ? (
+                <span className="text-gray-500 font-bold">{ballNumber}</span>
+              ) : (
+                renderBallContent(ballNumber, ballState.state)
+              )}
+            </Button>
           );
         })}
       </div>
