@@ -640,11 +640,20 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // CRITICAL FIX: Disable all ball locking during undo operations
-    // This prevents the gray ball issue when active player changes
-    setLockedBalls(new Set<number>());
+    // Calculate which balls should be locked based on the restored state
+    // Balls are locked if they were scored/dead by the OTHER player (not the current active player)
+    const restoredLockedBalls = new Set<number>();
+    const activePlayer = previousState.currentPlayer;
     
-    console.log('Disabled ball locking during undo operation');
+    previousState.ballStates.forEach(ball => {
+      if ((ball.state === 'scored' || ball.state === 'dead') && 
+          ball.scoredBy && ball.scoredBy !== activePlayer) {
+        restoredLockedBalls.add(ball.number);
+      }
+    });
+    
+    setLockedBalls(restoredLockedBalls);
+    console.log('Restored locked balls based on ball states:', Array.from(restoredLockedBalls));
     
     // Log the undo event
     const undoEvent: MatchEvent = {
@@ -673,10 +682,6 @@ export default function Game() {
       id: currentMatch.id,
       ballStates: previousState.ballStates,
     });
-
-    // Keep locked balls disabled during undo sequences to prevent gray ball issue
-    // Locked balls will be re-enabled only when a new turn starts (handleEndTurn)
-    console.log('Keeping locked balls disabled to prevent multi-turn undo issues');
 
     // Remove the last state from history
     setTurnHistory(prev => prev.slice(0, -1));
