@@ -800,8 +800,9 @@ export default function Game() {
 
     setShowGameWin(false);
     setGameWinner(null);
-    // Locked balls are now calculated dynamically
-    setCurrentInning(1);
+    // Reset player tracking for the new game, but keep inning progression
+    setPlayer1HasPlayed(false);
+    setPlayer2HasPlayed(false);
   };
 
   // Show loading state
