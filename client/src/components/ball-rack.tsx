@@ -26,6 +26,13 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
   const getLockedBalls = (): Set<number> => {
     const locked = new Set<number>();
     ballStates.forEach(ball => {
+      // CRITICAL: Only lock balls that are CURRENTLY scored/dead by the OTHER player
+      // Active balls are NEVER locked, regardless of any scoredBy property
+      if (ball.state === 'active') {
+        // Active balls are never locked
+        return;
+      }
+      
       if ((ball.state === 'scored' || ball.state === 'dead') && 
           ball.scoredBy && ball.scoredBy !== currentPlayer) {
         locked.add(ball.number);
