@@ -153,7 +153,7 @@ export default function Game() {
     queryKey: ["/api/match/current"],
   });
 
-  // Update locked balls whenever current player or ball states change
+  // Update locked balls whenever match data changes
   useEffect(() => {
     if (!currentMatch) return;
     
@@ -170,7 +170,7 @@ export default function Game() {
     });
     
     setLockedBalls(newLockedBalls);
-  }, [currentMatch?.currentPlayer, currentMatch?.ballStates]);
+  }, [currentMatch]);
 
   // Create new match mutation
   const createMatchMutation = useMutation({
