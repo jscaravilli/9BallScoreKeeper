@@ -21,11 +21,28 @@ export class LocalStorageAPI {
 
   getCurrentMatch(): Match | null {
     try {
+      // Safari private browsing mode check
+      if (!this.isLocalStorageAvailable()) {
+        console.warn('LocalStorage not available (Safari private browsing?)');
+        return null;
+      }
+      
       const matchData = localStorage.getItem(STORAGE_KEYS.CURRENT_MATCH);
       return matchData ? JSON.parse(matchData) : null;
     } catch (error) {
       console.error('Error getting current match:', error);
       return null;
+    }
+  }
+
+  private isLocalStorageAvailable(): boolean {
+    try {
+      const test = '__localStorage_test__';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 
