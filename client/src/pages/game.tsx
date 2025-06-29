@@ -129,7 +129,7 @@ export default function Game() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
 
-  const [lockedBalls, setLockedBalls] = useState<Set<number>>(new Set());
+
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
     name: string;
@@ -141,7 +141,7 @@ export default function Game() {
     currentPlayer: number;
     player1Score: number;
     player2Score: number;
-    lockedBalls?: number[]; // Optional for backward compatibility
+
   }[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [undoInProgress, setUndoInProgress] = useState(false);
@@ -165,16 +165,10 @@ export default function Game() {
     return newLockedBalls;
   };
 
-  // Update locked balls whenever match data changes
-  useEffect(() => {
-    if (!currentMatch) return;
-    
-    const ballStates = currentMatch.ballStates as BallInfo[] || [];
-    const activePlayer = currentMatch.currentPlayer;
-    const newLockedBalls = calculateLockedBalls(ballStates, activePlayer);
-    
-    setLockedBalls(newLockedBalls);
-  }, [currentMatch]);
+  // Real-time locked balls calculation - no state persistence needed
+  const currentLockedBalls = currentMatch ? 
+    calculateLockedBalls(currentMatch.ballStates as BallInfo[] || [], currentMatch.currentPlayer) : 
+    new Set<number>();
 
   // Create new match mutation
   const createMatchMutation = useMutation({
@@ -267,7 +261,7 @@ export default function Game() {
             }
           });
           
-          setLockedBalls(newLockedBalls);
+          // Locked balls will be calculated automatically in real-time
           
           // Deduct 2 points from the player who scored it
           const scoringPlayer = lastStateNineBall.scoredBy;
@@ -328,8 +322,8 @@ export default function Game() {
       }
     }
     
-    // Check if ball is locked (pocketed/marked dead in previous turn)
-    if (lockedBalls.has(ballNumber)) {
+    // Check if ball is locked (pocketed/marked dead by other player)
+    if (currentLockedBalls.has(ballNumber)) {
       return; // Don't allow interaction with locked balls
     }
     
@@ -640,9 +634,7 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Update locked balls immediately based on the state we're restoring to
-    const newLockedBalls = calculateLockedBalls(previousState.ballStates, previousState.currentPlayer);
-    setLockedBalls(newLockedBalls);
+    // Locked balls will be recalculated automatically after state restoration
     
     // Log the undo event
     const undoEvent: MatchEvent = {
@@ -746,7 +738,7 @@ export default function Game() {
 
     setShowGameWin(false);
     setGameWinner(null);
-    setLockedBalls(new Set());
+    // Locked balls will be calculated automatically in real-time
   };
 
   // Show loading state
@@ -839,7 +831,7 @@ export default function Game() {
       <BallRack 
         ballStates={currentMatch.ballStates as BallInfo[] || []}
         onBallTap={handleBallTap}
-        lockedBalls={lockedBalls}
+        lockedBalls={currentLockedBalls}
         turnHistory={turnHistory}
       />
 
