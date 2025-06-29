@@ -22,6 +22,31 @@ async function buildStaticOnly() {
     await execAsync('cp -r client/dist/* dist/');
     console.log('✓ Copied to dist directory');
     
+    // Inject deployment timestamp for cache busting
+    const indexPath = 'dist/index.html';
+    let indexContent = await fs.readFile(indexPath, 'utf-8');
+    const deploymentTime = Date.now();
+    
+    // Add cache-busting meta tag and deployment timestamp
+    indexContent = indexContent.replace(
+      '<head>',
+      `<head>
+    <meta name="deployment-time" content="${deploymentTime}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">`
+    );
+    
+    // Inject deployment timestamp as global variable
+    indexContent = indexContent.replace(
+      '<script type="module" src="/src/main.tsx"></script>',
+      `<script>window.DEPLOYMENT_TIME = ${deploymentTime};</script>
+    <script type="module" src="/src/main.tsx?v=${deploymentTime}"></script>`
+    );
+    
+    await fs.writeFile(indexPath, indexContent);
+    console.log(`✓ Injected deployment timestamp: ${deploymentTime}`);
+    
     // Verify index.html is ready
     const stats = await fs.stat('dist/index.html');
     console.log(`✓ index.html ready (${(stats.size / 1024).toFixed(1)}KB)`);

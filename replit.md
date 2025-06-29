@@ -175,10 +175,12 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: Updated deployment to use localStorage-only approach with no backend dependencies
 - June 29, 2025: FIXED dead ball behavior - dead balls remain visible throughout rack but become non-editable after their turn ends
 - June 29, 2025: RESOLVED first turn dead ball locking by preserving scoredBy value for turn completion tracking
-- June 29, 2025: Implemented comprehensive cache management system:
-  - Automatic version checking on app load clears caches when updates are deployed
+- June 29, 2025: Implemented deployment-based cache invalidation system:
+  - Build script injects unique deployment timestamp into production builds
+  - Automatic cache clearing when deployment timestamp changes
+  - Production-grade HTTP cache control headers (no-cache, no-store, must-revalidate)
   - Manual cache clear feature - tap version number 5 times quickly in About dialog
-  - Production-grade cache invalidation with service worker cleanup and forced reloads
+  - Version-specific script loading with cache-busting URL parameters
   - Preserves match data while clearing code caches to fix dead ball locking issues
 
 ## User Preferences
