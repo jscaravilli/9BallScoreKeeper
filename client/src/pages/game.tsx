@@ -123,6 +123,7 @@ export default function Game() {
   const [showControls, setShowControls] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [expandedMatch, setExpandedMatch] = useState<number | null>(null);
   const [gameWinner, setGameWinner] = useState<1 | 2 | null>(null);
   const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
@@ -866,7 +867,7 @@ export default function Game() {
               disabled={turnHistory.length === 0 || undoInProgress}
             >
               <RotateCcw className="h-4 w-4 mr-1" />
-              Undo Last Turn
+              Undo Last Action
             </Button>
             <Button
               onClick={() => setShowNewGameConfirm(true)}
@@ -934,7 +935,7 @@ export default function Game() {
             onClick={handleUndoTurn}
           >
             <History className="h-4 w-4 mr-2" />
-            Undo Last Turn
+            Undo Last Action
           </Button>
         )}
         
@@ -1003,6 +1004,16 @@ export default function Game() {
                 <span className="font-medium">Match History</span>
               </button>
               
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  setShowAbout(true);
+                }}
+                className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                <Info className="h-5 w-5 text-gray-600" />
+                <span className="font-medium">About</span>
+              </button>
 
             </div>
           </div>
@@ -1128,6 +1139,33 @@ export default function Game() {
                 Reset Match
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* About Modal */}
+      <Dialog open={showAbout} onOpenChange={setShowAbout}>
+        <DialogContent className="max-w-sm mx-auto">
+          <div className="text-center space-y-4">
+            <h2 className="text-xl font-bold text-gray-800">About</h2>
+            <div className="space-y-3">
+              <div>
+                <h3 className="font-semibold text-gray-700">Joseph's Unofficial APA 9 Ball Scorekeeper</h3>
+                <p className="text-sm text-gray-600">Version 1.0.0</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">
+                  Developed by Joseph<br />
+                  from IL-West Suburban League
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={() => setShowAbout(false)}
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
+            >
+              Close
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

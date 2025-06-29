@@ -156,6 +156,9 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: Updated reset confirmation dialog to say "Reset Match" and mention innings will be reset
 - June 29, 2025: Fixed complete ball state recording with deep cloning (JSON.parse/stringify) for all scenarios
 - June 29, 2025: Simplified ball visibility to disappear when scoring player's turn ends
+- June 29, 2025: Updated "Undo Last Turn" to "Undo Last Action" throughout interface
+- June 29, 2025: Added About button to hamburger menu with version 1.0.0 and developer credits
+- June 29, 2025: Fixed ball visibility system with turnCompleted tracking to prevent reappearing when players return
 
 ## User Preferences
 
