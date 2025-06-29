@@ -875,6 +875,7 @@ export default function Game() {
         lockedBalls={getLockedBalls()}
         turnHistory={turnHistory}
         currentInning={currentInning}
+        currentPlayer={currentMatch.currentPlayer as 1 | 2}
       />
 
       {/* Game Actions */}

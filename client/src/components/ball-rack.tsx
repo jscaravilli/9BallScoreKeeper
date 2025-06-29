@@ -8,6 +8,7 @@ interface BallRackProps {
   lockedBalls?: Set<number>;
   turnHistory?: any[]; // Turn history to check if 9-ball can be undone
   currentInning: number; // Current inning number for visibility decisions
+  currentPlayer: 1 | 2; // Current player to determine turn-based visibility
 }
 
 const BALL_COLORS = {
@@ -22,7 +23,7 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(), turnHistory = [], currentInning }: BallRackProps) {
+export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(), turnHistory = [], currentInning, currentPlayer }: BallRackProps) {
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
       number: ballNumber as BallInfo['number'],
@@ -137,12 +138,16 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
           const ballState = getBallState(ballNumber);
           const isLocked = lockedBalls.has(ballNumber);
           
-          // Show balls based purely on current state and inning
+          // Show balls based on turn-based visibility
           const isScoredThisInning = ballState.inning === currentInning;
           
-          // Hide balls that were scored/dead in previous innings only
-          if ((ballState.state === 'scored' || ballState.state === 'dead') && 
-              ballState.inning && ballState.inning < currentInning) {
+          // Hide balls that were scored/dead when it's not the scoring player's turn anymore
+          // Ball disappears once the scoring player's turn is over
+          const shouldHideBall = (ballState.state === 'scored' || ballState.state === 'dead') && 
+                                ballState.scoredBy && 
+                                ballState.scoredBy !== currentPlayer;
+          
+          if (shouldHideBall) {
             return (
               <div key={ballNumber} className="w-16 h-16 flex items-center justify-center">
                 {/* Empty space where ball used to be */}

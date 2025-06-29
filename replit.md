@@ -151,6 +151,11 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: Refined ball borders to ultra-thin 0.5px for cleaner appearance
 - June 29, 2025: Implemented turn-based ball visibility system - balls disappear after turn ends, not immediately
 - June 29, 2025: Fixed undo operation visual bugs by synchronizing ball state calculations with immediate updates
+- June 29, 2025: Added inning count display at top next to game indicator ("Game X • Inning Y")
+- June 29, 2025: Fixed inning advancement logic - now only increments when both players complete their turns
+- June 29, 2025: Updated reset confirmation dialog to say "Reset Match" and mention innings will be reset
+- June 29, 2025: Fixed complete ball state recording with deep cloning (JSON.parse/stringify) for all scenarios
+- June 29, 2025: Simplified ball visibility to disappear when scoring player's turn ends
 
 ## User Preferences
 
