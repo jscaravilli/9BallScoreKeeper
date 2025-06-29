@@ -434,18 +434,13 @@ export default function Game() {
         }
       }
 
-      // Update match with new score (not winning yet)
+      // Single API call to update both score and ball states
       updateMatchMutation.mutate({
         id: currentMatch.id,
         updates: {
           [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: newScore,
+          ballStates: ballStates
         }
-      });
-
-      // Update ball states first
-      updateBallsMutation.mutate({
-        id: currentMatch.id,
-        ballStates,
       });
 
       // Check for special 9-ball win (9-ball pocketed during game)
@@ -483,32 +478,34 @@ export default function Game() {
         };
         localStorageAPI.addMatchEvent(ballDeadEvent);
 
+        // Single API call to update both score and ball states for dead ball
         updateMatchMutation.mutate({
           id: currentMatch.id,
           updates: {
             [ball.scoredBy === 1 ? 'player1Score' : 'player2Score']: newScore,
+            ballStates: ballStates
+          }
+        });
+      } else {
+        // Update ball states only for dead ball without score change
+        updateMatchMutation.mutate({
+          id: currentMatch.id,
+          updates: {
+            ballStates: ballStates
           }
         });
       }
-      
-      ball.state = 'dead';
-      ball.scoredBy = currentMatch.currentPlayer as 1 | 2;
-      ball.turnScored = currentMatch.currentTurn || 1;
-      
-      // Update ball states
-      updateBallsMutation.mutate({
-        id: currentMatch.id,
-        ballStates,
-      });
     } else {
       // Third tap - reset to active
       ball.state = 'active';
       ball.scoredBy = undefined;
       
-      // Update ball states
-      updateBallsMutation.mutate({
+      // Single API call to reset ball state
+      updateMatchMutation.mutate({
         id: currentMatch.id,
-        ballStates,
+        updates: {
+          ballStates: ballStates
+        }
       });
     }
   };
@@ -552,6 +549,7 @@ export default function Game() {
       state: 'active' as const,
     }));
 
+    // Single API call to reset game completely
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
@@ -560,12 +558,8 @@ export default function Game() {
         player2Score: 0,
         isComplete: false,
         winnerId: null,
+        ballStates: initialBallStates,
       }
-    });
-
-    updateBallsMutation.mutate({
-      id: currentMatch.id,
-      ballStates: initialBallStates,
     });
 
     setTurnHistory([]);
@@ -624,7 +618,7 @@ export default function Game() {
     const updateKey = Date.now().toString();
     setForceUpdateKey(updateKey);
 
-    // INSTANTANEOUS RESET: Directly update to correct state with force key change
+    // Single API call for undo operation to prevent flashing
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
@@ -644,10 +638,8 @@ export default function Game() {
         setShowMatchWin(false);
         setUndoInProgress(false);
         
-        // COMPLETE COMPONENT RESET: Change BallRack key to force total remount
-        setBallRackKey(Date.now().toString());
+        // Minimal updates to prevent flashing
         setForceUpdateKey(Date.now().toString() + "-final");
-        queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
       }
     });
   };
