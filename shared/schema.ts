@@ -57,14 +57,6 @@ export interface BallInfo {
 export type ApaSkillLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 // Match event tracking for detailed history
-// GameState represents the complete state at any point in time
-export interface GameState {
-  ballStates: BallInfo[];
-  currentPlayer: number;
-  player1Score: number;
-  player2Score: number;
-}
-
 export interface MatchEvent {
   type: 'ball_scored' | 'ball_dead' | 'turn_ended' | 'match_completed';
   timestamp: string;
