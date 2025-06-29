@@ -688,20 +688,57 @@ export default function Game() {
   };
 
   const confirmCacheClear = () => {
-    // Clear browser cache
-    if ('caches' in window) {
-      caches.keys().then(cacheNames => {
-        return Promise.all(
-          cacheNames.map(cacheName => caches.delete(cacheName))
-        );
-      }).then(() => {
-        // Force reload to get fresh content
-        window.location.href = window.location.href;
-      });
-    } else {
-      // Fallback: Force reload with cache bypass
-      window.location.href = window.location.href;
-    }
+    // Force version increment to trigger cache clear
+    localStorage.setItem('force-app-update', 'true');
+    localStorage.setItem('app-version', '1.0.0'); // Reset to force update check
+    
+    // Multi-level cache clearing for production environments
+    const clearAllCaches = async () => {
+      try {
+        // 1. Clear Service Worker caches
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+        }
+        
+        // 2. Clear browser caches (except match data)
+        const keysToKeep = ['currentMatch', 'matches'];
+        const allKeys = Object.keys(localStorage);
+        allKeys.forEach(key => {
+          if (!keysToKeep.includes(key)) {
+            localStorage.removeItem(key);
+          }
+        });
+        sessionStorage.clear();
+        
+        // 3. Unregister service workers
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map(registration => registration.unregister()));
+        }
+        
+        // 4. Clear memory caches and force hard reload
+        if ('performance' in window && 'clearResourceTimings' in performance) {
+          performance.clearResourceTimings();
+        }
+        
+        // 5. Use multiple cache-busting techniques
+        const cacheBuster = Date.now() + Math.random().toString(36).substr(2, 9);
+        const url = new URL(window.location.href);
+        url.searchParams.set('v', cacheBuster);
+        url.searchParams.set('_cb', Date.now().toString());
+        url.searchParams.set('nocache', 'true');
+        
+        // Force hard reload
+        window.location.replace(url.toString());
+      } catch (error) {
+        console.log('Cache clear error:', error);
+        // Ultimate fallback
+        window.location.replace(window.location.origin + '?force=' + Date.now());
+      }
+    };
+    
+    clearAllCaches();
     setShowCacheClearConfirm(false);
   };
 
@@ -1193,7 +1230,7 @@ export default function Game() {
                   onClick={handleVersionTap}
                   title="Tap 5 times quickly to clear app cache"
                 >
-                  Version 1.0.0 {tapCount > 0 && `(${tapCount}/5)`}
+                  Version 1.0.2 {tapCount > 0 && `(${tapCount}/5)`}
                 </p>
               </div>
               <div>
@@ -1217,9 +1254,9 @@ export default function Game() {
       <Dialog open={showCacheClearConfirm} onOpenChange={setShowCacheClearConfirm}>
         <DialogContent className="max-w-sm mx-auto">
           <div className="text-center">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Clear App Cache?</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Force App Refresh?</h2>
             <p className="text-gray-600 mb-6">
-              This will clear the app cache and reload to get the latest updates. Your current match data will be preserved.
+              This will clear all app caches, unregister service workers, and force a complete reload to get the latest updates. Your current match data will be preserved in localStorage.
             </p>
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" onClick={() => setShowCacheClearConfirm(false)}>
