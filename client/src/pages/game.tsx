@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { clientQueryFunctions, clientMutation, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -153,13 +153,11 @@ export default function Game() {
     queryKey: ["/api/match/current"],
   });
 
-  // Update locked balls whenever match data changes
-  useEffect(() => {
-    if (!currentMatch) return;
-    
+  // Force locked ball recalculation function
+  const recalculateLockedBalls = useCallback((match: Match) => {
     const newLockedBalls = new Set<number>();
-    const ballStates = currentMatch.ballStates as BallInfo[] || [];
-    const activePlayer = currentMatch.currentPlayer;
+    const ballStates = match.ballStates as BallInfo[] || [];
+    const activePlayer = match.currentPlayer;
     
     // Lock balls that were scored/dead by the OTHER player
     ballStates.forEach(ball => {
@@ -170,7 +168,13 @@ export default function Game() {
     });
     
     setLockedBalls(newLockedBalls);
-  }, [currentMatch]);
+  }, []);
+
+  // Update locked balls whenever match data changes
+  useEffect(() => {
+    if (!currentMatch) return;
+    recalculateLockedBalls(currentMatch);
+  }, [currentMatch, currentMatch?.currentPlayer, currentMatch?.ballStates, recalculateLockedBalls]);
 
   // Create new match mutation
   const createMatchMutation = useMutation({
@@ -199,6 +203,13 @@ export default function Game() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
+      // Force immediate locked ball recalculation after ball state update
+      setTimeout(() => {
+        const updatedMatch = queryClient.getQueryData<Match | null>(["/api/match/current"]);
+        if (updatedMatch) {
+          recalculateLockedBalls(updatedMatch);
+        }
+      }, 50);
     },
   });
 
@@ -636,27 +647,18 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Clear locked balls immediately, then recalculate after state update
+    // Clear locked balls immediately, then recalculate after mutations complete
     setLockedBalls(new Set());
     
-    // Force immediate locked ball recalculation after the mutations complete
-    const recalculateAfterUndo = () => {
-      const newLockedBalls = new Set<number>();
-      const ballStates = previousState.ballStates;
-      const activePlayer = previousState.currentPlayer;
-      
-      ballStates.forEach(ball => {
-        if ((ball.state === 'scored' || ball.state === 'dead') && 
-            ball.scoredBy && ball.scoredBy !== activePlayer) {
-          newLockedBalls.add(ball.number);
-        }
-      });
-      
-      setLockedBalls(newLockedBalls);
-    };
-    
-    // Delay recalculation to ensure all mutations have completed
-    setTimeout(recalculateAfterUndo, 200);
+    // Force immediate recalculation with the previous state
+    setTimeout(() => {
+      const matchWithPreviousState = {
+        ...currentMatch,
+        ballStates: previousState.ballStates,
+        currentPlayer: previousState.currentPlayer
+      };
+      recalculateLockedBalls(matchWithPreviousState);
+    }, 100);
     
     // Log the undo event
     const undoEvent: MatchEvent = {
