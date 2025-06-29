@@ -22,7 +22,7 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [] }: BallRackProps) {
+export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [], undoInProgress = false }: BallRackProps) {
   // COMPLETELY REWRITTEN: Zero-tolerance ball locking with active state override
   const isActiveBall = (ballNumber: number): boolean => {
     const ball = ballStates.find(b => b.number === ballNumber);
@@ -30,6 +30,11 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
   };
   
   const isLockedBall = (ballNumber: number): boolean => {
+    // RULE 0: During undo operations, NO balls are locked to prevent visual glitches
+    if (undoInProgress) {
+      return false;
+    }
+    
     const ball = ballStates.find(b => b.number === ballNumber);
     
     // RULE 1: Active balls are NEVER locked, period
