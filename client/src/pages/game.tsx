@@ -678,11 +678,11 @@ export default function Game() {
       setTapCount(0);
       setTapTimer(null);
     } else {
-      // Reset counter after 1 second of inactivity
+      // Reset counter after 2.5 seconds of inactivity
       const timer = setTimeout(() => {
         setTapCount(0);
         setTapTimer(null);
-      }, 1000);
+      }, 2500);
       setTapTimer(timer);
     }
   };
