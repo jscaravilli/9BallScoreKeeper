@@ -12,15 +12,21 @@ async function buildStaticOnly() {
     await fs.rm('dist', { recursive: true, force: true });
     console.log('✓ Cleaned dist directory');
     
-    // Build frontend (Vite outputs to client/dist)
+    // Build frontend (Vite outputs to dist/public due to config)
     console.log('Building frontend...');
     await execAsync('vite build');
-    console.log('✓ Built frontend');
+    console.log('✓ Built frontend to dist/public');
     
-    // Copy from client/dist to root dist for static deployment
-    await fs.mkdir('dist', { recursive: true });
-    await execAsync('cp -r client/dist/* dist/');
-    console.log('✓ Copied to dist directory');
+    // Move files from dist/public to dist root for static deployment
+    try {
+      await fs.access('dist/public');
+      await execAsync('mv dist/public/* dist/ && rmdir dist/public');
+      console.log('✓ Moved files from dist/public to dist root');
+    } catch (error) {
+      // Fallback: try copying if move fails
+      await execAsync('cp -r dist/public/* dist/ && rm -rf dist/public');
+      console.log('✓ Copied files from dist/public to dist root');
+    }
     
     // Inject deployment timestamp for cache busting
     const indexPath = 'dist/index.html';

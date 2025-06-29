@@ -182,6 +182,12 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Manual cache clear feature - tap version number 5 times quickly in About dialog
   - Version-specific script loading with cache-busting URL parameters
   - Preserves match data while clearing code caches to fix dead ball locking issues
+- June 29, 2025: FIXED static deployment build process - resolved "index.html not found" error:
+  - Updated build-static-only.js to properly move files from dist/public to dist root
+  - Build script now handles Vite's output structure correctly for static hosting
+  - Added fallback file copying mechanism for reliability
+  - Verified deployment timestamp injection and cache-busting still work
+  - Static deployment now works correctly with "dist" as public directory
 
 ## User Preferences
 
