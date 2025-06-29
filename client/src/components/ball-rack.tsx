@@ -147,7 +147,7 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
 
   return (
     <section className="p-4">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">Ball Rack</h2>
+      <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">Rack</h2>
       
       {/* Balls Grid */}
       <div className="grid grid-cols-3 gap-4 justify-items-center max-w-xs mx-auto">
