@@ -214,17 +214,17 @@ export default function Game() {
   const handleBallTap = (ballNumber: number) => {
     if (!currentMatch || isProcessing || currentMatch.isComplete || matchWinner) return;
     
-    // Special handling for 9-ball undo - handle both scored 9-ball and rerack events
+    // Special handling for 9-ball undo - ONLY when 9-ball is already scored
     if (ballNumber === 9 && turnHistory.length > 0) {
       const currentNineBall = (currentMatch.ballStates as BallInfo[]).find((b: BallInfo) => b.number === 9);
-      const lastState = turnHistory[turnHistory.length - 1];
-      const lastStateNineBall = lastState.ballStates.find((b: BallInfo) => b.number === 9);
       
-      // Check if this is a rerack undo (all balls are active, but previous state had 9-ball scored)
-      const isRerackUndo = currentNineBall?.state === 'active' && lastStateNineBall?.state === 'scored';
-      
-      // If 9-ball is currently scored OR this is a rerack undo, handle accordingly
-      if (currentNineBall?.state === 'scored' || isRerackUndo) {
+      // Only handle undo if 9-ball is currently scored (not active)
+      if (currentNineBall?.state === 'scored') {
+        const lastState = turnHistory[turnHistory.length - 1];
+        const lastStateNineBall = lastState.ballStates.find((b: BallInfo) => b.number === 9);
+        
+        // Check if this is a rerack undo (current 9-ball scored, but previous state had 9-ball scored too)
+        const isRerackUndo = lastStateNineBall?.state === 'scored';
         if (isRerackUndo) {
           // For rerack undo: mark 9-ball as scored and deduct 2 points
           const ballStates = [...(currentMatch.ballStates as BallInfo[])];
