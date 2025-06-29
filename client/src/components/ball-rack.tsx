@@ -5,9 +5,8 @@ import type { BallInfo } from "@shared/schema";
 interface BallRackProps {
   ballStates: BallInfo[];
   onBallTap: (ballNumber: number) => void;
-  currentPlayer: 1 | 2;
-  turnHistory?: any[];
-  undoInProgress?: boolean; // Add undo state to prevent visual glitches
+  lockedBalls?: Set<number>;
+  turnHistory?: any[]; // Turn history to check if 9-ball can be undone
 }
 
 const BALL_COLORS = {
@@ -22,41 +21,7 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [], undoInProgress = false }: BallRackProps) {
-  // Show balls based on current turn context - only balls scored in THIS turn should be visible
-  const shouldShowBall = (ballNumber: number): boolean => {
-    const ball = ballStates.find(b => b.number === ballNumber);
-    
-    if (!ball) return true; // Show if no ball data found
-    
-    // Show active balls always
-    if (ball.state === 'active') return true;
-    
-    // For scored/dead balls, only show them if they were scored in the current turn
-    if (ball.state === 'scored' || ball.state === 'dead') {
-      // If no turn history, this must be the first turn, so show all balls scored by current player
-      if (turnHistory.length === 0) {
-        console.log(`Ball ${ballNumber}: No history, showing for current player ${currentPlayer}, scoredBy: ${ball.scoredBy}`);
-        return ball.scoredBy === currentPlayer;
-      }
-      
-      // Get the most recent previous state to compare
-      const previousState = turnHistory[turnHistory.length - 1];
-      const previousBall = previousState.ballStates?.find((b: any) => b.number === ballNumber);
-      
-      // Ball is visible if it was active in the previous state but is now scored/dead by current player
-      const wasActiveBefore = !previousBall || previousBall.state === 'active';
-      const isScoredByCurrentPlayer = ball.scoredBy === currentPlayer;
-      const shouldShow = wasActiveBefore && isScoredByCurrentPlayer;
-      
-      console.log(`Ball ${ballNumber}: currentPlayer=${currentPlayer}, ball.scoredBy=${ball.scoredBy}, wasActiveBefore=${wasActiveBefore}, shouldShow=${shouldShow}`);
-      console.log(`  Previous ball state:`, previousBall);
-      
-      return shouldShow;
-    }
-    
-    return false;
-  };
+export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(), turnHistory = [] }: BallRackProps) {
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
       number: ballNumber as BallInfo['number'],
@@ -180,26 +145,21 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
         {Array.from({ length: 9 }, (_, i) => {
           const ballNumber = i + 1;
           const ballState = getBallState(ballNumber);
-          const visible = shouldShowBall(ballNumber);
-          
-          // Hide balls that are scored/dead instead of showing them as locked
-          if (!visible) {
-            return (
-              <div
-                key={ballNumber}
-                className="w-16 h-16 opacity-0 pointer-events-none"
-              />
-            );
-          }
+          const isLocked = lockedBalls.has(ballNumber);
           
           return (
             <Button
               key={ballNumber}
-              className={getBallStyles(ballNumber, ballState.state, false)}
-              onClick={() => onBallTap(ballNumber)}
+              className={getBallStyles(ballNumber, ballState.state, isLocked)}
+              onClick={() => !isLocked && onBallTap(ballNumber)}
               variant="outline"
+              disabled={isLocked}
             >
-              {renderBallContent(ballNumber, ballState.state)}
+              {isLocked ? (
+                <span className="text-gray-500 font-bold">{ballNumber}</span>
+              ) : (
+                renderBallContent(ballNumber, ballState.state)
+              )}
             </Button>
           );
         })}

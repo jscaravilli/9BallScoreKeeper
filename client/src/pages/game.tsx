@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { clientQueryFunctions, clientMutation, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -129,7 +129,7 @@ export default function Game() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
 
-
+  const [lockedBalls, setLockedBalls] = useState<Set<number>>(new Set());
   const [matchWinner, setMatchWinner] = useState<{
     player: 1 | 2;
     name: string;
@@ -153,7 +153,24 @@ export default function Game() {
     queryKey: ["/api/match/current"],
   });
 
-
+  // Update locked balls whenever match data changes
+  useEffect(() => {
+    if (!currentMatch) return;
+    
+    const newLockedBalls = new Set<number>();
+    const ballStates = currentMatch.ballStates as BallInfo[] || [];
+    const activePlayer = currentMatch.currentPlayer;
+    
+    // Lock balls that were scored/dead by the OTHER player
+    ballStates.forEach(ball => {
+      if ((ball.state === 'scored' || ball.state === 'dead') && 
+          ball.scoredBy && ball.scoredBy !== activePlayer) {
+        newLockedBalls.add(ball.number);
+      }
+    });
+    
+    setLockedBalls(newLockedBalls);
+  }, [currentMatch]);
 
   // Create new match mutation
   const createMatchMutation = useMutation({
@@ -182,7 +199,6 @@ export default function Game() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
-
     },
   });
 
@@ -235,7 +251,19 @@ export default function Game() {
           const nineBallIndex = ballStates.findIndex(b => b.number === 9);
           ballStates[nineBallIndex] = { number: 9, state: 'scored', scoredBy: lastStateNineBall.scoredBy };
           
-          // Ball locking handled in BallRack component
+          // Restore locked balls from before the rerack
+          // Find balls that were scored/dead by non-current players in the previous state
+          const newLockedBalls = new Set<number>();
+          const currentPlayer = currentMatch.currentPlayer;
+          
+          lastState.ballStates.forEach(ball => {
+            if ((ball.state === 'scored' || ball.state === 'dead') && 
+                ball.scoredBy && ball.scoredBy !== currentPlayer) {
+              newLockedBalls.add(ball.number);
+            }
+          });
+          
+          setLockedBalls(newLockedBalls);
           
           // Deduct 2 points from the player who scored it
           const scoringPlayer = lastStateNineBall.scoredBy;
@@ -297,7 +325,9 @@ export default function Game() {
     }
     
     // Check if ball is locked (pocketed/marked dead in previous turn)
-    // Ball locking is now handled in BallRack component
+    if (lockedBalls.has(ballNumber)) {
+      return; // Don't allow interaction with locked balls
+    }
     
     setIsProcessing(true);
     
@@ -606,7 +636,27 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Ball locking is now handled directly in BallRack component
+    // Clear locked balls immediately, then recalculate after state update
+    setLockedBalls(new Set());
+    
+    // Force immediate locked ball recalculation after the mutations complete
+    const recalculateAfterUndo = () => {
+      const newLockedBalls = new Set<number>();
+      const ballStates = previousState.ballStates;
+      const activePlayer = previousState.currentPlayer;
+      
+      ballStates.forEach(ball => {
+        if ((ball.state === 'scored' || ball.state === 'dead') && 
+            ball.scoredBy && ball.scoredBy !== activePlayer) {
+          newLockedBalls.add(ball.number);
+        }
+      });
+      
+      setLockedBalls(newLockedBalls);
+    };
+    
+    // Delay recalculation to ensure all mutations have completed
+    setTimeout(recalculateAfterUndo, 200);
     
     // Log the undo event
     const undoEvent: MatchEvent = {
@@ -620,36 +670,30 @@ export default function Game() {
     
     setUndoInProgress(true);
 
-    // Clean up ball states - remove scoredBy for active balls to prevent locking confusion
-    const cleanedBallStates = previousState.ballStates.map(ball => ({
-      ...ball,
-      // Clear scoredBy for active balls to eliminate any historical locking issues
-      scoredBy: ball.state === 'active' ? undefined : ball.scoredBy
-    }));
-
-    // Force immediate state update by triggering React Query refetch
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
         currentPlayer: previousState.currentPlayer,
         player1Score: previousState.player1Score,
         player2Score: previousState.player2Score,
-        ballStates: cleanedBallStates,
         isComplete: false,
         winnerId: null,
       }
-    }, {
-      onSuccess: () => {
-        // Remove the last state from history
-        setTurnHistory(prev => prev.slice(0, -1));
-        setMatchWinner(null);
-        setShowMatchWin(false);
-        setUndoInProgress(false);
-        
-        // Trigger component re-render
-        queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
-      }
     });
+
+    updateBallsMutation.mutate({
+      id: currentMatch.id,
+      ballStates: previousState.ballStates,
+    });
+
+    // Remove the last state from history
+    setTurnHistory(prev => prev.slice(0, -1));
+    setMatchWinner(null);
+    setShowMatchWin(false);
+    
+    setTimeout(() => {
+      setUndoInProgress(false);
+    }, 500);
   };
 
 
@@ -716,6 +760,7 @@ export default function Game() {
 
     setShowGameWin(false);
     setGameWinner(null);
+    setLockedBalls(new Set());
   };
 
   // Show loading state
@@ -808,9 +853,8 @@ export default function Game() {
       <BallRack 
         ballStates={currentMatch.ballStates as BallInfo[] || []}
         onBallTap={handleBallTap}
-        currentPlayer={currentMatch.currentPlayer as 1 | 2}
+        lockedBalls={lockedBalls}
         turnHistory={turnHistory}
-        undoInProgress={undoInProgress}
       />
 
       {/* Game Actions */}
