@@ -631,9 +631,16 @@ export default function Game() {
       }
     });
 
+    // Clean up ball states - remove scoredBy for active balls to prevent locking confusion
+    const cleanedBallStates = previousState.ballStates.map(ball => ({
+      ...ball,
+      // Clear scoredBy for active balls to eliminate any historical locking issues
+      scoredBy: ball.state === 'active' ? undefined : ball.scoredBy
+    }));
+
     updateBallsMutation.mutate({
       id: currentMatch.id,
-      ballStates: previousState.ballStates,
+      ballStates: cleanedBallStates,
     });
 
     // Remove the last state from history

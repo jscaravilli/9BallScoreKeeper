@@ -22,22 +22,20 @@ const BALL_COLORS = {
 };
 
 export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [] }: BallRackProps) {
-  // Calculate locked balls directly from current game state
+  // Calculate locked balls with ZERO tolerance for active ball locking
   const getLockedBalls = (): Set<number> => {
     const locked = new Set<number>();
     
     ballStates.forEach(ball => {
-      // CRITICAL: Only lock balls that are CURRENTLY scored/dead by the OTHER player
-      // Active balls are NEVER locked, regardless of any scoredBy property
-      if (ball.state === 'active') {
-        // Active balls are never locked
-        return;
+      // ABSOLUTE RULE: Only balls that are CURRENTLY scored or dead can EVER be locked
+      // This completely eliminates any possibility of active balls appearing locked
+      if (ball.state === 'scored' || ball.state === 'dead') {
+        // Only lock if scored/dead by the OTHER player
+        if (ball.scoredBy && ball.scoredBy !== currentPlayer) {
+          locked.add(ball.number);
+        }
       }
-      
-      if ((ball.state === 'scored' || ball.state === 'dead') && 
-          ball.scoredBy && ball.scoredBy !== currentPlayer) {
-        locked.add(ball.number);
-      }
+      // Active balls are COMPLETELY IGNORED - they can never be locked under any circumstances
     });
     
     return locked;
