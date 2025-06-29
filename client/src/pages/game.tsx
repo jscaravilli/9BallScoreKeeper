@@ -141,6 +141,7 @@ export default function Game() {
     currentPlayer: number;
     player1Score: number;
     player2Score: number;
+    lockedBalls?: number[]; // Optional for backward compatibility
   }[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [undoInProgress, setUndoInProgress] = useState(false);
@@ -331,6 +332,7 @@ export default function Game() {
         currentPlayer: currentMatch.currentPlayer,
         player1Score: currentMatch.player1Score,
         player2Score: currentMatch.player2Score,
+        lockedBalls: Array.from(lockedBalls), // Save current locked balls
       };
       
       // Add to turn history, keeping only the last maxTurnHistory turns
@@ -536,12 +538,13 @@ export default function Game() {
     modifiedBalls.forEach(ballNum => newLockedBalls.add(ballNum));
     setLockedBalls(newLockedBalls);
 
-    // Save current state before switching turns
+    // Save current state before switching turns (including locked balls state)
     const currentState = {
       ballStates: currentMatch.ballStates as BallInfo[] || [],
       currentPlayer: currentMatch.currentPlayer,
       player1Score: currentMatch.player1Score,
       player2Score: currentMatch.player2Score,
+      lockedBalls: Array.from(lockedBalls), // Save current locked balls
     };
     
     setTurnHistory(prev => {
@@ -632,22 +635,12 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Completely rebuild the locked balls set based on the previous state
-    // This ensures proper locking after rerack undos
-    const newLockedBalls = new Set<number>();
-    const targetPlayer = previousState.currentPlayer; // Player who will be active after undo
+    // Restore the historical locked balls state from when this turn was originally played
+    // This prevents balls from incorrectly becoming gray during multi-turn undos
+    const historicalLockedBalls = new Set<number>((previousState as any).lockedBalls || []);
+    setLockedBalls(historicalLockedBalls);
     
-    // Lock balls that were scored/dead by the OTHER player in the previous state
-    previousState.ballStates.forEach(ball => {
-      if ((ball.state === 'scored' || ball.state === 'dead') && 
-          ball.scoredBy && ball.scoredBy !== targetPlayer) {
-        newLockedBalls.add(ball.number);
-      }
-    });
-    
-    setLockedBalls(newLockedBalls);
-    
-    console.log('Restored locked balls:', Array.from(newLockedBalls));
+    console.log('Restored locked balls:', Array.from(historicalLockedBalls));
     
     // Log the undo event
     const undoEvent: MatchEvent = {
