@@ -633,7 +633,7 @@ export default function Game() {
     const updateKey = Date.now().toString();
     setForceUpdateKey(updateKey);
 
-    // Use exact previous state without modification to avoid state corruption
+    // ATOMIC UPDATE: Combine match and ball state updates to prevent race conditions
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
@@ -641,15 +641,10 @@ export default function Game() {
         currentTurn: previousState.currentTurn || 1,
         player1Score: previousState.player1Score,
         player2Score: previousState.player2Score,
+        ballStates: previousState.ballStates, // Include ball states in single update
         isComplete: false,
         winnerId: null,
       }
-    });
-
-    // Update ball states separately to ensure clean restoration
-    updateBallsMutation.mutate({
-      id: currentMatch.id,
-      ballStates: previousState.ballStates,
     }, {
       onSuccess: () => {
         // Remove the last state from history
