@@ -96,14 +96,21 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
       });
     }
     
-    // Handle scored state - simple green checkmark for all balls
+    // EXPLICIT STATE CHECK: Only show icons for non-active states
     if (actualState === 'scored') {
       return <Check className="h-6 w-6 text-green-600" />;
     }
     
-    // Handle dead state
     if (actualState === 'dead') {
       return <X className="h-6 w-6 text-red-500" />;
+    }
+    
+    // FORCE ACTIVE STATE RENDERING: Explicitly handle active state
+    if (actualState === 'active') {
+      // Continue to ball design rendering below
+    } else {
+      // Fallback: any other state should also render as active
+      console.warn(`Unexpected ball state: ${actualState} for ball ${ballNumber}`);
     }
     
     // Only render special ball designs for active balls
@@ -221,14 +228,15 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
           }
           
           return (
-            <Button
-              key={`ball-${ballNumber}-${freshState}-${freshBallState.scoredBy || 'none'}-${freshBallState.turnScored || 0}-${forceUpdateKey || ''}`}
+            <div
+              key={`ball-${ballNumber}-${freshState}-${freshBallState.scoredBy || 'none'}-${freshBallState.turnScored || 0}-${forceUpdateKey || ''}-div`}
               className={getBallStyles(ballNumber, freshState, false)}
               onClick={() => onBallTap(ballNumber)}
-              variant="outline"
+              role="button"
+              tabIndex={0}
             >
               {renderBallContent(ballNumber, freshState)}
-            </Button>
+            </div>
           );
         })}
       </div>
