@@ -633,46 +633,31 @@ export default function Game() {
     const updateKey = Date.now().toString();
     setForceUpdateKey(updateKey);
 
-    // RESET APPROACH: Clear ball states first, then restore to force complete re-render
-    const emptyBallStates = Array.from({ length: 9 }, (_, i) => ({
-      number: (i + 1) as BallInfo['number'],
-      state: 'active' as BallState
-    }));
-
-    // Step 1: Clear all ball states
+    // INSTANTANEOUS RESET: Directly update to correct state with force key change
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
-        ballStates: emptyBallStates,
+        currentPlayer: previousState.currentPlayer,
+        currentTurn: previousState.currentTurn || 1,
+        player1Score: previousState.player1Score,
+        player2Score: previousState.player2Score,
+        ballStates: previousState.ballStates,
+        isComplete: false,
+        winnerId: null,
       }
     }, {
       onSuccess: () => {
-        // Step 2: Immediately restore to the correct previous state
-        setTimeout(() => {
-          updateMatchMutation.mutate({
-            id: currentMatch.id,
-            updates: {
-              currentPlayer: previousState.currentPlayer,
-              currentTurn: previousState.currentTurn || 1,
-              player1Score: previousState.player1Score,
-              player2Score: previousState.player2Score,
-              ballStates: previousState.ballStates,
-              isComplete: false,
-              winnerId: null,
-            }
-          }, {
-            onSuccess: () => {
-              // Remove the last state from history
-              setTurnHistory(prev => prev.slice(0, -1));
-              setMatchWinner(null);
-              setShowMatchWin(false);
-              setUndoInProgress(false);
-              
-              // Trigger component re-render
-              queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
-            }
-          });
-        }, 100); // Small delay to ensure complete reset
+        // Remove the last state from history
+        setTurnHistory(prev => prev.slice(0, -1));
+        setMatchWinner(null);
+        setShowMatchWin(false);
+        setUndoInProgress(false);
+        
+        // Force a complete component re-render by updating the key again
+        setForceUpdateKey(Date.now().toString() + "-final");
+        
+        // Trigger component re-render
+        queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
       }
     });
   };
