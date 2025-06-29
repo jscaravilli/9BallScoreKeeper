@@ -971,14 +971,8 @@ export default function Game() {
       <Dialog open={showMenu} onOpenChange={setShowMenu}>
         <DialogContent className="max-w-sm mx-auto">
           <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4">
               <h2 className="text-xl font-bold text-gray-800">Menu</h2>
-              <button 
-                onClick={() => setShowMenu(false)}
-                className="p-1 hover:bg-gray-100 rounded"
-              >
-                <X className="h-5 w-5 text-gray-500" />
-              </button>
             </div>
             
             <div className="space-y-3">
@@ -1068,26 +1062,18 @@ export default function Game() {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-800">Match History</h2>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => {
-                    if (confirm('Clear all match history? This cannot be undone.')) {
-                      localStorageAPI.clearHistory();
-                      setShowHistory(false);
-                    }
-                  }}
-                  className="p-1 hover:bg-red-100 rounded text-red-600"
-                  title="Clear History"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-                <button 
-                  onClick={() => setShowHistory(false)}
-                  className="p-1 hover:bg-gray-100 rounded"
-                >
-                  <X className="h-5 w-5 text-gray-500" />
-                </button>
-              </div>
+              <button 
+                onClick={() => {
+                  if (confirm('Clear all match history? This cannot be undone.')) {
+                    localStorageAPI.clearHistory();
+                    setShowHistory(false);
+                  }
+                }}
+                className="p-1 hover:bg-red-100 rounded text-red-600"
+                title="Clear History"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
             
             <HistoryDisplay 
