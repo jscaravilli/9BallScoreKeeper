@@ -23,7 +23,7 @@ const BALL_COLORS = {
 };
 
 export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [], undoInProgress = false }: BallRackProps) {
-  // FINAL APPROACH: Show balls based on current inning context
+  // Show balls based on current turn context - only balls scored in THIS turn should be visible
   const shouldShowBall = (ballNumber: number): boolean => {
     const ball = ballStates.find(b => b.number === ballNumber);
     
@@ -32,9 +32,22 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
     // Show active balls always
     if (ball.state === 'active') return true;
     
-    // For scored/dead balls, show them only if scored by current player in this inning
+    // For scored/dead balls, only show them if they were scored in the current turn
     if (ball.state === 'scored' || ball.state === 'dead') {
-      return ball.scoredBy === currentPlayer;
+      // If no turn history, this must be the first turn, so show all balls scored by current player
+      if (turnHistory.length === 0) {
+        return ball.scoredBy === currentPlayer;
+      }
+      
+      // Get the most recent previous state to compare
+      const previousState = turnHistory[turnHistory.length - 1];
+      const previousBall = previousState.ballStates?.find((b: any) => b.number === ballNumber);
+      
+      // Ball is visible if it was active in the previous state but is now scored/dead by current player
+      const wasActiveBefore = !previousBall || previousBall.state === 'active';
+      const isScoredByCurrentPlayer = ball.scoredBy === currentPlayer;
+      
+      return wasActiveBefore && isScoredByCurrentPlayer;
     }
     
     return false;
