@@ -174,7 +174,7 @@ export default function Game() {
   useEffect(() => {
     if (!currentMatch) return;
     recalculateLockedBalls(currentMatch);
-  }, [currentMatch, currentMatch?.currentPlayer, currentMatch?.ballStates, recalculateLockedBalls]);
+  }, [currentMatch, recalculateLockedBalls]);
 
   // Create new match mutation
   const createMatchMutation = useMutation({
@@ -647,18 +647,13 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Clear locked balls immediately, then recalculate after mutations complete
-    setLockedBalls(new Set());
-    
-    // Force immediate recalculation with the previous state
-    setTimeout(() => {
-      const matchWithPreviousState = {
-        ...currentMatch,
-        ballStates: previousState.ballStates,
-        currentPlayer: previousState.currentPlayer
-      };
-      recalculateLockedBalls(matchWithPreviousState);
-    }, 100);
+    // Immediately calculate locked balls based on the previous state we're restoring to
+    const tempMatch = {
+      ...currentMatch,
+      ballStates: previousState.ballStates,
+      currentPlayer: previousState.currentPlayer
+    };
+    recalculateLockedBalls(tempMatch);
     
     // Log the undo event
     const undoEvent: MatchEvent = {
@@ -686,6 +681,16 @@ export default function Game() {
     updateBallsMutation.mutate({
       id: currentMatch.id,
       ballStates: previousState.ballStates,
+    }, {
+      onSuccess: () => {
+        // Force immediate locked ball recalculation with previous state
+        const tempMatch = {
+          ...currentMatch,
+          ballStates: previousState.ballStates,
+          currentPlayer: previousState.currentPlayer
+        };
+        recalculateLockedBalls(tempMatch);
+      }
     });
 
     // Remove the last state from history
