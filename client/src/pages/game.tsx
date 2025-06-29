@@ -153,13 +153,14 @@ export default function Game() {
     queryKey: ["/api/match/current"],
   });
 
-  // Update locked balls whenever current player or ball states change
-  useEffect(() => {
-    if (!currentMatch) return;
+  // Function to recalculate locked balls
+  const recalculateLockedBalls = (match?: Match | null) => {
+    const targetMatch = match || currentMatch;
+    if (!targetMatch) return;
     
     const newLockedBalls = new Set<number>();
-    const ballStates = currentMatch.ballStates as BallInfo[] || [];
-    const activePlayer = currentMatch.currentPlayer;
+    const ballStates = targetMatch.ballStates as BallInfo[] || [];
+    const activePlayer = targetMatch.currentPlayer;
     
     // Lock balls that were scored/dead by the OTHER player
     ballStates.forEach(ball => {
@@ -170,7 +171,12 @@ export default function Game() {
     });
     
     setLockedBalls(newLockedBalls);
-  }, [currentMatch?.currentPlayer, currentMatch?.ballStates]);
+  };
+
+  // Update locked balls whenever match data changes
+  useEffect(() => {
+    recalculateLockedBalls();
+  }, [currentMatch]);
 
   // Create new match mutation
   const createMatchMutation = useMutation({
@@ -197,8 +203,10 @@ export default function Game() {
     mutationFn: async ({ id, ballStates }: { id: number; ballStates: BallInfo[] }) => {
       return clientMutation(() => clientQueryFunctions.updateBallStates(id, ballStates));
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
+      // Force recalculation of locked balls after state change
+      setTimeout(() => recalculateLockedBalls(), 50);
     },
   });
 
@@ -636,7 +644,7 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Locked balls will be updated after the match state is restored via updateLockedBalls effect
+    // Locked balls will be recalculated automatically after match state updates
     
     // Log the undo event
     const undoEvent: MatchEvent = {
