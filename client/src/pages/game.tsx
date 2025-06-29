@@ -640,11 +640,11 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // CRITICAL FIX: Clear locked balls FIRST to prevent flicker
-    // During undo, we temporarily clear all locks, then recalculate after state is restored
+    // CRITICAL FIX: Disable all ball locking during undo operations
+    // This prevents the gray ball issue when active player changes
     setLockedBalls(new Set<number>());
     
-    console.log('Cleared locked balls to prevent flicker during undo');
+    console.log('Disabled ball locking during undo operation');
     
     // Log the undo event
     const undoEvent: MatchEvent = {
@@ -674,21 +674,9 @@ export default function Game() {
       ballStates: previousState.ballStates,
     });
 
-    // Recalculate locked balls after state updates complete
-    setTimeout(() => {
-      const finalLockedBalls = new Set<number>();
-      const activePlayer = previousState.currentPlayer;
-      
-      previousState.ballStates.forEach(ball => {
-        if ((ball.state === 'scored' || ball.state === 'dead') && 
-            ball.scoredBy && ball.scoredBy !== activePlayer) {
-          finalLockedBalls.add(ball.number);
-        }
-      });
-      
-      setLockedBalls(finalLockedBalls);
-      console.log('Final locked balls after undo:', Array.from(finalLockedBalls));
-    }, 100);
+    // Keep locked balls disabled during undo sequences to prevent gray ball issue
+    // Locked balls will be re-enabled only when a new turn starts (handleEndTurn)
+    console.log('Keeping locked balls disabled to prevent multi-turn undo issues');
 
     // Remove the last state from history
     setTurnHistory(prev => prev.slice(0, -1));
