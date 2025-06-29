@@ -122,7 +122,7 @@ button {
 
 /* Ball colors with white circles for numbers 1-8 */
 .ball-1 { 
-  background: #FFD700; 
+  background: linear-gradient(to bottom, #eab308, #fbbf24, #eab308); 
   position: relative;
 }
 .ball-2 { 
