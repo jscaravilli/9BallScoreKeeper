@@ -719,6 +719,53 @@ export default function Game() {
     setGameWinner(null);
   };
 
+  const handleScoreUpdate = (newScore: number, ballChanges: BallInfo[], playerNumber: 1 | 2) => {
+    if (!currentMatch) return;
+
+    // Save current state to turn history before making changes
+    const currentBallStates = currentMatch.ballStates as BallInfo[];
+    const stateBeforeEdit = {
+      player1Score: currentMatch.player1Score,
+      player2Score: currentMatch.player2Score,
+      currentPlayer: currentMatch.currentPlayer,
+      ballStates: JSON.parse(JSON.stringify(currentBallStates)),
+      previousBallStates: turnHistory.length > 0 ? turnHistory[turnHistory.length - 1].ballStates : currentBallStates
+    };
+
+    setTurnHistory(prev => {
+      const newHistory = [...prev, stateBeforeEdit];
+      return newHistory.slice(-maxTurnHistory);
+    });
+
+    // Update match with new score and ball states
+    const scoreUpdate = playerNumber === 1 
+      ? { player1Score: newScore }
+      : { player2Score: newScore };
+
+    updateMatchMutation.mutate({
+      id: currentMatch.id,
+      updates: scoreUpdate,
+    });
+
+    updateBallsMutation.mutate({
+      id: currentMatch.id,
+      ballStates: ballChanges,
+    });
+
+    // Log the manual score edit event
+    const editEvent: MatchEvent = {
+      type: 'turn_ended',
+      timestamp: new Date().toISOString(),
+      player: playerNumber,
+      playerName: playerNumber === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+      details: `Manual score edit: ${playerNumber === 1 ? currentMatch.player1Score : currentMatch.player2Score} → ${newScore} points`
+    };
+    localStorageAPI.addMatchEvent(editEvent);
+
+    // Clear locked balls to recalculate
+    setLockedBalls(new Set());
+  };
+
   const handleRerack = () => {
     if (!currentMatch) return;
 

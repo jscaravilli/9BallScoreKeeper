@@ -149,6 +149,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: Made orange ball (ball 5) more saturated and darker for better visibility
 - June 29, 2025: Widened yellow stripe on 9-ball and matched ball 1 yellow to 9-ball color
 - June 29, 2025: Refined ball borders to ultra-thin 0.5px for cleaner appearance
+- June 29, 2025: Started implementing manual score editing feature with pencil icons (incomplete)
 
 ## User Preferences
 
