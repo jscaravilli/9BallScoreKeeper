@@ -30,22 +30,19 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
   };
   
   const isLockedBall = (ballNumber: number): boolean => {
-    // RULE 0: During undo operations, NO balls are locked to prevent visual glitches
-    if (undoInProgress) {
-      return false;
-    }
-    
     const ball = ballStates.find(b => b.number === ballNumber);
     
-    // RULE 1: Active balls are NEVER locked, period
-    if (!ball || ball.state === 'active') {
-      return false;
-    }
+    // BULLETPROOF LOGIC: Check active state first and foremost
+    if (!ball) return false;
+    if (ball.state === 'active') return false;
+    if (undoInProgress) return false;
     
-    // RULE 2: Only scored/dead balls by other player can be locked
-    return (ball.state === 'scored' || ball.state === 'dead') && 
-           ball.scoredBy !== undefined && 
-           ball.scoredBy !== currentPlayer;
+    // Only allow locking for scored/dead balls by other player
+    if (ball.state !== 'scored' && ball.state !== 'dead') return false;
+    if (!ball.scoredBy) return false;
+    if (ball.scoredBy === currentPlayer) return false;
+    
+    return true;
   };
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {

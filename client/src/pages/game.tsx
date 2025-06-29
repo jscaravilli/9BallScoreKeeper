@@ -627,27 +627,25 @@ export default function Game() {
       scoredBy: ball.state === 'active' ? undefined : ball.scoredBy
     }));
 
-    // ATOMIC UPDATE: Update both player and ball states together to prevent race conditions
-    updateMatchMutation.mutate({
-      id: currentMatch.id,
-      updates: {
-        currentPlayer: previousState.currentPlayer,
-        player1Score: previousState.player1Score,
-        player2Score: previousState.player2Score,
-        ballStates: cleanedBallStates,
-        isComplete: false,
-        winnerId: null,
-      }
-    });
+    // Synchronous localStorage update to eliminate React state timing issues
+    const updatedMatch = {
+      ...currentMatch,
+      currentPlayer: previousState.currentPlayer,
+      player1Score: previousState.player1Score,
+      player2Score: previousState.player2Score,
+      ballStates: cleanedBallStates,
+      isComplete: false,
+      winnerId: null,
+    };
+    
+    // Update localStorage immediately
+    localStorageAPI.updateMatch(currentMatch.id, updatedMatch);
 
     // Remove the last state from history
     setTurnHistory(prev => prev.slice(0, -1));
     setMatchWinner(null);
     setShowMatchWin(false);
-    
-    setTimeout(() => {
-      setUndoInProgress(false);
-    }, 500);
+    setUndoInProgress(false);
   };
 
 
