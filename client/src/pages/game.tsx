@@ -575,14 +575,19 @@ export default function Game() {
       return newHistory.slice(-maxTurnHistory);
     });
 
-    // Increment to next inning
-    setCurrentInning(prev => prev + 1);
+    // Switch to the other player
+    const nextPlayer = currentMatch.currentPlayer === 1 ? 2 : 1;
+    
+    // Only increment inning when player 2 finishes their turn (completing the full inning)
+    if (currentMatch.currentPlayer === 2) {
+      setCurrentInning(prev => prev + 1);
+    }
 
     // Switch to the other player - locked balls will be updated automatically by useEffect
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
-        currentPlayer: currentMatch.currentPlayer === 1 ? 2 : 1,
+        currentPlayer: nextPlayer,
       }
     });
   };
@@ -619,6 +624,8 @@ export default function Game() {
     setMatchWinner(null);
     setShowMatchWin(false);
     setShowResetConfirm(false);
+    // Reset innings to 1 for match reset
+    setCurrentInning(1);
   };
 
   const handleUndoTurn = () => {
@@ -1084,9 +1091,9 @@ export default function Game() {
       <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
         <DialogContent className="max-w-sm mx-auto">
           <div className="text-center">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Reset Current Game?</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Reset Current Match?</h2>
             <p className="text-gray-600 mb-6">
-              This will reset the current game to 0-0 and clear all ball states.
+              This will reset the current match to 0-0, clear all ball states, and reset innings to 1.
             </p>
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" onClick={() => setShowResetConfirm(false)}>
@@ -1096,7 +1103,7 @@ export default function Game() {
                 onClick={confirmResetGame}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
-                Reset Game
+                Reset Match
               </Button>
             </div>
           </div>
