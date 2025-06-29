@@ -173,7 +173,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: SIMPLIFIED static deployment approach - eliminated server complexity for pure client-side deployment
 - June 29, 2025: Created streamlined build-static-only.js script that outputs directly to dist directory
 - June 29, 2025: Updated deployment to use localStorage-only approach with no backend dependencies
-- June 29, 2025: FIXED dead ball behavior - dead balls remain visible throughout rack but become non-editable after their turn ends (including first player's first turn)
+- June 29, 2025: FIXED dead ball behavior - dead balls remain visible throughout rack but become non-editable after their turn ends
+- June 29, 2025: RESOLVED first turn dead ball locking by preserving scoredBy value for turn completion tracking
 
 ## User Preferences
 

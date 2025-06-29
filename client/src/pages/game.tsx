@@ -547,7 +547,7 @@ export default function Game() {
       }
       
       ball.state = 'dead';
-      ball.scoredBy = undefined;
+      // Keep scoredBy to track who marked it dead for turn completion logic
       ball.inning = currentInning; // Track which inning ball was marked dead
       
       // Update ball states
