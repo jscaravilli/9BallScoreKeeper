@@ -12,6 +12,8 @@ interface BallRackProps {
   forceUpdateKey?: string; // Add key to force component updates
 }
 
+
+
 const BALL_COLORS = {
   1: "", // Yellow - handled with custom gradient
   2: "", // Blue - handled with custom gradient
@@ -25,6 +27,70 @@ const BALL_COLORS = {
 };
 
 export default function BallRack({ ballStates, onBallTap, currentPlayer, currentTurn, turnHistory = [], undoInProgress = false, forceUpdateKey }: BallRackProps) {
+  
+  // NUCLEAR OPTION: Force complete component rebuild on undo
+  const shouldForceRebuild = forceUpdateKey && forceUpdateKey.includes('final');
+  
+  if (shouldForceRebuild) {
+    // NUCLEAR OPTION: Return completely different component structure
+    const getBallState = (ballNumber: number): BallInfo => {
+      const found = ballStates.find((b: BallInfo) => b.number === ballNumber);
+      return found || { number: ballNumber as BallInfo['number'], state: 'active' };
+    };
+
+    const renderBallIcon = (ballNumber: number) => {
+      const ballData = getBallState(ballNumber);
+      
+      if (ballData.state === 'scored') {
+        return <Check className="h-8 w-8 text-green-600 font-bold" />;
+      }
+      
+      if (ballData.state === 'dead') {
+        return <X className="h-8 w-8 text-red-500 font-bold" />;
+      }
+      
+      // Active ball - show number in colored circle
+      return (
+        <span 
+          className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
+          style={{
+            background: ballNumber === 9 ? 'linear-gradient(45deg, #FFD700, #FFA500)' : 
+                       ballNumber === 1 ? '#FFD700' :
+                       ballNumber === 2 ? '#0066CC' :
+                       ballNumber === 3 ? '#CC0000' :
+                       ballNumber === 4 ? '#663399' :
+                       ballNumber === 5 ? '#FF6600' :
+                       ballNumber === 6 ? '#006600' :
+                       ballNumber === 7 ? '#990000' :
+                       '#000000'
+          }}
+        >
+          {ballNumber}
+        </span>
+      );
+    };
+
+    return (
+      <section className="p-6 bg-gradient-to-b from-green-50 to-green-100 rounded-lg">
+        <h2 className="text-xl font-bold text-center mb-6 text-green-800">Pool Balls - Rebuilt</h2>
+        
+        <div className="grid grid-cols-3 gap-6 max-w-md mx-auto">
+          {[1,2,3,4,5,6,7,8,9].map(ballNumber => {
+            const ballData = getBallState(ballNumber);
+            return (
+              <button
+                key={`nuclear-ball-${ballNumber}-${ballData.state}-${Date.now()}`}
+                onClick={() => onBallTap(ballNumber)}
+                className="w-16 h-16 rounded-full border-2 border-gray-400 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center bg-white"
+              >
+                {renderBallIcon(ballNumber)}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }
   // IMPROVED TURN-BASED APPROACH: Hide balls from completed innings
   const shouldHideBall = (ballNumber: number): boolean => {
     const ball = ballStates.find(b => b.number === ballNumber);
