@@ -201,9 +201,13 @@ export default function Game() {
     const ballStates = currentMatch.ballStates as BallInfo[];
     
     ballStates.forEach(ball => {
-      // Only lock scored balls from other players, not dead balls
-      // Dead balls should remain interactable by any player until new rack
+      // Lock scored balls from other players
       if (ball.state === 'scored' && ball.scoredBy && ball.scoredBy !== currentMatch.currentPlayer) {
+        lockedBalls.add(ball.number);
+      }
+      
+      // Lock dead balls that are from previous innings (not current inning)
+      if (ball.state === 'dead' && ball.inning && ball.inning < currentInning) {
         lockedBalls.add(ball.number);
       }
     });
@@ -543,6 +547,7 @@ export default function Game() {
       
       ball.state = 'dead';
       ball.scoredBy = undefined;
+      ball.inning = currentInning; // Track which inning ball was marked dead
       
       // Update ball states
       updateBallsMutation.mutate({
