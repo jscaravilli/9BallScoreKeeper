@@ -36,6 +36,7 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
     if (ball.state === 'scored' || ball.state === 'dead') {
       // If no turn history, this must be the first turn, so show all balls scored by current player
       if (turnHistory.length === 0) {
+        console.log(`Ball ${ballNumber}: No history, showing for current player ${currentPlayer}, scoredBy: ${ball.scoredBy}`);
         return ball.scoredBy === currentPlayer;
       }
       
@@ -46,8 +47,12 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
       // Ball is visible if it was active in the previous state but is now scored/dead by current player
       const wasActiveBefore = !previousBall || previousBall.state === 'active';
       const isScoredByCurrentPlayer = ball.scoredBy === currentPlayer;
+      const shouldShow = wasActiveBefore && isScoredByCurrentPlayer;
       
-      return wasActiveBefore && isScoredByCurrentPlayer;
+      console.log(`Ball ${ballNumber}: currentPlayer=${currentPlayer}, ball.scoredBy=${ball.scoredBy}, wasActiveBefore=${wasActiveBefore}, shouldShow=${shouldShow}`);
+      console.log(`  Previous ball state:`, previousBall);
+      
+      return shouldShow;
     }
     
     return false;
