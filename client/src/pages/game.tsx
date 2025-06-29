@@ -627,15 +627,7 @@ export default function Game() {
     
     setUndoInProgress(true);
 
-    // Clean up ball states - ensure proper state restoration
-    const cleanedBallStates = previousState.ballStates.map(ball => ({
-      ...ball,
-      // Clear scoredBy and turnScored for active balls to eliminate any historical issues
-      scoredBy: ball.state === 'active' ? undefined : ball.scoredBy,
-      turnScored: ball.state === 'active' ? undefined : ball.turnScored
-    }));
-
-    // Force immediate state update by triggering React Query refetch
+    // Use exact previous state without modification to avoid state corruption
     updateMatchMutation.mutate({
       id: currentMatch.id,
       updates: {
@@ -643,24 +635,25 @@ export default function Game() {
         currentTurn: previousState.currentTurn || 1,
         player1Score: previousState.player1Score,
         player2Score: previousState.player2Score,
-        ballStates: cleanedBallStates,
         isComplete: false,
         winnerId: null,
       }
+    });
+
+    // Update ball states separately to ensure clean restoration
+    updateBallsMutation.mutate({
+      id: currentMatch.id,
+      ballStates: previousState.ballStates,
     }, {
       onSuccess: () => {
         // Remove the last state from history
         setTurnHistory(prev => prev.slice(0, -1));
         setMatchWinner(null);
         setShowMatchWin(false);
+        setUndoInProgress(false);
         
-        // Force refresh before clearing undo flag to ensure visual update
+        // Trigger component re-render
         queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
-        
-        // Small delay to ensure visual refresh, then clear undo flag
-        setTimeout(() => {
-          setUndoInProgress(false);
-        }, 100);
       }
     });
   };
