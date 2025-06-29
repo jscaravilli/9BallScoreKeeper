@@ -72,8 +72,11 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn,
-      staleTime: 0, // Always fresh for localStorage
+      staleTime: Infinity, // Never consider stale to prevent automatic refetches
+      gcTime: Infinity, // Keep cache forever (replaces cacheTime in v5)
       refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
       retry: false,
     },
     mutations: {

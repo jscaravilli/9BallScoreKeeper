@@ -169,26 +169,34 @@ export default function Game() {
     },
   });
 
-  // Update match mutation - no automatic invalidation to prevent flashing
+  // Update match mutation - direct API calls without React Query reactivity
   const updateMatchMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: number; updates: any }) => {
-      return clientMutation(() => clientQueryFunctions.updateMatch(id, updates));
+      const result = await clientMutation(() => clientQueryFunctions.updateMatch(id, updates));
+      // Directly update the cache without triggering observers
+      queryClient.getQueryCache().find({ queryKey: ["/api/match/current"] })?.setState({
+        data: result,
+        status: 'success',
+        dataUpdatedAt: Date.now(),
+      });
+      return result;
     },
-    onSuccess: (data) => {
-      // Optimistic update - set cache directly instead of invalidating
-      queryClient.setQueryData(["/api/match/current"], data);
-    },
+    // No onSuccess callback to prevent automatic re-renders
   });
 
-  // Update ball states mutation - no automatic invalidation to prevent flashing
+  // Update ball states mutation - direct API calls without React Query reactivity
   const updateBallsMutation = useMutation({
     mutationFn: async ({ id, ballStates }: { id: number; ballStates: BallInfo[] }) => {
-      return clientMutation(() => clientQueryFunctions.updateBallStates(id, ballStates));
+      const result = await clientMutation(() => clientQueryFunctions.updateBallStates(id, ballStates));
+      // Directly update the cache without triggering observers
+      queryClient.getQueryCache().find({ queryKey: ["/api/match/current"] })?.setState({
+        data: result,
+        status: 'success',
+        dataUpdatedAt: Date.now(),
+      });
+      return result;
     },
-    onSuccess: (data) => {
-      // Optimistic update - set cache directly instead of invalidating
-      queryClient.setQueryData(["/api/match/current"], data);
-    },
+    // No onSuccess callback to prevent automatic re-renders
   });
 
   // Always show player setup modal when there's no current match
