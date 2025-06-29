@@ -1,5 +1,6 @@
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import type { BallInfo } from "@shared/schema";
 
 interface BallRackProps {
@@ -25,6 +26,16 @@ const BALL_COLORS = {
 };
 
 export default function BallRack({ ballStates, onBallTap, currentPlayer, currentTurn, turnHistory = [], undoInProgress = false, forceUpdateKey }: BallRackProps) {
+  const [componentKey, setComponentKey] = useState(0);
+
+  // FORCE IMMEDIATE RE-RENDER: Watch for forceUpdateKey changes and trigger complete refresh
+  useEffect(() => {
+    if (forceUpdateKey) {
+      console.log('FORCE REFRESH TRIGGERED:', forceUpdateKey);
+      setComponentKey(prev => prev + 1);
+    }
+  }, [forceUpdateKey]);
+
   // IMPROVED TURN-BASED APPROACH: Hide balls from completed innings
   const shouldHideBall = (ballNumber: number): boolean => {
     const ball = ballStates.find(b => b.number === ballNumber);
@@ -229,7 +240,7 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
           
           return (
             <div
-              key={`ball-${ballNumber}-${freshState}-${freshBallState.scoredBy || 'none'}-${freshBallState.turnScored || 0}-${forceUpdateKey || ''}-div`}
+              key={`ball-${ballNumber}-${freshState}-${freshBallState.scoredBy || 'none'}-${freshBallState.turnScored || 0}-${forceUpdateKey || ''}-${componentKey}-div`}
               className={getBallStyles(ballNumber, freshState, false)}
               onClick={() => onBallTap(ballNumber)}
               role="button"

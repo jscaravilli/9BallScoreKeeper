@@ -689,7 +689,7 @@ export default function Game() {
         setShowMatchWin(false);
         setUndoInProgress(false);
         
-        // FORCE COMPLETE RESET: Trigger player change detection system
+        // IMMEDIATE VISUAL REFRESH: Force instant component reset
         const resetTimestamp = Date.now();
         setBallRackKey(`reset-${resetTimestamp}`);
         setForceUpdateKey(`final-${resetTimestamp}`);
@@ -698,10 +698,16 @@ export default function Game() {
         // Force previous player reset to trigger detection on next render
         setPreviousPlayer(null);
         
-        // Delay query invalidation to ensure state is fully set
+        // IMMEDIATE QUERY REFRESH: No delay, instant visual update
+        queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
+        
+        // Force a second refresh after state settles to ensure visual sync
         setTimeout(() => {
+          const secondRefresh = Date.now();
+          setBallRackKey(`refresh-${secondRefresh}`);
+          setPlayerChangeKey(`refresh-${secondRefresh}`);
           queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
-        }, 50);
+        }, 100);
       }
     });
   };
