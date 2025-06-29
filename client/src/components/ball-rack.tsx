@@ -82,18 +82,22 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
   };
 
   const renderBallContent = (ballNumber: number, state: BallInfo['state']) => {
+    // FORCE CORRECT STATE: Double-check the current ball state to prevent stale visuals
+    const currentBallState = getBallState(ballNumber);
+    const actualState = currentBallState.state;
+    
     // Handle scored state - simple green checkmark for all balls
-    if (state === 'scored') {
+    if (actualState === 'scored') {
       return <Check className="h-6 w-6 text-green-600" />;
     }
     
     // Handle dead state
-    if (state === 'dead') {
+    if (actualState === 'dead') {
       return <X className="h-6 w-6 text-red-500" />;
     }
     
     // Only render special ball designs for active balls
-    if (ballNumber === 9 && state === 'active') {
+    if (ballNumber === 9 && actualState === 'active') {
       // CSS-based 9-ball design with gradient effect
       return (
         <div className="relative w-full h-full rounded-full overflow-hidden">
@@ -192,14 +196,17 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
             );
           }
           
+          // Get fresh state for accurate visual rendering
+          const freshBallState = getBallState(ballNumber);
+          
           return (
             <Button
-              key={`ball-${ballNumber}-${ballState.state}-${ballState.scoredBy || 'none'}-${ballState.turnScored || 0}-${forceUpdateKey || ''}`}
-              className={getBallStyles(ballNumber, ballState.state, false)}
+              key={`ball-${ballNumber}-${freshBallState.state}-${freshBallState.scoredBy || 'none'}-${freshBallState.turnScored || 0}-${forceUpdateKey || ''}`}
+              className={getBallStyles(ballNumber, freshBallState.state, false)}
               onClick={() => onBallTap(ballNumber)}
               variant="outline"
             >
-              {renderBallContent(ballNumber, ballState.state)}
+              {renderBallContent(ballNumber, freshBallState.state)}
             </Button>
           );
         })}
