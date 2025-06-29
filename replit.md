@@ -144,6 +144,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 28, 2025: Added Safari compatibility fixes - improved touch handling, localStorage checks, and iOS-specific meta tags
 - June 29, 2025: FIXED 9-ball scoring bug after rerack - now correctly awards 2 points instead of deducting them
 - June 29, 2025: Updated undo logic to only trigger when 9-ball is already scored, not when active after rerack
+- June 29, 2025: Reverted complex ball locking system back to simple useEffect-based approach for stability
 
 ## User Preferences
 

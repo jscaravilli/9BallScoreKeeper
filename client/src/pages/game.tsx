@@ -153,14 +153,13 @@ export default function Game() {
     queryKey: ["/api/match/current"],
   });
 
-  // Function to recalculate locked balls
-  const recalculateLockedBalls = (match?: Match | null) => {
-    const targetMatch = match || currentMatch;
-    if (!targetMatch) return;
+  // Update locked balls whenever current player or ball states change
+  useEffect(() => {
+    if (!currentMatch) return;
     
     const newLockedBalls = new Set<number>();
-    const ballStates = targetMatch.ballStates as BallInfo[] || [];
-    const activePlayer = targetMatch.currentPlayer;
+    const ballStates = currentMatch.ballStates as BallInfo[] || [];
+    const activePlayer = currentMatch.currentPlayer;
     
     // Lock balls that were scored/dead by the OTHER player
     ballStates.forEach(ball => {
@@ -171,12 +170,7 @@ export default function Game() {
     });
     
     setLockedBalls(newLockedBalls);
-  };
-
-  // Update locked balls whenever match data changes
-  useEffect(() => {
-    recalculateLockedBalls();
-  }, [currentMatch]);
+  }, [currentMatch?.currentPlayer, currentMatch?.ballStates]);
 
   // Create new match mutation
   const createMatchMutation = useMutation({
@@ -203,10 +197,8 @@ export default function Game() {
     mutationFn: async ({ id, ballStates }: { id: number; ballStates: BallInfo[] }) => {
       return clientMutation(() => clientQueryFunctions.updateBallStates(id, ballStates));
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/match/current"] });
-      // Force recalculation of locked balls after state change
-      setTimeout(() => recalculateLockedBalls(), 50);
     },
   });
 
@@ -644,7 +636,8 @@ export default function Game() {
     console.log('Current ball states:', currentMatch.ballStates);
     console.log('Previous ball states to restore:', previousState.ballStates);
     
-    // Locked balls will be recalculated automatically after match state updates
+    // Simple approach: clear locked balls during undo to let useEffect recalculate
+    setLockedBalls(new Set());
     
     // Log the undo event
     const undoEvent: MatchEvent = {
