@@ -159,22 +159,24 @@ export default function Game() {
     queryKey: ["/api/match/current"],
   });
 
-  // PLAYER CHANGE DETECTION: Force complete visual refresh when player changes
+  // NUCLEAR OPTION: Completely unmount/remount BallRack on cross-player changes
   useEffect(() => {
     if (currentMatch && currentMatch.currentPlayer !== previousPlayer) {
       if (previousPlayer !== null) {
-        console.log(`PLAYER CHANGE DETECTED: ${previousPlayer} → ${currentMatch.currentPlayer}`);
+        console.log(`PLAYER CHANGE DETECTED: ${previousPlayer} → ${currentMatch.currentPlayer} - NUCLEAR RESET`);
         
-        // Force complete visual reset with new keys
-        const changeTimestamp = Date.now();
-        setPlayerChangeKey(`player-change-${changeTimestamp}`);
-        setBallRackKey(`rack-reset-${changeTimestamp}`);
-        setForceUpdateKey(`force-${changeTimestamp}`);
+        // NUCLEAR RESET: Completely unmount BallRack component
+        setBallRackKey(`UNMOUNT`);
+        setPlayerChangeKey(`UNMOUNT`);
         
-        // Small delay to ensure DOM updates
+        // Then remount with fresh keys after a delay
         setTimeout(() => {
+          const changeTimestamp = Date.now();
+          setPlayerChangeKey(`REMOUNT-${changeTimestamp}`);
+          setBallRackKey(`REMOUNT-${changeTimestamp}`);
+          setForceUpdateKey(`NUCLEAR-${changeTimestamp}`);
           queryClient.invalidateQueries({ queryKey: ['/api/match/current'] });
-        }, 100);
+        }, 200);
       }
       setPreviousPlayer(currentMatch.currentPlayer);
     }
@@ -864,17 +866,28 @@ export default function Game() {
         } : undefined}
       />
 
-      {/* Ball Rack */}
-      <BallRack 
-        key={`${ballRackKey}-${playerChangeKey}`}
-        ballStates={currentMatch.ballStates as BallInfo[] || []}
-        onBallTap={handleBallTap}
-        currentPlayer={currentMatch.currentPlayer as 1 | 2}
-        currentTurn={currentMatch.currentTurn || 1}
-        turnHistory={turnHistory}
-        undoInProgress={undoInProgress}
-        forceUpdateKey={`${forceUpdateKey}-${playerChangeKey}`}
-      />
+      {/* Ball Rack - Conditional Rendering for Nuclear Reset */}
+      {ballRackKey !== "UNMOUNT" && playerChangeKey !== "UNMOUNT" ? (
+        <BallRack 
+          key={`${ballRackKey}-${playerChangeKey}`}
+          ballStates={currentMatch.ballStates as BallInfo[] || []}
+          onBallTap={handleBallTap}
+          currentPlayer={currentMatch.currentPlayer as 1 | 2}
+          currentTurn={currentMatch.currentTurn || 1}
+          turnHistory={turnHistory}
+          undoInProgress={undoInProgress}
+          forceUpdateKey={`${forceUpdateKey}-${playerChangeKey}`}
+        />
+      ) : (
+        <div className="p-4">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">Rack</h2>
+          <div className="grid grid-cols-3 gap-4 justify-items-center max-w-xs mx-auto">
+            {Array.from({ length: 9 }, (_, i) => (
+              <div key={i} className="w-16 h-16 opacity-0" />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Game Actions */}
       <section className="p-4 pb-20">

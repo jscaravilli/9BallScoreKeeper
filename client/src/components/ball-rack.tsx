@@ -33,6 +33,9 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, current
     if (forceUpdateKey) {
       console.log('FORCE REFRESH TRIGGERED:', forceUpdateKey);
       setComponentKey(prev => prev + 1);
+      
+      // NUCLEAR COMPONENT RESET: Force complete re-creation
+      console.log('NUCLEAR RESET: Component will completely rebuild');
     }
   }, [forceUpdateKey]);
 
