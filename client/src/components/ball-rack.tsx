@@ -23,14 +23,19 @@ const BALL_COLORS = {
 };
 
 export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHistory = [], undoInProgress = false }: BallRackProps) {
-  // NEW APPROACH: Hide all scored/dead balls regardless of who scored them
-  const shouldHideBall = (ballNumber: number): boolean => {
+  // IMPROVED APPROACH: Hide all scored/dead balls with undo-aware visibility
+  const shouldShowBall = (ballNumber: number): boolean => {
     const ball = ballStates.find(b => b.number === ballNumber);
     
-    if (!ball) return false;
+    if (!ball) return true; // Show if no ball data found
     
-    // Hide all balls that are scored or dead (regardless of player)
-    return ball.state === 'scored' || ball.state === 'dead';
+    // During undo operations, show all balls that are active in current state
+    if (undoInProgress) {
+      return ball.state === 'active';
+    }
+    
+    // Normal gameplay: only show active balls
+    return ball.state === 'active';
   };
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
@@ -155,10 +160,10 @@ export default function BallRack({ ballStates, onBallTap, currentPlayer, turnHis
         {Array.from({ length: 9 }, (_, i) => {
           const ballNumber = i + 1;
           const ballState = getBallState(ballNumber);
-          const hidden = shouldHideBall(ballNumber);
+          const visible = shouldShowBall(ballNumber);
           
-          // Hide balls scored by other player instead of showing them as locked
-          if (hidden) {
+          // Hide balls that are scored/dead instead of showing them as locked
+          if (!visible) {
             return (
               <div
                 key={ballNumber}
