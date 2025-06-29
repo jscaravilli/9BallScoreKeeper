@@ -575,12 +575,33 @@ export default function Game() {
       return newHistory.slice(-maxTurnHistory);
     });
 
+    // Mark all balls scored by current player as turn completed
+    const ballStates = [...(currentMatch.ballStates as BallInfo[])];
+    let ballStatesChanged = false;
+    
+    ballStates.forEach(ball => {
+      if ((ball.state === 'scored' || ball.state === 'dead') && 
+          ball.scoredBy === currentMatch.currentPlayer && 
+          !ball.turnCompleted) {
+        ball.turnCompleted = true;
+        ballStatesChanged = true;
+      }
+    });
+
     // Switch to the other player
     const nextPlayer = currentMatch.currentPlayer === 1 ? 2 : 1;
     
     // Only increment inning when player 2 finishes their turn (completing the full inning)
     if (currentMatch.currentPlayer === 2) {
       setCurrentInning(prev => prev + 1);
+    }
+
+    // Update ball states if any were marked as turn completed
+    if (ballStatesChanged) {
+      updateBallsMutation.mutate({
+        id: currentMatch.id,
+        ballStates,
+      });
     }
 
     // Switch to the other player - locked balls will be updated automatically by useEffect

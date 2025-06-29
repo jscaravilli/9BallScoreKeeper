@@ -51,6 +51,7 @@ export interface BallInfo {
   state: BallState;
   scoredBy?: 1 | 2; // player who scored it
   inning?: number; // which inning this ball was scored in
+  turnCompleted?: boolean; // whether the scoring player's turn has ended
 }
 
 // APA Skill Level type
