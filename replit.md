@@ -155,6 +155,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 29, 2025: Rewrote ball locking logic with function-based approach for more deterministic behavior
 - June 29, 2025: RESOLVED ball locking visual issues by implementing ball hiding system instead of locking
 - June 29, 2025: Balls now disappear completely when scored/dead and reappear only during undo operations to previous innings
+- June 29, 2025: SIMPLIFIED ball display system - removed complex turn-based hiding to ensure all balls show correct states during undo operations
+- June 29, 2025: Fixed undo operations to properly restore ball visual states including checkmarks for scored balls
 
 ## User Preferences
 
