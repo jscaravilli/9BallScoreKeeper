@@ -47,17 +47,7 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
   };
 
   const renderBallContent = (ballNumber: number, state: BallInfo['state']) => {
-    // Handle scored state - simple green checkmark for all balls
-    if (state === 'scored') {
-      return <Check className="h-6 w-6 text-green-600" />;
-    }
-    
-    // Handle dead state
-    if (state === 'dead') {
-      return <X className="h-6 w-6 text-red-500" />;
-    }
-    
-    // Only render special ball designs for active balls
+    // Only render ball designs for active balls (scored/dead balls are hidden entirely)
     if (ballNumber === 9 && state === 'active') {
       // CSS-based 9-ball design with gradient effect
       return (
@@ -126,12 +116,8 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
     
     if (isLocked) {
       return `${baseStyles} bg-gray-300 border-gray-400 opacity-40 cursor-not-allowed`;
-    } else if (state === 'scored') {
-      return `${baseStyles} bg-gray-300 border-green-600 opacity-60 text-gray-600 hover:shadow-xl active:scale-95`;
-    } else if (state === 'dead') {
-      return `${baseStyles} bg-gray-400 border-red-500 opacity-40 text-white hover:shadow-xl active:scale-95`;
     } else {
-      // All balls now use custom gradients, no background needed here
+      // All active balls use custom gradients, no background needed here
       return `${baseStyles} bg-transparent border-gray-300 text-white overflow-hidden p-0 hover:shadow-xl active:scale-95`;
     }
   };
@@ -146,6 +132,15 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
           const ballNumber = i + 1;
           const ballState = getBallState(ballNumber);
           const isLocked = lockedBalls.has(ballNumber);
+          
+          // Hide balls that are scored or dead - they disappear from the rack
+          if (ballState.state === 'scored' || ballState.state === 'dead') {
+            return (
+              <div key={ballNumber} className="w-16 h-16 flex items-center justify-center">
+                {/* Empty space where ball used to be */}
+              </div>
+            );
+          }
           
           return (
             <Button
