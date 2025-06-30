@@ -208,6 +208,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 30, 2025: Version 1.0.4 - production build ready with game counter fixes and improved UI text
 - June 30, 2025: CONVERTED TO PWA - added manifest.json, service worker, app icons, and offline functionality
 - June 30, 2025: Version 1.0.5 - PWA-enabled production build ready for Android APK conversion
+- June 30, 2025: FIXED PWA manifest serving - added proper content-type headers for PWABuilder compatibility
 
 ## User Preferences
 

@@ -3,8 +3,23 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertMatchSchema, insertGameSchema, type BallInfo } from "@shared/schema";
 import { z } from "zod";
+import path from "path";
+import fs from "fs";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve PWA files with correct content types
+  app.get('/manifest.json', (req, res) => {
+    const distPath = path.resolve(import.meta.dirname, "..", "manifest.json");
+    res.setHeader('Content-Type', 'application/manifest+json');
+    res.sendFile(distPath);
+  });
+
+  app.get('/sw.js', (req, res) => {
+    const distPath = path.resolve(import.meta.dirname, "..", "sw.js");
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(distPath);
+  });
+
   // Get current active match
   app.get("/api/match/current", async (req, res) => {
     try {
