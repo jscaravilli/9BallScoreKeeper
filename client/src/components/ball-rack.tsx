@@ -51,39 +51,14 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
   const renderBallContent = (ballNumber: number, state: BallInfo['state']) => {
     // Only render ball designs for active balls (scored/dead balls are hidden entirely)
     if (ballNumber === 9 && state === 'active') {
-      // CSS-based 9-ball design with gradient effect
+      // Use CSS-based 9-ball design with 3D overlays
       return (
-        <div className="relative w-full h-full rounded-full overflow-hidden">
-          {/* Base gradient ball */}
-          <div 
-            className="absolute inset-0 rounded-full"
-            style={{ background: getBallGradient(9) }}
-          ></div>
-          
-          {/* Glossy highlight effect */}
-          <div 
-            className="absolute rounded-full"
-            style={{
-              top: '10%',
-              left: '20%',
-              width: '35%',
-              height: '35%',
-              background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 40%, transparent 70%)',
-            }}
-          ></div>
-          
-          {/* Yellow horizontal stripe spanning full width of the button */}
-          <div 
-            className="absolute left-0 right-0"
-            style={{ 
-              top: '22%',
-              height: '56%',
-              background: 'linear-gradient(to bottom, #eab308, #fbbf24, #eab308)'
-            }}
-          ></div>
-          
-          {/* White circle for number in center */}
-          <div className="absolute inset-0 flex items-center justify-center">
+        <div 
+          className="ball-9 w-full h-full rounded-full overflow-hidden relative"
+          data-number={ballNumber}
+        >
+          {/* White circle for number - positioned above all overlays */}
+          <div className="absolute inset-0 flex items-center justify-center z-10">
             <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm">
               <span className="font-bold text-base text-black">9</span>
             </div>
