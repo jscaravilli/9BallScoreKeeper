@@ -182,7 +182,7 @@ button {
     transparent 14px, 
     #d4a517 16px
   );
-  border-radius: 50% / 100%;
+  border-radius: 50% / 60%;
   z-index: 1;
 }
 
