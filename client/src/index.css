@@ -162,20 +162,27 @@ button {
   box-shadow: inset -8px -8px 15px rgba(0,0,0,0.4), 2px 2px 8px rgba(0,0,0,0.3);
 }
 .ball-9 { 
-  background: 
-    linear-gradient(45deg, 
-      radial-gradient(circle at 30% 30%, #fef08a, #eab308 60%, #ca8a04 100%) 0%, 
-      radial-gradient(circle at 30% 30%, #fef08a, #eab308 60%, #ca8a04 100%) 48%, 
-      radial-gradient(circle at 30% 30%, #ffffff, #f3f4f6 60%, #d1d5db 100%) 52%, 
-      radial-gradient(circle at 30% 30%, #ffffff, #f3f4f6 60%, #d1d5db 100%) 100%
-    );
+  background: linear-gradient(45deg, #fef08a 50%, #ffffff 50%);
   position: relative;
   box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 
-/* Add highlight effects to all balls */
+.ball-9::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), rgba(255,255,255,0.3) 50%, rgba(0,0,0,0.1) 80%, rgba(0,0,0,0.2) 100%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Add highlight effects to balls 1-8 */
 .ball-1::before, .ball-2::before, .ball-3::before, .ball-4::before,
-.ball-5::before, .ball-6::before, .ball-7::before, .ball-8::before, .ball-9::before {
+.ball-5::before, .ball-6::before, .ball-7::before, .ball-8::before {
   content: "";
   position: absolute;
   top: 15%;
@@ -190,9 +197,16 @@ button {
 
 /* Secondary light reflection for more realism */
 .ball-1:hover::before, .ball-2:hover::before, .ball-3:hover::before, .ball-4:hover::before,
-.ball-5:hover::before, .ball-6:hover::before, .ball-7:hover::before, .ball-8:hover::before, .ball-9:hover::before {
+.ball-5:hover::before, .ball-6:hover::before, .ball-7:hover::before, .ball-8:hover::before {
   opacity: 0.9;
   transform: scale(1.1);
+  transition: all 0.2s ease;
+}
+
+/* Hover effect for ball-9's special highlight */
+.ball-9:hover::before {
+  opacity: 0.8;
+  transform: scale(1.05);
   transition: all 0.2s ease;
 }
 
