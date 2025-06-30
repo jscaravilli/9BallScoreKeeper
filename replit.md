@@ -188,6 +188,13 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Added fallback file copying mechanism for reliability
   - Verified deployment timestamp injection and cache-busting still work
   - Static deployment now works correctly with "dist" as public directory
+- June 29, 2025: Enhanced pool balls with sophisticated 3D sphere effects:
+  - Implemented radial gradients for realistic lighting and depth on all balls
+  - Added inset shadows and external shadows for authentic 3D curvature
+  - Created highlight reflections with blur effects using pseudo-elements
+  - Enhanced white number circles with gradient depth and proper shadows
+  - Fixed 9-ball to match spherical gradient depth of other balls with layered gradients
+  - Added hover effects for interactive visual feedback
 
 ## User Preferences
 

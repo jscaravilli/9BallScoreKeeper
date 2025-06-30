@@ -162,10 +162,10 @@ button {
   box-shadow: inset -8px -8px 15px rgba(0,0,0,0.4), 2px 2px 8px rgba(0,0,0,0.3);
 }
 .ball-9 { 
-  background: linear-gradient(45deg, 
-    radial-gradient(circle at 30% 30%, #fef08a, #eab308 60%, #ca8a04 100%) 50%, 
-    radial-gradient(circle at 30% 30%, #ffffff, #f3f4f6 60%, #d1d5db 100%) 50%
-  );
+  background: 
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0.7) 60%, rgba(255,255,255,0.5) 100%),
+    linear-gradient(45deg, #fef08a 0%, #fef08a 48%, #ffffff 52%, #ffffff 100%),
+    radial-gradient(circle at 70% 70%, rgba(0,0,0,0.1), rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.3) 100%);
   position: relative;
   box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
