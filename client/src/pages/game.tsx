@@ -638,22 +638,19 @@ export default function Game() {
       state: 'active' as const,
     }));
 
-    updateMatchMutation.mutate({
-      id: currentMatch.id,
-      updates: {
-        currentPlayer: 1,
-        player1Score: 0,
-        player2Score: 0,
-        currentGame: 1,
-        isComplete: false,
-        winnerId: null,
-      }
+    // Reset match with all updates in single operation
+    const updatedMatch = localStorageAPI.updateMatch(currentMatch.id, {
+      currentPlayer: 1,
+      player1Score: 0,
+      player2Score: 0,
+      currentGame: 1,
+      ballStates: initialBallStates,
+      isComplete: false,
+      winnerId: null,
     });
 
-    updateBallsMutation.mutate({
-      id: currentMatch.id,
-      ballStates: initialBallStates,
-    });
+    // Invalidate cache to trigger re-render
+    queryClient.setQueryData(["/api/match/current"], updatedMatch);
 
     setTurnHistory([]);
     setMatchWinner(null);
