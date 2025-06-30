@@ -20,6 +20,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(distPath);
   });
 
+  // Serve PWA icons with correct content types
+  app.get('/icon-192.png', (req, res) => {
+    const distPath = path.resolve(import.meta.dirname, "..", "icon-192.png");
+    res.setHeader('Content-Type', 'image/png');
+    res.sendFile(distPath);
+  });
+
+  app.get('/icon-512.png', (req, res) => {
+    const distPath = path.resolve(import.meta.dirname, "..", "icon-512.png");
+    res.setHeader('Content-Type', 'image/png');
+    res.sendFile(distPath);
+  });
+
   // Get current active match
   app.get("/api/match/current", async (req, res) => {
     try {
