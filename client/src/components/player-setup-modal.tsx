@@ -60,7 +60,7 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
         <div className="space-y-4">
           {/* Player 1 Setup */}
           <div>
-            <Label htmlFor="player1Name">Player 1 Name</Label>
+            <Label htmlFor="player1Name">Player 1 Name (Lag Winner)</Label>
             <Input
               id="player1Name"
               value={player1Name}
