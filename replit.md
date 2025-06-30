@@ -214,6 +214,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 30, 2025: Added unique PWA ID "9bsk2085082207" to manifest for proper app identification in stores and installations
 - June 30, 2025: FIXED APK installation issues - changed PWA ID to "bsk9ball2025" (Android package names can't start with numbers)
 - June 30, 2025: Added Digital Asset Links (.well-known/assetlinks.json) for proper APK domain verification and browser bar removal
+- June 30, 2025: FIXED Android APK compatibility - added minSdkVersion 26 and android:exported="true" for Android 12+ support via pwabuilder.json configuration
 
 ## User Preferences
 

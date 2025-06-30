@@ -1,0 +1,27 @@
+{
+  "name": "9 Ball Scorekeeper",
+  "packageId": "com.nineball.scorekeeper",
+  "url": "https://your-deployed-url.replit.app",
+  "android": {
+    "minSdkVersion": 26,
+    "targetSdkVersion": 34,
+    "compileSdkVersion": 34,
+    "versionCode": 1,
+    "versionName": "1.0.6",
+    "exported": true,
+    "permissions": [
+      "android.permission.INTERNET",
+      "android.permission.ACCESS_NETWORK_STATE"
+    ],
+    "manifestOverrides": {
+      "android:exported": "true"
+    }
+  },
+  "manifest": {
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "theme_color": "#1a4b3a",
+    "background_color": "#1a4b3a"
+  }
+}

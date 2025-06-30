@@ -29,7 +29,7 @@ async function buildStaticOnly() {
     }
     
     // Copy PWA files to dist directory
-    const pwaFiles = ['manifest.json', 'sw.js', 'icon-192.png', 'icon-512.png', 'screenshot-mobile.png'];
+    const pwaFiles = ['manifest.json', 'sw.js', 'icon-192.png', 'icon-512.png', 'screenshot-mobile.png', 'pwabuilder.json', 'pwabuilder-sw.js'];
     
     // Copy .well-known directory for asset links
     await execAsync('mkdir -p dist/.well-known');

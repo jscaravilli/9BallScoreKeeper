@@ -38,5 +38,15 @@
   "prefer_related_applications": false,
   "edge_side_panel": {
     "preferred_width": 400
+  },
+  "android": {
+    "minSdkVersion": 26,
+    "targetSdkVersion": 34,
+    "compileSdkVersion": 34,
+    "exported": true,
+    "permissions": [
+      "android.permission.INTERNET",
+      "android.permission.ACCESS_NETWORK_STATE"
+    ]
   }
 }
