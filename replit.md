@@ -204,6 +204,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Updated ball 1 to true yellow gradient and ball 5 to vibrant true orange for authentic pool ball colors
 - June 30, 2025: FIXED game numbering system - games now properly start at 1 and increment with each new rack after winning
 - June 30, 2025: FIXED production game counter persistence - replaced async mutations with direct localStorage updates for reliable state management
+- June 30, 2025: Updated UI terminology - match win modal now says "Start New Match" and player setup shows "Player 1 Name (Lag Winner)"
+- June 30, 2025: Version 1.0.4 - production build ready with game counter fixes and improved UI text
 
 ## User Preferences
 
