@@ -644,6 +644,7 @@ export default function Game() {
         currentPlayer: 1,
         player1Score: 0,
         player2Score: 0,
+        currentGame: 1,
         isComplete: false,
         winnerId: null,
       }
