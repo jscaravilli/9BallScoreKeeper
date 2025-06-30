@@ -196,6 +196,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Fixed 9-ball to match spherical gradient depth of other balls with layered gradients
   - Enhanced 9-ball with dramatic dual-layer gradient system for maximum visual impact
   - Added hover effects for interactive visual feedback
+  - Removed all borders from pool balls for cleaner, modern appearance
 
 ## User Preferences
 

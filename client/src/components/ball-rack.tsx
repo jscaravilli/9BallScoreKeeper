@@ -84,7 +84,7 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
           
           {/* White circle for number in center */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center border border-gray-400 shadow-sm">
+            <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm">
               <span className="font-bold text-base text-black">9</span>
             </div>
           </div>
@@ -114,16 +114,16 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
   };
 
   const getBallStyles = (ballNumber: number, state: BallInfo['state'], isLocked: boolean, isScoredThisInning: boolean) => {
-    const baseStyles = "w-16 h-16 rounded-full border-[0.5px] shadow-lg flex items-center justify-center font-bold text-lg transition-all touch-target";
+    const baseStyles = "w-16 h-16 rounded-full shadow-lg flex items-center justify-center font-bold text-lg transition-all touch-target";
     
     if (isLocked) {
-      return `${baseStyles} bg-gray-300 border-gray-400 opacity-40 cursor-not-allowed`;
+      return `${baseStyles} bg-gray-300 opacity-40 cursor-not-allowed`;
     } else if (isScoredThisInning && (state === 'scored' || state === 'dead')) {
       // Balls scored during current inning show with greyed background for check marks
-      return `${baseStyles} bg-gray-100 border-green-600 text-gray-600 hover:shadow-xl active:scale-95`;
+      return `${baseStyles} bg-gray-100 text-gray-600 hover:shadow-xl active:scale-95`;
     } else {
       // All active balls use custom gradients
-      return `${baseStyles} bg-transparent border-gray-300 text-white overflow-hidden p-0 hover:shadow-xl active:scale-95`;
+      return `${baseStyles} bg-transparent text-white overflow-hidden p-0 hover:shadow-xl active:scale-95`;
     }
   };
 
