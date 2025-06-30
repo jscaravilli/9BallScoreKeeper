@@ -1,10 +1,10 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.bsk9ball2025.twa",
-    "sha256_cert_fingerprints": [
-      "19:E2:1E:0E:C5:58:7F:19:D6:95:B3:EE:F2:B2:AB:CD:8F:BB:3C:82:85:23:CF:A7:77:39:BD:49:93:6E:40:86"
-    ]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.nineball.scorekeeper.twa",
+      "sha256_cert_fingerprints": ["19:E2:1E:0E:C5:58:7F:19:D6:95:B3:EE:F2:B2:AB:CD:8F:BB:3C:82:85:23:CF:A7:77:39:BD:49:93:6E:40:86"]
+    }
   }
-}]
+]
