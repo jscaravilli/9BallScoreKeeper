@@ -219,7 +219,7 @@ export default function Game() {
     return lockedBalls;
   };
 
-  const handlePlayerSetupSave = (player1Name: string, player1SkillLevel: number, player2Name: string, player2SkillLevel: number, firstPlayer: 1 | 2) => {
+  const handlePlayerSetupSave = (player1Name: string, player1SkillLevel: number, player2Name: string, player2SkillLevel: number) => {
     const initialBallStates: BallInfo[] = Array.from({ length: 9 }, (_, i) => ({
       number: (i + 1) as BallInfo['number'],
       state: 'active' as const,
@@ -232,7 +232,7 @@ export default function Game() {
       player2Name,
       player2SkillLevel,
       player2Score: 0,
-      currentPlayer: firstPlayer,
+      currentPlayer: 1,
       currentGame: 1,
       ballStates: initialBallStates,
       isComplete: false,

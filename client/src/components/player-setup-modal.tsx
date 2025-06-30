@@ -10,7 +10,7 @@ import type { Match } from "@shared/schema";
 interface PlayerSetupModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (player1Name: string, player1SkillLevel: number, player2Name: string, player2SkillLevel: number, firstPlayer: 1 | 2) => void;
+  onSave: (player1Name: string, player1SkillLevel: number, player2Name: string, player2SkillLevel: number) => void;
   currentMatch?: Match | null;
 }
 
@@ -19,7 +19,6 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
   const [player1SkillLevel, setPlayer1SkillLevel] = useState(5);
   const [player2Name, setPlayer2Name] = useState("");
   const [player2SkillLevel, setPlayer2SkillLevel] = useState(5);
-  const [firstPlayer, setFirstPlayer] = useState<1 | 2>(1);
 
   useEffect(() => {
     if (currentMatch) {
@@ -32,7 +31,7 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
 
   const handleSave = () => {
     if (player1Name.trim() && player2Name.trim()) {
-      onSave(player1Name.trim(), player1SkillLevel, player2Name.trim(), player2SkillLevel, firstPlayer);
+      onSave(player1Name.trim(), player1SkillLevel, player2Name.trim(), player2SkillLevel);
     }
   };
 
@@ -41,7 +40,6 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
     setPlayer1SkillLevel(5);
     setPlayer2Name("");
     setPlayer2SkillLevel(5);
-    setFirstPlayer(1);
   };
 
   const skillLevelOptions = Object.entries(APA_HANDICAPS).map(([level, points]) => ({
@@ -112,20 +110,6 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
                     {option.label}
                   </SelectItem>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Who Goes First Selection */}
-          <div>
-            <Label htmlFor="firstPlayer">Who Goes First</Label>
-            <Select value={firstPlayer.toString()} onValueChange={(value) => setFirstPlayer(parseInt(value) as 1 | 2)}>
-              <SelectTrigger className="mt-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">{player1Name || "Player 1"}</SelectItem>
-                <SelectItem value="2">{player2Name || "Player 2"}</SelectItem>
               </SelectContent>
             </Select>
           </div>

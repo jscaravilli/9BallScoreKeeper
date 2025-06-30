@@ -13,7 +13,6 @@ export const clientQueryFunctions = {
     player1SkillLevel: number;
     player2Name: string;
     player2SkillLevel: number;
-    currentPlayer?: number;
     ballStates?: BallInfo[];
   }): Match => {
     return localStorageAPI.createMatch(matchData);
