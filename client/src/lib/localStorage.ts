@@ -51,6 +51,7 @@ export class LocalStorageAPI {
     player1SkillLevel: number;
     player2Name: string;
     player2SkillLevel: number;
+    currentPlayer?: number;
     ballStates?: BallInfo[];
   }): Match {
     const match: Match = {
@@ -61,7 +62,7 @@ export class LocalStorageAPI {
       player2SkillLevel: matchData.player2SkillLevel,
       player1Score: 0,
       player2Score: 0,
-      currentPlayer: 1,
+      currentPlayer: matchData.currentPlayer || 1,
       currentGame: 1,
       ballStates: matchData.ballStates || [],
       isComplete: false,
