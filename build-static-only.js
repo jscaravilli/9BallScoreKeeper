@@ -29,7 +29,7 @@ async function buildStaticOnly() {
     }
     
     // Copy PWA files to dist directory
-    const pwaFiles = ['manifest.json', 'sw.js', 'icon-192.png', 'icon-512.png'];
+    const pwaFiles = ['manifest.json', 'sw.js', 'icon-192.png', 'icon-512.png', 'screenshot-mobile.png'];
     for (const file of pwaFiles) {
       try {
         await fs.copyFile(file, `dist/${file}`);

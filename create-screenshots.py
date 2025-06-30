@@ -18,20 +18,19 @@ def create_pwa_screenshots():
     mobile_width = 540
     mobile_height = 960
     
-    # Calculate crop area to maintain aspect ratio
+    # Manual crop to remove Replit interface
+    # The app content starts around y=200 and goes to about y=900
+    # and is centered horizontally
     original_width, original_height = img.size
-    aspect_ratio = mobile_width / mobile_height
     
-    if original_width / original_height > aspect_ratio:
-        # Image is wider, crop width
-        new_width = int(original_height * aspect_ratio)
-        left = (original_width - new_width) // 2
-        crop_box = (left, 0, left + new_width, original_height)
-    else:
-        # Image is taller, crop height
-        new_height = int(original_width / aspect_ratio)
-        top = (original_height - new_height) // 2
-        crop_box = (0, top, original_width, top + new_height)
+    # Crop out the Replit interface (browser bar, etc.)
+    # Focus on just the app content area
+    app_left = 0  # Start from left edge
+    app_top = 320  # Skip all browser/Replit interface completely
+    app_right = original_width  # Go to right edge
+    app_bottom = original_height - 200  # Skip the bottom device navigation
+    
+    crop_box = (app_left, app_top, app_right, app_bottom)
     
     # Crop and resize
     cropped = img.crop(crop_box)
@@ -39,23 +38,7 @@ def create_pwa_screenshots():
     mobile_screenshot.save("screenshot-mobile.png", "PNG", optimize=True)
     print("Created screenshot-mobile.png")
     
-    # Create desktop screenshot (wider format)
-    desktop_width = 1280
-    desktop_height = 800
-    
-    # For desktop, we'll use a different approach - pad the mobile screenshot
-    desktop_screenshot = Image.new("RGB", (desktop_width, desktop_height), "#1a4b3a")
-    
-    # Scale mobile screenshot to fit desktop height
-    scale_factor = desktop_height / mobile_height
-    scaled_mobile_width = int(mobile_width * scale_factor)
-    scaled_mobile = mobile_screenshot.resize((scaled_mobile_width, desktop_height), Image.Resampling.LANCZOS)
-    
-    # Center the mobile screenshot on desktop canvas
-    x_offset = (desktop_width - scaled_mobile_width) // 2
-    desktop_screenshot.paste(scaled_mobile, (x_offset, 0))
-    desktop_screenshot.save("screenshot-desktop.png", "PNG", optimize=True)
-    print("Created screenshot-desktop.png")
+
     
     print("PWA screenshots created successfully!")
 

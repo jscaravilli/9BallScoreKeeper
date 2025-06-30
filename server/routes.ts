@@ -33,6 +33,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(distPath);
   });
 
+  app.get('/screenshot-mobile.png', (req, res) => {
+    const distPath = path.resolve(import.meta.dirname, "..", "screenshot-mobile.png");
+    res.setHeader('Content-Type', 'image/png');
+    res.sendFile(distPath);
+  });
+
   // Get current active match
   app.get("/api/match/current", async (req, res) => {
     try {

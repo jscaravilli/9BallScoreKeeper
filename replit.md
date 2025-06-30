@@ -210,6 +210,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 30, 2025: Version 1.0.5 - PWA-enabled production build ready for Android APK conversion
 - June 30, 2025: FIXED PWA manifest serving - added proper content-type headers for PWABuilder compatibility
 - June 30, 2025: UPDATED PWA icons to authentic 9-ball design - replaced generic club icon with proper yellow 9-ball pool ball graphics
+- June 30, 2025: CROPPED mobile screenshot to remove Replit interface - shows pure app content for professional PWA installation experience
 
 ## User Preferences
 

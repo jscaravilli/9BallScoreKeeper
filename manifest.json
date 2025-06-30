@@ -22,6 +22,15 @@
       "purpose": "maskable any"
     }
   ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "540x960",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "9-Ball Pool Score Tracker gameplay with interactive ball rack"
+    }
+  ],
   "categories": ["games", "sports", "utilities"],
   "lang": "en-US",
   "dir": "ltr"
