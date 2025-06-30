@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Trophy } from "lucide-react";
 import { getPointsToWin } from "@/lib/apa-handicaps";
@@ -37,6 +37,10 @@ export default function GameWinModal({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-sm mx-auto">
+        <DialogTitle className="sr-only">Game Over</DialogTitle>
+        <DialogDescription className="sr-only">
+          {winnerName} wins this game by pocketing the 9-ball for 2 points
+        </DialogDescription>
         <div className="text-center">
           <Trophy className="h-16 w-16 text-yellow-400 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-gray-800 mb-2">Game Over!</h2>

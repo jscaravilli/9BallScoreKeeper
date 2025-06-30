@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { clientQueryFunctions, clientMutation, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { Menu, Users, History, Settings, Plus, RotateCcw, Info, X, Trash2 } from "lucide-react";
 import PlayerSetupModal from "@/components/player-setup-modal";
@@ -1070,6 +1070,8 @@ export default function Game() {
       {/* Menu Modal */}
       <Dialog open={showMenu} onOpenChange={setShowMenu}>
         <DialogContent className="max-w-sm mx-auto">
+          <DialogTitle className="sr-only">Menu</DialogTitle>
+          <DialogDescription className="sr-only">Navigation menu with options for controls, history, and about</DialogDescription>
           <div className="space-y-4">
             <div className="mb-4">
               <h2 className="text-xl font-bold text-gray-800">Menu</h2>
@@ -1117,6 +1119,8 @@ export default function Game() {
       {/* Controls Modal */}
       <Dialog open={showControls} onOpenChange={setShowControls}>
         <DialogContent className="max-w-md mx-auto">
+          <DialogTitle className="sr-only">Game Controls</DialogTitle>
+          <DialogDescription className="sr-only">Instructions for how to play and control the game</DialogDescription>
           <div className="space-y-4">
             <div className="mb-4">
               <h2 className="text-xl font-bold text-gray-800">Ball Controls</h2>
@@ -1153,6 +1157,8 @@ export default function Game() {
       {/* History Modal */}
       <Dialog open={showHistory} onOpenChange={setShowHistory}>
         <DialogContent className="max-w-lg mx-auto max-h-[80vh] overflow-hidden">
+          <DialogTitle className="sr-only">Match History</DialogTitle>
+          <DialogDescription className="sr-only">View and manage completed match history with detailed game events</DialogDescription>
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-800">Match History</h2>
@@ -1183,6 +1189,8 @@ export default function Game() {
       {/* Confirmation Dialogs */}
       <Dialog open={showNewGameConfirm} onOpenChange={setShowNewGameConfirm}>
         <DialogContent className="max-w-sm mx-auto">
+          <DialogTitle className="sr-only">Start New Match</DialogTitle>
+          <DialogDescription className="sr-only">Confirm starting a new match which will reset current progress</DialogDescription>
           <div className="text-center">
             <h2 className="text-xl font-bold text-gray-800 mb-2">Start New Match?</h2>
             <p className="text-gray-600 mb-6">
@@ -1228,6 +1236,8 @@ export default function Game() {
       {/* About Modal */}
       <Dialog open={showAbout} onOpenChange={setShowAbout}>
         <DialogContent className="max-w-sm mx-auto">
+          <DialogTitle className="sr-only">About</DialogTitle>
+          <DialogDescription className="sr-only">Application information including version and developer credits</DialogDescription>
           <div className="text-center space-y-4">
             <h2 className="text-xl font-bold text-gray-800">About</h2>
             <div className="space-y-3">

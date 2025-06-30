@@ -202,6 +202,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Implemented advanced 3D overlay system for 9-ball with elliptical gradients, horizontal stripe spanning 50% of ball with circular cutout and 3D downward bend
   - Made white number circles smaller (1.5rem) across all balls for better proportions
   - Updated ball 1 to true yellow gradient and ball 5 to vibrant true orange for authentic pool ball colors
+- June 30, 2025: FIXED game numbering system - games now properly start at 1 and increment with each new rack after winning
 
 ## User Preferences
 
