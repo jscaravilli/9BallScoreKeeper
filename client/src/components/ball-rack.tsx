@@ -35,11 +35,11 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
 
   const getBallGradient = (ballNumber: number) => {
     const gradients = {
-      1: 'radial-gradient(circle at 30% 30%, #f59e0b, #d4a517, #ca8a04, #a16207)',
+      1: 'radial-gradient(circle at 30% 30%, #fde047, #facc15, #eab308, #ca8a04)',
       2: 'radial-gradient(circle at 30% 30%, #60a5fa, #2563eb, #1d4ed8, #172554)',
       3: 'radial-gradient(circle at 30% 30%, #f87171, #dc2626, #b91c1c, #7f1d1d)',
       4: 'radial-gradient(circle at 30% 30%, #a78bfa, #7c3aed, #6d28d9, #4c1d95)',
-      5: 'radial-gradient(circle at 30% 30%, #fed7aa, #fdba74, #fb923c, #ea580c)',
+      5: 'radial-gradient(circle at 30% 30%, #ff8c00, #ff7300, #e55100, #bf360c)',
       6: 'radial-gradient(circle at 30% 30%, #4ade80, #16a34a, #15803d, #14532d)',
       7: 'radial-gradient(circle at 30% 30%, #991b1b, #7f1d1d, #450a0a, #1c0606)',
       8: 'radial-gradient(circle at 30% 30%, #4b5563, #374151, #1f2937, #000000)',
