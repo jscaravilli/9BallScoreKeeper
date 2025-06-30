@@ -203,6 +203,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Made white number circles smaller (1.5rem) across all balls for better proportions
   - Updated ball 1 to true yellow gradient and ball 5 to vibrant true orange for authentic pool ball colors
 - June 30, 2025: FIXED game numbering system - games now properly start at 1 and increment with each new rack after winning
+- June 30, 2025: FIXED production game counter persistence - replaced async mutations with direct localStorage updates for reliable state management
 
 ## User Preferences
 
