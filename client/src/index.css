@@ -174,19 +174,18 @@ button {
 .ball-9::before {
   content: "";
   position: absolute;
-  top: 16.5%;
+  top: 17%;
   left: 0;
   right: 0;
-  height: 67%;
+  height: 66%;
   background: linear-gradient(to bottom,
     transparent 0%,
-    #d4a517 10%,
+    #d4a517 15%,
     #ca8a04 50%,
-    #d4a517 90%,
+    #d4a517 85%,
     transparent 100%
   );
-  border-radius: 50% / 100%;
-  transform: perspective(100px) rotateX(15deg);
+  border-radius: 50% / 80%;
   z-index: 1;
 }
 
