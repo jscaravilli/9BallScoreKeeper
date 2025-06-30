@@ -39,6 +39,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(distPath);
   });
 
+  app.get('/.well-known/assetlinks.json', (req, res) => {
+    const distPath = path.resolve(import.meta.dirname, "..", ".well-known", "assetlinks.json");
+    res.setHeader('Content-Type', 'application/json');
+    res.sendFile(distPath);
+  });
+
   // Get current active match
   app.get("/api/match/current", async (req, res) => {
     try {

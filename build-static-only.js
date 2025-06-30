@@ -30,6 +30,10 @@ async function buildStaticOnly() {
     
     // Copy PWA files to dist directory
     const pwaFiles = ['manifest.json', 'sw.js', 'icon-192.png', 'icon-512.png', 'screenshot-mobile.png'];
+    
+    // Copy .well-known directory for asset links
+    await execAsync('mkdir -p dist/.well-known');
+    await fs.copyFile('.well-known/assetlinks.json', 'dist/.well-known/assetlinks.json');
     for (const file of pwaFiles) {
       try {
         await fs.copyFile(file, `dist/${file}`);
