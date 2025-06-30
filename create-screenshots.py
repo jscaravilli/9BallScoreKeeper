@@ -28,7 +28,7 @@ def create_pwa_screenshots():
     app_left = 0  # Start from left edge
     app_top = 320  # Skip all browser/Replit interface completely
     app_right = original_width  # Go to right edge
-    app_bottom = original_height - 200  # Skip the bottom device navigation
+    app_bottom = original_height - 320  # Crop to end at green area, remove bottom navigation
     
     crop_box = (app_left, app_top, app_right, app_bottom)
     
