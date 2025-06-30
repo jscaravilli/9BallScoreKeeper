@@ -170,22 +170,22 @@ button {
     3px 3px 10px rgba(0,0,0,0.3);
 }
 
-/* Yellow horizontal stripe overlay with 3D curve */
+/* Yellow horizontal stripe overlay - traditional 9-ball style */
 .ball-9::before {
   content: "";
   position: absolute;
-  top: 17%;
+  top: 35%;
   left: 0;
   right: 0;
-  height: 66%;
+  height: 30%;
   background: linear-gradient(to bottom,
     transparent 0%,
-    #d4a517 15%,
+    #d4a517 20%,
     #ca8a04 50%,
-    #d4a517 85%,
+    #d4a517 80%,
     transparent 100%
   );
-  border-radius: 50% / 80%;
+  border-radius: 50% / 100%;
   z-index: 1;
 }
 
