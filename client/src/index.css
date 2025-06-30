@@ -120,45 +120,80 @@ button {
   background-color: var(--ball-black);
 }
 
-/* Ball colors with white circles for numbers 1-8 */
+/* 3D Ball sphere effects with radial gradients */
 .ball-1 { 
-  background: linear-gradient(to bottom, #eab308, #fbbf24, #eab308); 
+  background: radial-gradient(circle at 30% 30%, #fef08a, #eab308 60%, #ca8a04 100%);
   position: relative;
+  box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 .ball-2 { 
-  background: #0000FF; 
+  background: radial-gradient(circle at 30% 30%, #60a5fa, #2563eb 60%, #1d4ed8 100%);
   position: relative;
+  box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 .ball-3 { 
-  background: #FF0000; 
+  background: radial-gradient(circle at 30% 30%, #f87171, #dc2626 60%, #b91c1c 100%);
   position: relative;
+  box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 .ball-4 { 
-  background: #800080; 
+  background: radial-gradient(circle at 30% 30%, #c084fc, #7c3aed 60%, #6d28d9 100%);
   position: relative;
+  box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 .ball-5 { 
-  background: #FF8C00; 
+  background: radial-gradient(circle at 30% 30%, #fb923c, #ea580c 60%, #c2410c 100%);
   position: relative;
+  box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 .ball-6 { 
-  background: #008000; 
+  background: radial-gradient(circle at 30% 30%, #4ade80, #16a34a 60%, #15803d 100%);
   position: relative;
+  box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 .ball-7 { 
-  background: #8B4513; 
+  background: radial-gradient(circle at 30% 30%, #a16207, #92400e 60%, #78350f 100%);
   position: relative;
+  box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 .ball-8 { 
-  background: #000000; 
+  background: radial-gradient(circle at 30% 30%, #525252, #171717 60%, #000000 100%);
   position: relative;
+  box-shadow: inset -8px -8px 15px rgba(0,0,0,0.4), 2px 2px 8px rgba(0,0,0,0.3);
 }
 .ball-9 { 
-  background: linear-gradient(45deg, #FFD700 50%, #FFFFFF 50%); 
+  background: linear-gradient(45deg, 
+    radial-gradient(circle at 30% 30%, #fef08a, #eab308 60%, #ca8a04 100%) 50%, 
+    radial-gradient(circle at 30% 30%, #ffffff, #f3f4f6 60%, #d1d5db 100%) 50%
+  );
   position: relative;
+  box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 
-/* White circle with black number for balls 1-8 - matching 9-ball style */
+/* Add highlight effects to all balls */
+.ball-1::before, .ball-2::before, .ball-3::before, .ball-4::before,
+.ball-5::before, .ball-6::before, .ball-7::before, .ball-8::before, .ball-9::before {
+  content: "";
+  position: absolute;
+  top: 15%;
+  left: 25%;
+  width: 30%;
+  height: 30%;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 50%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(3px);
+  pointer-events: none;
+}
+
+/* Secondary light reflection for more realism */
+.ball-1:hover::before, .ball-2:hover::before, .ball-3:hover::before, .ball-4:hover::before,
+.ball-5:hover::before, .ball-6:hover::before, .ball-7:hover::before, .ball-8:hover::before, .ball-9:hover::before {
+  opacity: 0.9;
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+}
+
+/* White circle with black number for balls 1-8 - with 3D effect */
 .ball-1::after, .ball-2::after, .ball-3::after, .ball-4::after,
 .ball-5::after, .ball-6::after, .ball-7::after, .ball-8::after {
   content: attr(data-number);
@@ -168,7 +203,7 @@ button {
   transform: translate(-50%, -50%);
   width: 1.75rem;
   height: 1.75rem;
-  background: white;
+  background: radial-gradient(circle at 40% 30%, #ffffff, #f8fafc 70%, #e2e8f0 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -176,8 +211,12 @@ button {
   color: black;
   font-weight: bold;
   font-size: 1rem;
-  border: 0.5px solid #9ca3af;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 0.5px solid rgba(0,0,0,0.1);
+  box-shadow: 
+    0 2px 4px rgba(0,0,0,0.15),
+    inset -2px -2px 4px rgba(0,0,0,0.1),
+    inset 2px 2px 4px rgba(255,255,255,0.8);
+  z-index: 10;
 }
 
 /* Touch optimization */
