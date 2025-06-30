@@ -4,7 +4,7 @@
   "short_name": "9 Ball Scorekeeper",
   "description": "APA 9-Ball Pool Match Scoring Application",
   "start_url": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#1a4b3a",
   "theme_color": "#1a4b3a",
   "orientation": "portrait",

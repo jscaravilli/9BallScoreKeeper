@@ -1,0 +1,36 @@
+{
+  "appName": "9 Ball Scorekeeper",
+  "packageName": "com.nineball.scorekeeper",
+  "webUrl": "https://your-deployed-url.replit.app",
+  "versionName": "1.0.6",
+  "versionCode": 6,
+  "minSdkVersion": 26,
+  "targetSdkVersion": 34,
+  "permissions": [
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.WAKE_LOCK",
+    "android.permission.VIBRATE"
+  ],
+  "webViewSettings": {
+    "allowFileAccess": true,
+    "allowContentAccess": true,
+    "allowFileAccessFromFileURLs": false,
+    "allowUniversalAccessFromFileURLs": false,
+    "allowZoom": false,
+    "builtInZoomControls": false,
+    "displayZoomControls": false,
+    "domStorageEnabled": true,
+    "javaScriptEnabled": true,
+    "loadWithOverviewMode": true,
+    "useWideViewPort": true,
+    "userAgentString": "9BallScorekeeper/1.0.6 (Android)"
+  },
+  "features": {
+    "immersiveMode": true,
+    "hideSystemUI": true,
+    "keepScreenOn": true,
+    "hardwareAcceleration": true,
+    "localStorageBackup": true
+  }
+}
