@@ -170,7 +170,7 @@ button {
     3px 3px 10px rgba(0,0,0,0.3);
 }
 
-/* Yellow horizontal stripe overlay - 60% of ball */
+/* Yellow horizontal stripe overlay - 60% of ball with circle cutout */
 .ball-9::before {
   content: "";
   position: absolute;
@@ -178,7 +178,10 @@ button {
   left: 0;
   right: 0;
   height: 60%;
-  background: #d4a517;
+  background: radial-gradient(circle at center, 
+    transparent 14px, 
+    #d4a517 16px
+  );
   border-radius: 50% / 100%;
   z-index: 1;
 }
