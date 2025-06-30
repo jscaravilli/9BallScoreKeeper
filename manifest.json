@@ -1,6 +1,6 @@
 {
   "name": "9-Ball Pool Score Tracker",
-  "short_name": "Pool Scorer",
+  "short_name": "9 Ball Scorekeeper",
   "description": "APA 9-Ball Pool Match Scoring Application",
   "start_url": "/",
   "display": "standalone",
