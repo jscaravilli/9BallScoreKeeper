@@ -120,39 +120,39 @@ button {
   background-color: var(--ball-black);
 }
 
-/* 3D Ball sphere effects with radial gradients */
+/* 3D Ball sphere effects with radial gradients - 15% darker for balls 1-7 */
 .ball-1 { 
-  background: radial-gradient(circle at 30% 30%, #fef08a, #eab308 60%, #ca8a04 100%);
+  background: radial-gradient(circle at 30% 30%, #d4a517, #ca8a04 60%, #a16207 100%);
   position: relative;
   box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 .ball-2 { 
-  background: radial-gradient(circle at 30% 30%, #60a5fa, #2563eb 60%, #1d4ed8 100%);
+  background: radial-gradient(circle at 30% 30%, #4285f4, #1d4ed8 60%, #1e3a8a 100%);
   position: relative;
   box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 .ball-3 { 
-  background: radial-gradient(circle at 30% 30%, #f87171, #dc2626 60%, #b91c1c 100%);
+  background: radial-gradient(circle at 30% 30%, #dc2626, #b91c1c 60%, #991b1b 100%);
   position: relative;
   box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 .ball-4 { 
-  background: radial-gradient(circle at 30% 30%, #c084fc, #7c3aed 60%, #6d28d9 100%);
+  background: radial-gradient(circle at 30% 30%, #9333ea, #6d28d9 60%, #581c87 100%);
   position: relative;
   box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 .ball-5 { 
-  background: radial-gradient(circle at 30% 30%, #fb923c, #ea580c 60%, #c2410c 100%);
+  background: radial-gradient(circle at 30% 30%, #ea580c, #c2410c 60%, #9a3412 100%);
   position: relative;
   box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 .ball-6 { 
-  background: radial-gradient(circle at 30% 30%, #4ade80, #16a34a 60%, #15803d 100%);
+  background: radial-gradient(circle at 30% 30%, #16a34a, #15803d 60%, #14532d 100%);
   position: relative;
   box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
 .ball-7 { 
-  background: radial-gradient(circle at 30% 30%, #a16207, #92400e 60%, #78350f 100%);
+  background: radial-gradient(circle at 30% 30%, #78350f, #451a03 60%, #292524 100%);
   position: relative;
   box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 2px 2px 8px rgba(0,0,0,0.2);
 }
