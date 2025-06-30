@@ -160,7 +160,7 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
               key={ballNumber}
               className={getBallStyles(ballNumber, ballState.state, isLocked, isScoredThisInning)}
               onClick={() => !isLocked && onBallTap(ballNumber)}
-              variant="outline"
+              variant="ghost"
               disabled={isLocked}
             >
               {isLocked ? (
