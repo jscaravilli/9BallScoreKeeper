@@ -170,14 +170,14 @@ button {
     3px 3px 10px rgba(0,0,0,0.3);
 }
 
-/* Yellow horizontal stripe overlay - 60% of ball with circle cutout */
+/* Yellow horizontal stripe overlay - 45% of ball with circle cutout */
 .ball-9::before {
   content: "";
   position: absolute;
-  top: 20%;
+  top: 27.5%;
   left: 0;
   right: 0;
-  height: 60%;
+  height: 45%;
   background: radial-gradient(circle at center, 
     transparent 14px, 
     #d4a517 16px
