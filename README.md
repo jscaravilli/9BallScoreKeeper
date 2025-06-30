@@ -1,4 +1,4 @@
-# 9-Ball Pool Score Tracker
+# 9-Ball Score Keeper
 
 Note from the human involved: I should have been practicing pool instead of telling AI to build this app. I'm a glorified unit-tester :(
 
