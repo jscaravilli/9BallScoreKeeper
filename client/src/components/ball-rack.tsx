@@ -35,15 +35,15 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
 
   const getBallGradient = (ballNumber: number) => {
     const gradients = {
-      1: 'radial-gradient(circle at 30% 30%, #facc15, #eab308, #a16207, #451a03)',
-      2: 'radial-gradient(circle at 30% 30%, #60a5fa, #2563eb, #1d4ed8, #172554)',
-      3: 'radial-gradient(circle at 30% 30%, #f87171, #dc2626, #b91c1c, #7f1d1d)',
-      4: 'radial-gradient(circle at 30% 30%, #a78bfa, #7c3aed, #6d28d9, #4c1d95)',
-      5: 'radial-gradient(circle at 30% 30%, #fb923c, #ea580c, #c2410c, #9a3412)',
-      6: 'radial-gradient(circle at 30% 30%, #4ade80, #16a34a, #15803d, #14532d)',
-      7: 'radial-gradient(circle at 30% 30%, #991b1b, #7f1d1d, #450a0a, #1c0606)',
-      8: 'radial-gradient(circle at 30% 30%, #4b5563, #374151, #1f2937, #000000)',
-      9: 'radial-gradient(circle at 30% 30%, #ffffff, #f9fafb, #e5e7eb, #9ca3af)'
+      1: 'radial-gradient(ellipse 60% 40% at 25% 25%, rgba(255,255,255,0.8), rgba(255,255,255,0.4) 30%, #fbbf24 50%, #eab308 70%, #d97706 85%, #92400e)',
+      2: 'radial-gradient(ellipse 60% 40% at 25% 25%, rgba(255,255,255,0.8), rgba(255,255,255,0.4) 30%, #60a5fa 50%, #3b82f6 70%, #1d4ed8 85%, #1e3a8a)',
+      3: 'radial-gradient(ellipse 60% 40% at 25% 25%, rgba(255,255,255,0.8), rgba(255,255,255,0.4) 30%, #f87171 50%, #ef4444 70%, #dc2626 85%, #991b1b)',
+      4: 'radial-gradient(ellipse 60% 40% at 25% 25%, rgba(255,255,255,0.8), rgba(255,255,255,0.4) 30%, #a78bfa 50%, #8b5cf6 70%, #7c3aed 85%, #5b21b6)',
+      5: 'radial-gradient(ellipse 60% 40% at 25% 25%, rgba(255,255,255,0.8), rgba(255,255,255,0.4) 30%, #fb923c 50%, #f97316 70%, #ea580c 85%, #c2410c)',
+      6: 'radial-gradient(ellipse 60% 40% at 25% 25%, rgba(255,255,255,0.8), rgba(255,255,255,0.4) 30%, #4ade80 50%, #22c55e 70%, #16a34a 85%, #15803d)',
+      7: 'radial-gradient(ellipse 60% 40% at 25% 25%, rgba(255,255,255,0.8), rgba(255,255,255,0.4) 30%, #dc2626 50%, #b91c1c 70%, #991b1b 85%, #7f1d1d)',
+      8: 'radial-gradient(ellipse 60% 40% at 25% 25%, rgba(255,255,255,0.8), rgba(255,255,255,0.4) 30%, #6b7280 50%, #4b5563 70%, #374151 85%, #111827)',
+      9: 'radial-gradient(ellipse 60% 40% at 25% 25%, rgba(255,255,255,0.9), rgba(255,255,255,0.6) 30%, #f9fafb 50%, #e5e7eb 70%, #d1d5db 85%, #9ca3af)'
     };
     return gradients[ballNumber as keyof typeof gradients] || '';
   };
@@ -51,7 +51,7 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
   const renderBallContent = (ballNumber: number, state: BallInfo['state']) => {
     // Only render ball designs for active balls (scored/dead balls are hidden entirely)
     if (ballNumber === 9 && state === 'active') {
-      // CSS-based 9-ball design with gradient effect
+      // 9-ball design with new gradient system
       return (
         <div className="relative w-full h-full rounded-full overflow-hidden">
           {/* Base gradient ball */}
@@ -60,70 +60,56 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
             style={{ background: getBallGradient(9) }}
           ></div>
           
-          {/* Glossy highlight effect */}
-          <div 
-            className="absolute rounded-full"
-            style={{
-              top: '10%',
-              left: '20%',
-              width: '35%',
-              height: '35%',
-              background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 40%, transparent 70%)',
-            }}
-          ></div>
-          
-          {/* Yellow horizontal stripe spanning full width of the button */}
+          {/* Yellow horizontal stripe spanning full width */}
           <div 
             className="absolute left-0 right-0"
             style={{ 
               top: '22%',
               height: '56%',
-              background: 'linear-gradient(to bottom, #eab308, #fbbf24, #eab308)'
+              background: 'linear-gradient(to bottom, #fbbf24, #eab308, #d97706)'
             }}
           ></div>
           
-          {/* White circle for number in center */}
+          {/* White circle for number in center - no border */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center border border-gray-400 shadow-sm">
+            <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-lg">
               <span className="font-bold text-base text-black">9</span>
             </div>
           </div>
         </div>
       );
     } else {
-      // For balls 1-8, use CSS-based design with white circles and black numbers
+      // For balls 1-8, use new gradient system with white circles and black numbers
       return (
-        <div 
-          className={`ball-${ballNumber} w-full h-full rounded-full overflow-hidden relative`}
-          data-number={ballNumber}
-        >
-          {/* Glossy highlight effect */}
+        <div className="relative w-full h-full rounded-full overflow-hidden">
+          {/* Base gradient ball */}
           <div 
-            className="absolute rounded-full"
-            style={{
-              top: '10%',
-              left: '20%',
-              width: '35%',
-              height: '35%',
-              background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 40%, transparent 70%)',
-            }}
+            className="absolute inset-0 rounded-full"
+            style={{ background: getBallGradient(ballNumber) }}
           ></div>
+          
+          {/* White circle for number in center - no border */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-lg">
+              <span className="font-bold text-base text-black">{ballNumber}</span>
+            </div>
+          </div>
         </div>
       );
     }
   };
 
   const getBallStyles = (ballNumber: number, state: BallInfo['state'], isLocked: boolean, isScoredThisInning: boolean) => {
-    const baseStyles = "w-16 h-16 rounded-full border-[0.5px] shadow-lg flex items-center justify-center font-bold text-lg transition-all touch-target";
+    const baseStyles = "w-16 h-16 rounded-full shadow-xl flex items-center justify-center font-bold text-lg transition-all touch-target";
     
     if (isLocked) {
-      return `${baseStyles} bg-gray-300 border-gray-400 opacity-40 cursor-not-allowed`;
+      return `${baseStyles} bg-gray-300 opacity-40 cursor-not-allowed`;
     } else if (isScoredThisInning && (state === 'scored' || state === 'dead')) {
       // Balls scored during current inning show with greyed background for check marks
-      return `${baseStyles} bg-gray-100 border-green-600 text-gray-600 hover:shadow-xl active:scale-95`;
+      return `${baseStyles} bg-gray-100 text-gray-600 hover:shadow-2xl active:scale-95`;
     } else {
-      // All active balls use custom gradients
-      return `${baseStyles} bg-transparent border-gray-300 text-white overflow-hidden p-0 hover:shadow-xl active:scale-95`;
+      // All active balls use custom gradients with no border
+      return `${baseStyles} bg-transparent text-white overflow-hidden p-0 hover:shadow-2xl hover:scale-105 active:scale-95`;
     }
   };
 
