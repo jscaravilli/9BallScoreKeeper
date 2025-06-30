@@ -875,6 +875,14 @@ export default function Game() {
       state: 'active' as const,
     }));
 
+    // Increment game number for new rack
+    updateMatchMutation.mutate({
+      id: currentMatch.id,
+      updates: {
+        currentGame: currentMatch.currentGame + 1,
+      }
+    });
+
     updateBallsMutation.mutate({
       id: currentMatch.id,
       ballStates: initialBallStates,
