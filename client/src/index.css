@@ -174,10 +174,28 @@ button {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), rgba(255,255,255,0.3) 50%, rgba(0,0,0,0.1) 80%, rgba(0,0,0,0.2) 100%);
+  background: radial-gradient(circle at 30% 30%, 
+    rgba(255,255,255,0.8) 0%, 
+    transparent 40%, 
+    rgba(0,0,0,0.15) 70%, 
+    rgba(0,0,0,0.4) 100%);
   border-radius: 50%;
   pointer-events: none;
   z-index: 1;
+}
+
+.ball-9::after {
+  content: "";
+  position: absolute;
+  top: 15%;
+  left: 25%;
+  width: 30%;
+  height: 30%;
+  background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.5) 50%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(2px);
+  pointer-events: none;
+  z-index: 2;
 }
 
 /* Add highlight effects to balls 1-8 */
