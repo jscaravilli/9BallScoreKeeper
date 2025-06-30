@@ -198,6 +198,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Added hover effects for interactive visual feedback
   - Removed all borders from pool balls for cleaner, modern appearance
   - Made balls 1-7 15% darker with deeper, more saturated color gradients for authentic pool hall appearance
+  - Matched 9-ball yellow section to ball 1's darker yellow gradient for visual consistency
 
 ## User Preferences
 

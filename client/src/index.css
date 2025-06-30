@@ -163,7 +163,7 @@ button {
 }
 .ball-9 { 
   background: linear-gradient(45deg, 
-    radial-gradient(circle at 30% 30%, #fef08a, #eab308 60%, #ca8a04 100%) 50%, 
+    radial-gradient(circle at 30% 30%, #d4a517, #ca8a04 60%, #a16207 100%) 50%, 
     radial-gradient(circle at 30% 30%, #ffffff, #f3f4f6 60%, #d1d5db 100%) 50%
   );
   position: relative;
