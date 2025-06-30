@@ -876,18 +876,14 @@ export default function Game() {
       state: 'active' as const,
     }));
 
-    // Increment game number for new rack
-    updateMatchMutation.mutate({
-      id: currentMatch.id,
-      updates: {
-        currentGame: currentMatch.currentGame + 1,
-      }
+    // Update match with incremented game number and reset balls in single operation
+    const updatedMatch = localStorageAPI.updateMatch(currentMatch.id, {
+      currentGame: currentMatch.currentGame + 1,
+      ballStates: initialBallStates
     });
 
-    updateBallsMutation.mutate({
-      id: currentMatch.id,
-      ballStates: initialBallStates,
-    });
+    // Invalidate cache to trigger re-render
+    queryClient.setQueryData(["/api/match/current"], updatedMatch);
 
     // Create rerack event
     const rerackEvent: MatchEvent = {
