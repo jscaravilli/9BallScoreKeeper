@@ -2,6 +2,8 @@
 
 Note from the human involved: I should have been practicing pool instead of telling AI to build this app. I'm a glorified unit-tester :(
 
+https://9BallScoreKeeper.com
+
 A professional-grade web application for tracking APA 9-ball pool matches with realistic 3D ball graphics and tournament-quality scoring.
 
 ## Features
