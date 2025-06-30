@@ -35,11 +35,11 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
 
   const getBallGradient = (ballNumber: number) => {
     const gradients = {
-      1: 'radial-gradient(circle at 30% 30%, #facc15, #eab308, #a16207, #451a03)',
+      1: 'radial-gradient(circle at 30% 30%, #d4a517, #ca8a04, #a16207, #451a03)',
       2: 'radial-gradient(circle at 30% 30%, #60a5fa, #2563eb, #1d4ed8, #172554)',
       3: 'radial-gradient(circle at 30% 30%, #f87171, #dc2626, #b91c1c, #7f1d1d)',
       4: 'radial-gradient(circle at 30% 30%, #a78bfa, #7c3aed, #6d28d9, #4c1d95)',
-      5: 'radial-gradient(circle at 30% 30%, #fb923c, #ea580c, #c2410c, #9a3412)',
+      5: 'radial-gradient(circle at 30% 30%, #fdba74, #fb923c, #ea580c, #c2410c)',
       6: 'radial-gradient(circle at 30% 30%, #4ade80, #16a34a, #15803d, #14532d)',
       7: 'radial-gradient(circle at 30% 30%, #991b1b, #7f1d1d, #450a0a, #1c0606)',
       8: 'radial-gradient(circle at 30% 30%, #4b5563, #374151, #1f2937, #000000)',
@@ -59,7 +59,7 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
         >
           {/* White circle for number - positioned above all overlays */}
           <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm">
+            <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
               <span className="font-bold text-base text-black">9</span>
             </div>
           </div>

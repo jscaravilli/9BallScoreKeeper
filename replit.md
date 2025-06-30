@@ -199,7 +199,9 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Removed all borders from pool balls for cleaner, modern appearance
   - Made balls 1-7 15% darker with deeper, more saturated color gradients for authentic pool hall appearance
   - Matched 9-ball yellow section to ball 1's darker yellow gradient for visual consistency
-  - Implemented advanced 3D overlay system for 9-ball with elliptical gradients, horizontal stripe spanning 50% of ball with circular cutout and straighter edges, and sophisticated lighting effects
+  - Implemented advanced 3D overlay system for 9-ball with elliptical gradients, horizontal stripe spanning 50% of ball with circular cutout and 3D downward bend
+  - Made white number circles smaller (1.5rem) across all balls for better proportions
+  - Lightened ball 5 orange color and matched ball 1 yellow to 9-ball stripe color for consistency
 
 ## User Preferences
 

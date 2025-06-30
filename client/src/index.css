@@ -179,8 +179,8 @@ button {
   right: 0;
   height: 50%;
   background: radial-gradient(circle at center, 
-    transparent 14px, 
-    #d4a517 16px
+    transparent 12px, 
+    #d4a517 14px
   );
   transform: perspective(200px) rotateX(8deg);
   z-index: 1;
@@ -253,8 +253,8 @@ button {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
   background: radial-gradient(circle at 40% 30%, #ffffff, #f8fafc 70%, #e2e8f0 100%);
   border-radius: 50%;
   display: flex;
