@@ -206,6 +206,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 30, 2025: FIXED production game counter persistence - replaced async mutations with direct localStorage updates for reliable state management
 - June 30, 2025: Updated UI terminology - match win modal now says "Start New Match" and player setup shows "Player 1 Name (Lag Winner)"
 - June 30, 2025: Version 1.0.4 - production build ready with game counter fixes and improved UI text
+- June 30, 2025: CONVERTED TO PWA - added manifest.json, service worker, app icons, and offline functionality
+- June 30, 2025: Version 1.0.5 - PWA-enabled production build ready for Android APK conversion
 
 ## User Preferences
 

@@ -1,0 +1,28 @@
+{
+  "name": "9-Ball Pool Score Tracker",
+  "short_name": "Pool Scorer",
+  "description": "APA 9-Ball Pool Match Scoring Application",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a4b3a",
+  "theme_color": "#1a4b3a",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["games", "sports", "utilities"],
+  "lang": "en-US",
+  "dir": "ltr"
+}

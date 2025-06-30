@@ -1242,7 +1242,7 @@ export default function Game() {
                   onClick={handleVersionTap}
                   title="Tap 5 times quickly to clear app cache"
                 >
-                  Version 1.0.4 {tapCount > 0 && `(${tapCount}/5)`}
+                  Version 1.0.5 {tapCount > 0 && `(${tapCount}/5)`}
                 </p>
               </div>
               <div>

@@ -28,6 +28,17 @@ async function buildStaticOnly() {
       console.log('✓ Copied files from dist/public to dist root');
     }
     
+    // Copy PWA files to dist directory
+    const pwaFiles = ['manifest.json', 'sw.js', 'icon-192.png', 'icon-512.png'];
+    for (const file of pwaFiles) {
+      try {
+        await fs.copyFile(file, `dist/${file}`);
+        console.log(`✓ Copied ${file} to dist`);
+      } catch (error) {
+        console.log(`⚠ Could not copy ${file}: ${error.message}`);
+      }
+    }
+    
     // Inject deployment timestamp for cache busting
     const indexPath = 'dist/index.html';
     let indexContent = await fs.readFile(indexPath, 'utf-8');
