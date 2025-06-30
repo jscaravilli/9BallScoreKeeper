@@ -170,7 +170,7 @@ button {
     3px 3px 10px rgba(0,0,0,0.3);
 }
 
-/* Yellow horizontal stripe overlay - traditional 9-ball style */
+/* Yellow horizontal stripe overlay - 30% of ball */
 .ball-9::before {
   content: "";
   position: absolute;
@@ -178,13 +178,7 @@ button {
   left: 0;
   right: 0;
   height: 30%;
-  background: linear-gradient(to bottom,
-    transparent 0%,
-    #d4a517 20%,
-    #ca8a04 50%,
-    #d4a517 80%,
-    transparent 100%
-  );
+  background: #d4a517;
   border-radius: 50% / 100%;
   z-index: 1;
 }
