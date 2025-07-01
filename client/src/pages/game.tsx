@@ -1213,34 +1213,34 @@ export default function Game() {
           {/* End Turn Button */}
           <Button 
             variant="outline" 
-            className="py-3 px-2 bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+            className="py-2.5 px-2 bg-red-50 border-red-200 text-red-700 hover:bg-red-100 text-xs"
             onClick={handleEndTurn}
           >
             End Turn
           </Button>
 
-          {/* Safety Button with Minus */}
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleUndoSafety}
-              disabled={(currentMatch.currentPlayer === 1 ? (currentMatch.player1SafetiesUsed || 0) : (currentMatch.player2SafetiesUsed || 0)) === 0}
-              className="p-2 bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-30"
-            >
-              <Minus className="h-3 w-3" />
-            </Button>
+          {/* Safety Button */}
+          <div className="relative">
             <Button 
               variant="outline" 
-              className="flex-1 py-3 px-2 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
+              className="w-full py-2.5 px-2 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 text-xs"
               onClick={handleSafety}
             >
-              <Shield className="h-4 w-4 mr-1" />
+              <Shield className="h-3 w-3 mr-1" />
               Safety ({currentMatch.currentPlayer === 1 ? (currentMatch.player1SafetiesUsed || 0) : (currentMatch.player2SafetiesUsed || 0)})
             </Button>
+            {(currentMatch.currentPlayer === 1 ? (currentMatch.player1SafetiesUsed || 0) : (currentMatch.player2SafetiesUsed || 0)) > 0 && (
+              <button
+                onClick={handleUndoSafety}
+                className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm"
+                title="Undo last safety"
+              >
+                <Minus className="h-2.5 w-2.5" />
+              </button>
+            )}
           </div>
 
-          {/* Timeout Button with Minus */}
+          {/* Timeout Button */}
           {(() => {
             const currentPlayerTimeoutsUsed = currentMatch.currentPlayer === 1 
               ? (currentMatch.player1TimeoutsUsed || 0)
@@ -1254,25 +1254,25 @@ export default function Game() {
             const maxTimeouts = currentPlayerSkillLevel <= 3 ? 2 : 1;
             
             return (
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleUndoTimeout}
-                  disabled={currentPlayerTimeoutsUsed === 0}
-                  className="p-2 bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-30"
-                >
-                  <Minus className="h-3 w-3" />
-                </Button>
+              <div className="relative">
                 <Button
                   variant="outline"
                   onClick={handleTakeTimeout}
                   disabled={remainingTimeouts === 0}
-                  className="flex-1 py-3 px-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-2.5 px-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed text-xs"
                 >
-                  <Clock className="h-4 w-4 mr-1" />
+                  <Clock className="h-3 w-3 mr-1" />
                   Timeout ({currentPlayerTimeoutsUsed}/{maxTimeouts})
                 </Button>
+                {currentPlayerTimeoutsUsed > 0 && (
+                  <button
+                    onClick={handleUndoTimeout}
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm"
+                    title="Undo last timeout"
+                  >
+                    <Minus className="h-2.5 w-2.5" />
+                  </button>
+                )}
               </div>
             );
           })()}
