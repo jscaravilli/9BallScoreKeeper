@@ -30,7 +30,7 @@ function HistoryDisplay({
 }) {
   // Use useMemo to make history reactive to refreshKey changes
   const history = useMemo(() => {
-    return localStorageAPI.getMatchHistory();
+    return cookieStorageAPI.getMatchHistory();
   }, [refreshKey]);
   
   if (history.length === 0) {
@@ -428,7 +428,7 @@ export default function Game() {
         newScore: newScore,
         details: `${ballNumber}-Ball scored for ${points} point${points > 1 ? 's' : ''}`
       };
-      localStorageAPI.addMatchEvent(ballScoredEvent);
+      cookieStorageAPI.addMatchEvent(ballScoredEvent);
 
       // Check if this scoring wins the match (reaches or exceeds handicap)
       const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
@@ -489,10 +489,10 @@ export default function Game() {
             playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
             details: `Match won by ${currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name} with final score ${currentMatch.currentPlayer === 1 ? newScore : currentMatch.player1Score}-${currentMatch.currentPlayer === 2 ? newScore : currentMatch.player2Score}`
           };
-          localStorageAPI.addMatchEvent(matchCompletedEvent);
+          cookieStorageAPI.addMatchEvent(matchCompletedEvent);
 
           // Save completed match to local history immediately
-          localStorageAPI.addToHistory(completedMatch);
+          cookieStorageAPI.addToHistory(completedMatch);
           
           // Trigger history refresh to make it immediately visible
           setHistoryRefreshKey(prev => prev + 1);
@@ -567,7 +567,7 @@ export default function Game() {
           newScore: newScore,
           details: `${ballNumber}-Ball marked dead, ${points} point${points > 1 ? 's' : ''} deducted`
         };
-        localStorageAPI.addMatchEvent(ballDeadEvent);
+        cookieStorageAPI.addMatchEvent(ballDeadEvent);
 
         updateMatchMutation.mutate({
           id: currentMatch.id,
@@ -717,7 +717,7 @@ export default function Game() {
       details: `Timeout taken for ${timeoutDuration}`
     };
     
-    localStorageAPI.addMatchEvent(timeoutEvent);
+    cookieStorageAPI.addMatchEvent(timeoutEvent);
     setShowTimeoutModal(false);
   };
 
@@ -883,7 +883,7 @@ export default function Game() {
       playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
       details: 'Turn undone - reverted to previous state'
     };
-    localStorageAPI.addMatchEvent(undoEvent);
+    cookieStorageAPI.addMatchEvent(undoEvent);
     
     setUndoInProgress(true);
 
@@ -983,7 +983,7 @@ export default function Game() {
       playerName: gameWinner === 1 ? currentMatch.player1Name : currentMatch.player2Name,
       details: 'Rerack - New game started after 9-ball win'
     };
-    localStorageAPI.addMatchEvent(rerackEvent);
+    cookieStorageAPI.addMatchEvent(rerackEvent);
 
     setShowGameWin(false);
     setGameWinner(null);

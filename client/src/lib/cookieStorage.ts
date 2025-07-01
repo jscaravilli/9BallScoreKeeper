@@ -151,14 +151,51 @@ class CookieStorageAPI {
     this.deleteCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS);
   }
 
-  // History management
+  // Multi-cookie history management - one cookie per match
   getMatchHistory(): (Match & { completedAt: string; events: MatchEvent[] })[] {
     try {
-      const history = this.getCookie(COOKIE_KEYS.MATCH_HISTORY);
-      return history ? JSON.parse(history) : [];
+      const history: (Match & { completedAt: string; events: MatchEvent[] })[] = [];
+      
+      // Get the index of stored matches
+      const indexCookie = this.getCookie('match_history_index');
+      const matchIds = indexCookie ? JSON.parse(indexCookie) : [];
+      
+      // Load each match from its individual cookie
+      for (const matchId of matchIds) {
+        const matchCookie = this.getCookie(`match_history_${matchId}`);
+        if (matchCookie) {
+          try {
+            const match = JSON.parse(matchCookie);
+            history.push(match);
+          } catch (parseError) {
+            console.warn(`Error parsing match ${matchId}, removing from index`);
+            // Remove corrupted match from index
+            this.removeMatchFromIndex(matchId);
+          }
+        } else {
+          // Cookie missing, remove from index
+          this.removeMatchFromIndex(matchId);
+        }
+      }
+      
+      // Sort by completion date (newest first)
+      return history.sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime());
     } catch (error) {
       console.error('Error getting match history from cookies:', error);
       return [];
+    }
+  }
+
+  private removeMatchFromIndex(matchId: string): void {
+    try {
+      const indexCookie = this.getCookie('match_history_index');
+      const matchIds = indexCookie ? JSON.parse(indexCookie) : [];
+      const updatedIds = matchIds.filter((id: string) => id !== matchId);
+      this.setCookie('match_history_index', JSON.stringify(updatedIds));
+      // Also delete the match cookie if it exists
+      this.deleteCookie(`match_history_${matchId}`);
+    } catch (error) {
+      console.error('Error removing match from index:', error);
     }
   }
 
@@ -166,7 +203,6 @@ class CookieStorageAPI {
     if (!match.isComplete) return;
     
     try {
-      const history = this.getMatchHistory();
       const events = this.getCurrentMatchEvents();
       
       const historyEntry = {
@@ -175,25 +211,54 @@ class CookieStorageAPI {
         events: events
       };
       
-      // Add to beginning of array (newest first)
-      history.unshift(historyEntry);
+      // Create unique ID for this match (timestamp + match ID)
+      const matchKey = `${Date.now()}_${match.id}`;
       
-      // Keep only last 50 matches to prevent cookie bloat
-      if (history.length > 50) {
-        history.splice(50);
+      // Store the match in its own cookie
+      this.setCookie(`match_history_${matchKey}`, JSON.stringify(historyEntry));
+      
+      // Update the index
+      const indexCookie = this.getCookie('match_history_index');
+      const matchIds = indexCookie ? JSON.parse(indexCookie) : [];
+      matchIds.unshift(matchKey); // Add to beginning (newest first)
+      
+      // Keep only last 20 matches to prevent too many cookies
+      if (matchIds.length > 20) {
+        // Remove oldest matches
+        const removedIds = matchIds.splice(20);
+        removedIds.forEach((id: string) => {
+          this.deleteCookie(`match_history_${id}`);
+        });
       }
       
-      this.setCookie(COOKIE_KEYS.MATCH_HISTORY, JSON.stringify(history));
+      this.setCookie('match_history_index', JSON.stringify(matchIds));
       
       // Clear current match events after saving to history
       this.clearCurrentMatchEvents();
+      
+      console.log(`Match ${matchKey} saved to history cookies`);
     } catch (error) {
       console.error('Error adding to match history in cookies:', error);
     }
   }
 
   clearHistory(): void {
-    this.deleteCookie(COOKIE_KEYS.MATCH_HISTORY);
+    try {
+      // Get all match IDs and delete their cookies
+      const indexCookie = this.getCookie('match_history_index');
+      const matchIds = indexCookie ? JSON.parse(indexCookie) : [];
+      
+      matchIds.forEach((id: string) => {
+        this.deleteCookie(`match_history_${id}`);
+      });
+      
+      // Delete the index
+      this.deleteCookie('match_history_index');
+      
+      console.log('All match history cookies cleared');
+    } catch (error) {
+      console.error('Error clearing match history:', error);
+    }
   }
 
   // Migration helper: copy data from localStorage to cookies
