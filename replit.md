@@ -224,6 +224,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - July 1, 2025: FIXED match history compatibility with timeout system - updated database schema to properly include timeout fields
 - July 1, 2025: FIXED match history timing - history now writes immediately when match winner modal appears, not when next match starts
 - July 1, 2025: Added offline indicator next to innings count and improved current player outline visibility with thicker green border and ring effect
+- July 1, 2025: RESOLVED match history cookie storage issue - implemented comprehensive debugging system with multi-tier fallback (cookie → localStorage) and 48-hour expiration
+- July 1, 2025: Fixed cookie verification failures with enhanced storage methods, overwrite detection, and automatic index rebuilding from orphaned cookies
 
 ## User Preferences
 
