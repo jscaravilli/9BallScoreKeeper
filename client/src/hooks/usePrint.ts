@@ -25,7 +25,7 @@ export function usePrint() {
             @media print {
               @page {
                 margin: 0;
-                size: letter;
+                size: letter landscape;
               }
               body {
                 margin: 0;

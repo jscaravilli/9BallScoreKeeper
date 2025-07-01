@@ -29,7 +29,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
   
   return (
     <div className="print:block hidden" id="scoresheet-print">
-      <div className="relative bg-white" style={{ width: '8.5in', height: '11in', pageBreakAfter: 'always' }}>
+      <div className="relative bg-white" style={{ width: '11in', height: '8.5in', pageBreakAfter: 'always' }}>
         {/* Background scoresheet image */}
         <img 
           src={scoresheetPdf} 
