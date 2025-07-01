@@ -155,10 +155,7 @@ class CookieStorageAPI {
   getMatchHistory(): (Match & { completedAt: string; events: MatchEvent[] })[] {
     try {
       const history = this.getCookie(COOKIE_KEYS.MATCH_HISTORY);
-      console.log('Raw history cookie data:', history);
-      const parsed = history ? JSON.parse(history) : [];
-      console.log('Parsed history:', parsed);
-      return parsed;
+      return history ? JSON.parse(history) : [];
     } catch (error) {
       console.error('Error getting match history from cookies:', error);
       return [];
@@ -169,18 +166,14 @@ class CookieStorageAPI {
     if (!match.isComplete) return;
     
     try {
-      console.log('Adding match to history:', match);
       const history = this.getMatchHistory();
       const events = this.getCurrentMatchEvents();
-      console.log('Current events:', events);
       
       const historyEntry = {
         ...match,
         completedAt: new Date().toISOString(),
         events: events
       };
-      
-      console.log('History entry to save:', historyEntry);
       
       // Add to beginning of array (newest first)
       history.unshift(historyEntry);
@@ -190,9 +183,7 @@ class CookieStorageAPI {
         history.splice(50);
       }
       
-      console.log('Updated history array:', history);
       this.setCookie(COOKIE_KEYS.MATCH_HISTORY, JSON.stringify(history));
-      console.log('History saved to cookie');
       
       // Clear current match events after saving to history
       this.clearCurrentMatchEvents();
