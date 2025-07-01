@@ -1170,81 +1170,81 @@ export default function Game() {
 
       {/* Game Actions */}
       <section className="p-4 pb-20">
-        {/* Timeout Button */}
-        {(() => {
-          const currentPlayerTimeoutsUsed = currentMatch.currentPlayer === 1 
-            ? (currentMatch.player1TimeoutsUsed || 0)
-            : (currentMatch.player2TimeoutsUsed || 0);
-          
-          const currentPlayerSkillLevel = currentMatch.currentPlayer === 1 
-            ? currentMatch.player1SkillLevel 
-            : currentMatch.player2SkillLevel;
-          
-          const remainingTimeouts = getRemainingTimeouts(currentPlayerSkillLevel as any, currentPlayerTimeoutsUsed);
-          const maxTimeouts = currentPlayerSkillLevel <= 3 ? 2 : 1;
-          
-          return (
-            <div className="mb-3 flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleUndoTimeout}
-                disabled={currentPlayerTimeoutsUsed === 0}
-                className="p-2 bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-30"
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleTakeTimeout}
-                disabled={remainingTimeouts === 0}
-                className="flex-1 py-3 px-4 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Clock className="h-4 w-4 mr-2" />
-                {remainingTimeouts} of {maxTimeouts} timeouts remaining
-              </Button>
-            </div>
-          );
-        })()}
-
-        {/* Safety Button - next to timeout */}
-        <div className="mb-3">
+        {/* Top row: End Turn, Safety, Timeout */}
+        <div className="grid grid-cols-3 gap-3 mb-3">
+          {/* End Turn Button */}
           <Button 
             variant="outline" 
-            className="w-full py-3 px-4 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
-            onClick={handleSafety}
-          >
-            <Shield className="h-4 w-4 mr-2" />
-            Safety ({currentMatch.currentPlayer === 1 ? (currentMatch.player1SafetiesUsed || 0) : (currentMatch.player2SafetiesUsed || 0)})
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 mb-3">
-          <Button 
-            variant="outline" 
-            className="py-3 px-4 bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+            className="py-3 px-2 bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
             onClick={handleEndTurn}
           >
             End Turn
           </Button>
-        </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-3">
+          {/* Safety Button */}
           <Button 
             variant="outline" 
-            className="py-3 px-4 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+            className="py-3 px-2 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
+            onClick={handleSafety}
+          >
+            <Shield className="h-4 w-4 mr-1" />
+            Safety ({currentMatch.currentPlayer === 1 ? (currentMatch.player1SafetiesUsed || 0) : (currentMatch.player2SafetiesUsed || 0)})
+          </Button>
+
+          {/* Timeout Button */}
+          {(() => {
+            const currentPlayerTimeoutsUsed = currentMatch.currentPlayer === 1 
+              ? (currentMatch.player1TimeoutsUsed || 0)
+              : (currentMatch.player2TimeoutsUsed || 0);
+            
+            const currentPlayerSkillLevel = currentMatch.currentPlayer === 1 
+              ? currentMatch.player1SkillLevel 
+              : currentMatch.player2SkillLevel;
+            
+            const remainingTimeouts = getRemainingTimeouts(currentPlayerSkillLevel as any, currentPlayerTimeoutsUsed);
+            const maxTimeouts = currentPlayerSkillLevel <= 3 ? 2 : 1;
+            
+            return (
+              <Button
+                variant="outline"
+                onClick={handleTakeTimeout}
+                disabled={remainingTimeouts === 0}
+                className="py-3 px-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Clock className="h-4 w-4 mr-1" />
+                Timeout ({currentPlayerTimeoutsUsed}/{maxTimeouts})
+              </Button>
+            );
+          })()}
+        </div>
+
+        {/* Empty space after top row */}
+        <div className="mb-4"></div>
+        
+        {/* New Match Button */}
+        <div className="mb-3">
+          <Button 
+            variant="outline" 
+            className="w-full py-3 px-4 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
             onClick={handleNewGame}
           >
             <Plus className="h-4 w-4 mr-2" />
             New Match
           </Button>
+        </div>
+
+        {/* Two empty spaces */}
+        <div className="mb-8"></div>
+
+        {/* Reset Match Button */}
+        <div className="mb-3">
           <Button 
             variant="secondary" 
-            className="py-3 px-4"
+            className="w-full py-3 px-4"
             onClick={handleResetGame}
           >
             <RotateCcw className="h-4 w-4 mr-2" />
-            Reset
+            Reset Match
           </Button>
         </div>
 
