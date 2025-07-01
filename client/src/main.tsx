@@ -26,10 +26,15 @@ const checkForUpdates = () => {
     // Clear session storage
     sessionStorage.clear();
     
-    // Clear browser caches aggressively for production
+    // Clear browser caches except airplane mode cache
     if ('caches' in window) {
       caches.keys().then(cacheNames => {
-        cacheNames.forEach(cacheName => caches.delete(cacheName));
+        cacheNames.forEach(cacheName => {
+          // NEVER delete airplane mode cache - preserves offline functionality
+          if (!cacheName.includes('airplane') && !cacheName.includes('offline')) {
+            caches.delete(cacheName);
+          }
+        });
       });
     }
     
