@@ -945,10 +945,12 @@ export default function Game() {
       state: 'active' as const,
     }));
 
-    // Update match with incremented game number and reset balls in single operation
+    // Update match with incremented game number, reset balls, and reset timeout counters in single operation
     const updatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, {
       currentGame: currentMatch.currentGame + 1,
-      ballStates: initialBallStates
+      ballStates: initialBallStates,
+      player1TimeoutsUsed: 0, // Reset timeouts for new game
+      player2TimeoutsUsed: 0  // Reset timeouts for new game
     });
 
     // Invalidate cache to trigger re-render

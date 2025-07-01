@@ -219,6 +219,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - July 1, 2025: UPGRADED to cookie-based storage system - replaced localStorage with more persistent browser cookies for reliable state preservation across browser refreshes and sessions
 - July 1, 2025: Cookie storage automatically migrates existing localStorage data on first load to ensure smooth user transition
 - July 1, 2025: IMPLEMENTED comprehensive timeout system - added timeout button with skill-level-based allocation (SL ≤3 get 2 timeouts, SL ≥4 get 1 timeout), timer modal with overtime indicator after 1:00, undo timeout functionality, and match history logging
+- July 1, 2025: FIXED timeout reset logic - timeouts now correctly reset each game (not each match) by resetting counters during rerack operations
 - July 1, 2025: Added offline indicator next to innings count and improved current player outline visibility with thicker green border and ring effect
 
 ## User Preferences

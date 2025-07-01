@@ -97,6 +97,8 @@ class CookieStorageAPI {
       ballStates: matchData.ballStates || [],
       isComplete: false,
       winnerId: null,
+      player1TimeoutsUsed: 0, // Initialize timeout counters
+      player2TimeoutsUsed: 0, // Initialize timeout counters
       createdAt: new Date()
     };
 
