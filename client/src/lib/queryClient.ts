@@ -1,11 +1,11 @@
 import { QueryClient } from "@tanstack/react-query";
-import { localStorageAPI } from "./localStorage";
+import { cookieStorageAPI } from "./cookieStorage";
 import type { Match, BallInfo } from "@shared/schema";
 
-// Client-side query functions using localStorage
+// Client-side query functions using cookie storage
 export const clientQueryFunctions = {
   getCurrentMatch: (): Match | null => {
-    return localStorageAPI.getCurrentMatch();
+    return cookieStorageAPI.getCurrentMatch();
   },
   
   createMatch: (matchData: {
@@ -15,15 +15,15 @@ export const clientQueryFunctions = {
     player2SkillLevel: number;
     ballStates?: BallInfo[];
   }): Match => {
-    return localStorageAPI.createMatch(matchData);
+    return cookieStorageAPI.createMatch(matchData);
   },
   
   updateMatch: (matchId: number, updates: Partial<Match>): Match | null => {
-    return localStorageAPI.updateMatch(matchId, updates);
+    return cookieStorageAPI.updateMatch(matchId, updates);
   },
   
   updateBallStates: (matchId: number, ballStates: BallInfo[]): Match | null => {
-    return localStorageAPI.updateBallStates(matchId, ballStates);
+    return cookieStorageAPI.updateBallStates(matchId, ballStates);
   }
 };
 
@@ -50,7 +50,7 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn,
-      staleTime: 0, // Always fresh for localStorage
+      staleTime: 0, // Always fresh for cookie storage
       refetchOnWindowFocus: false,
       retry: false,
     },
