@@ -1229,8 +1229,27 @@ export default function Game() {
           })()}
         </div>
 
-        {/* Much larger space after top row */}
-        <div className="mb-16"></div>
+        {/* Space after top row */}
+        <div className="mb-8"></div>
+        
+        {/* Undo button in middle column */}
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          <div></div> {/* Empty first column */}
+          <div>
+            {/* Undo Action Button */}
+            {turnHistory.length > 0 && (
+              <Button
+                variant="ghost"
+                className="w-full py-3 px-2 bg-gray-50 hover:bg-gray-100"
+                onClick={handleUndoTurn}
+              >
+                <History className="h-4 w-4 mr-1" />
+                Undo Action
+              </Button>
+            )}
+          </div>
+          <div></div> {/* Empty third column */}
+        </div>
         
         {/* New Match and Reset buttons in a grid aligned with Safety button width */}
         <div className="grid grid-cols-3 gap-3">
@@ -1259,16 +1278,7 @@ export default function Game() {
           <div></div> {/* Empty third column */}
         </div>
 
-        {turnHistory.length > 0 && (
-          <Button
-            variant="outline"
-            className="w-full py-3 px-4 bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100"
-            onClick={handleUndoTurn}
-          >
-            <History className="h-4 w-4 mr-2" />
-            Undo Last Action
-          </Button>
-        )}
+
         
 
       </section>
