@@ -6,73 +6,46 @@ interface ScoresheetPrintProps {
   match: Match & { completedAt: string; events: MatchEvent[] };
 }
 
-// Comprehensive pixel mapping for APA scoresheet
+// Focused pixel mapping for APA scoresheet scoring area based on user markup
 const SCORESHEET_POSITIONS = {
-  // Top rectangle - both players
-  topRectangle: {
-    player1: {
-      name: { top: 136, left: 125 },
-      skillLevel: { top: 136, left: 619, width: 24 },
-      scoreGrid: { top: 136, left: 315 }, // Starting position for score marks
-      defensiveShots: { top: 136, left: 645, width: 48 },
-      totalPoints: { top: 136, left: 709, width: 38 },
-      matchPointsEarned: { top: 136, left: 772, width: 38 },
-      runningTotal: { top: 136, left: 834, width: 38 }
-    },
-    player2: {
-      name: { top: 170, left: 125 },
-      skillLevel: { top: 170, left: 619, width: 24 },
-      scoreGrid: { top: 170, left: 315 }, // Starting position for score marks
-      defensiveShots: { top: 170, left: 645, width: 48 },
-      totalPoints: { top: 170, left: 709, width: 38 },
-      matchPointsEarned: { top: 170, left: 772, width: 38 },
-      runningTotal: { top: 170, left: 834, width: 38 }
-    }
-  },
-  
-  // Score grid positions (dots and numbers)
+  // Score grid positioning from blue dot analysis
   scoreGrid: {
-    baseX: 315,
-    baseY: 136,
-    cellWidth: 21.8,
-    numberHeight: 20,
-    // Exact pixel positions for each score value
+    // Player row positions (top = lag winner)
+    player1Row: 35, // Top row (lag winner)
+    player2Row: 80, // Bottom row
+    
+    // Precise X positions for each score (extrapolated from blue dots)
     positions: {
-      1: 0, 2: 0.5, 3: 0.5, 4: 0.5, 5: 1,
-      6: 1.5, 7: 1.5, 8: 1.5, 9: 1.5, 10: 2,
-      11: 2.5, 12: 2.5, 13: 2.5, 14: 3,
-      15: 3.5, 16: 3.5, 17: 3.5, 18: 3.5, 19: 4,
-      20: 4.5, 21: 4.5, 22: 4.5, 23: 4.5, 24: 4.5, 25: 5,
-      26: 5.5, 27: 5.5, 28: 5.5, 29: 5.5, 30: 5.5, 31: 6,
-      32: 6.5, 33: 6.5, 34: 6.5, 35: 7,
-      36: 7.5, 37: 7.5, 38: 8,
-      39: 8.5, 40: 8.5, 41: 8.5, 42: 8.5, 43: 8.5, 44: 8.5, 45: 8.5, 46: 9,
-      47: 9.5, 48: 9.5, 49: 9.5, 50: 10,
-      51: 10.5, 52: 10.5, 53: 10.5, 54: 10.5, 55: 11,
-      56: 11.5, 57: 11.5, 58: 11.5, 59: 11.5, 60: 12,
-      61: 12.5, 62: 12.5, 63: 12.5, 64: 12.5, 65: 13,
-      66: 13.5, 67: 13.5, 68: 13.5, 69: 13.5, 70: 14,
-      71: 14.5, 72: 14.5, 73: 14.5, 74: 14.5, 75: 15
-    }
+      // Number positions (get circles)
+      1: 85, 5: 130, 10: 176, 14: 222, 19: 268, 25: 314,
+      31: 360, 35: 406, 38: 452, 46: 498, 50: 544, 55: 590,
+      60: 636, 65: 682, 70: 728, 75: 774,
+      
+      // Dot positions (get slash marks) - between number positions
+      2: 107, 3: 107, 4: 107,
+      6: 153, 7: 153, 8: 153, 9: 153,
+      11: 199, 12: 199, 13: 199,
+      15: 245, 16: 245, 17: 245, 18: 245,
+      20: 291, 21: 291, 22: 291, 23: 291, 24: 291,
+      26: 337, 27: 337, 28: 337, 29: 337, 30: 337,
+      32: 383, 33: 383, 34: 383,
+      36: 429, 37: 429,
+      39: 475, 40: 475, 41: 475, 42: 475, 43: 475, 44: 475, 45: 475,
+      47: 521, 48: 521, 49: 521,
+      51: 567, 52: 567, 53: 567, 54: 567,
+      56: 613, 57: 613, 58: 613, 59: 613,
+      61: 659, 62: 659, 63: 659, 64: 659,
+      66: 705, 67: 705, 68: 705, 69: 705,
+      71: 751, 72: 751, 73: 751, 74: 751
+    } as { [key: number]: number }
   },
   
-  // Match info
-  matchInfo: {
-    startTime: { top: 43, right: 144 },
-    endTime: { top: 43, right: 38 },
-    tableType: { bottom: 56, left: 691 } // Checkbox for 4x8 Regulation
-  },
-  
-  // Dead balls section (for future use)
-  deadBalls: {
-    player1: { top: 152, left: 280 },
-    player2: { top: 186, left: 280 }
-  },
-  
-  // Innings display (for future use)
-  innings: {
-    top: 118,
-    left: 450
+  // Right side columns from blue dot analysis
+  rightColumns: {
+    defensiveShots: 820,
+    totalPoints: 860,
+    matchPoints: 900,
+    runningTotal: 940
   }
 };
 
@@ -174,8 +147,8 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
           </div>
           
           {/* Combined Score marks in top grid for both players */}
-          {renderScoreMarks(player1RunningTotals, player1Target, SCORESHEET_POSITIONS.topRectangle.player1.scoreGrid.top, 'player1')}
-          {renderScoreMarks(player2RunningTotals, player2Target, SCORESHEET_POSITIONS.topRectangle.player2.scoreGrid.top, 'player2')}
+          {renderScoreMarks(player1RunningTotals, player1Target, 'player1')}
+          {renderScoreMarks(player2RunningTotals, player2Target, 'player2')}
           
           {/* Player 1 Defensive Shots - using mapped position */}
           <div className="absolute text-center font-bold" style={{ 
@@ -287,14 +260,15 @@ function calculateRunningTotals(events: MatchEvent[], playerId: 1 | 2): number[]
   return totals;
 }
 
-// Render score marks on the grid
-function renderScoreMarks(runningTotals: number[], targetScore: number, topPosition: number, player?: 'player1' | 'player2') {
+// Render score marks on the grid using focused pixel mapping
+function renderScoreMarks(runningTotals: number[], targetScore: number, playerRow: 'player1' | 'player2') {
   const marks: JSX.Element[] = [];
   
-  // Use the comprehensive mapping system
-  const baseX = SCORESHEET_POSITIONS.scoreGrid.baseX;
-  const cellWidth = SCORESHEET_POSITIONS.scoreGrid.cellWidth;
+  // Use the focused mapping system
   const positions = SCORESHEET_POSITIONS.scoreGrid.positions;
+  const yPosition = playerRow === 'player1' 
+    ? SCORESHEET_POSITIONS.scoreGrid.player1Row 
+    : SCORESHEET_POSITIONS.scoreGrid.player2Row;
   
   // Numbers that should get circles (not dots)
   const circleNumbers = [1, 5, 10, 14, 19, 25, 31, 35, 38, 46, 50, 55, 60, 65, 70, 75];
@@ -302,17 +276,15 @@ function renderScoreMarks(runningTotals: number[], targetScore: number, topPosit
   // Draw running tally marks for each score point
   const finalScore = runningTotals[runningTotals.length - 1] || 0;
   for (let i = 1; i <= Math.min(finalScore, 75); i++) {
-    const position = positions[i];
-    if (position !== undefined) {
-      const xPosition = baseX + (position * cellWidth);
-      
+    const xPosition = positions[i as keyof typeof positions];
+    if (xPosition !== undefined) {
       marks.push(
         <div
-          key={`mark-${i}-${player || 'default'}`}
+          key={`mark-${i}-${playerRow}`}
           className="absolute text-center"
           style={{
             left: `${xPosition}px`,
-            top: `${topPosition}px`,
+            top: `${yPosition}px`,
             fontSize: '18px',
             fontWeight: 'bold',
             width: '20px',
@@ -328,16 +300,15 @@ function renderScoreMarks(runningTotals: number[], targetScore: number, topPosit
   
   // Circle the target score (only if it's one of the number positions)
   if (circleNumbers.includes(targetScore)) {
-    const position = positions[targetScore];
-    if (position !== undefined) {
-      const xPosition = baseX + (position * cellWidth);
+    const xPosition = positions[targetScore as keyof typeof positions];
+    if (xPosition !== undefined) {
       marks.push(
         <div
-          key={`target-circle-${player || 'default'}`}
+          key={`target-circle-${playerRow}`}
           className="absolute"
           style={{
             left: `${xPosition - 11}px`,
-            top: `${topPosition - 6}px`,
+            top: `${yPosition - 6}px`,
             width: '26px',
             height: '26px',
             border: '2px solid black',
