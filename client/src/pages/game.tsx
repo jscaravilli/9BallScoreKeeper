@@ -14,6 +14,7 @@ import TimeoutModal from "@/components/timeout-modal";
 import { getPointsToWin } from "@/lib/apa-handicaps";
 import { getRemainingTimeouts } from "@/lib/timeout-utils";
 import { cookieStorageAPI } from "@/lib/cookieStorage";
+import { localStorageAPI } from "@/lib/localStorage";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import type { Match, BallInfo, MatchEvent } from "@shared/schema";
 
@@ -29,7 +30,7 @@ function HistoryDisplay({
 }) {
   // Use useMemo to make history reactive to refreshKey changes
   const history = useMemo(() => {
-    return cookieStorageAPI.getMatchHistory();
+    return localStorageAPI.getMatchHistory();
   }, [refreshKey]);
   
   if (history.length === 0) {
@@ -427,7 +428,7 @@ export default function Game() {
         newScore: newScore,
         details: `${ballNumber}-Ball scored for ${points} point${points > 1 ? 's' : ''}`
       };
-      cookieStorageAPI.addMatchEvent(ballScoredEvent);
+      localStorageAPI.addMatchEvent(ballScoredEvent);
 
       // Check if this scoring wins the match (reaches or exceeds handicap)
       const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
@@ -488,10 +489,10 @@ export default function Game() {
             playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
             details: `Match won by ${currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name} with final score ${currentMatch.currentPlayer === 1 ? newScore : currentMatch.player1Score}-${currentMatch.currentPlayer === 2 ? newScore : currentMatch.player2Score}`
           };
-          cookieStorageAPI.addMatchEvent(matchCompletedEvent);
+          localStorageAPI.addMatchEvent(matchCompletedEvent);
 
           // Save completed match to local history immediately
-          cookieStorageAPI.addToHistory(completedMatch);
+          localStorageAPI.addToHistory(completedMatch);
           
           // Trigger history refresh to make it immediately visible
           setHistoryRefreshKey(prev => prev + 1);
@@ -566,7 +567,7 @@ export default function Game() {
           newScore: newScore,
           details: `${ballNumber}-Ball marked dead, ${points} point${points > 1 ? 's' : ''} deducted`
         };
-        cookieStorageAPI.addMatchEvent(ballDeadEvent);
+        localStorageAPI.addMatchEvent(ballDeadEvent);
 
         updateMatchMutation.mutate({
           id: currentMatch.id,
@@ -716,7 +717,7 @@ export default function Game() {
       details: `Timeout taken for ${timeoutDuration}`
     };
     
-    cookieStorageAPI.addMatchEvent(timeoutEvent);
+    localStorageAPI.addMatchEvent(timeoutEvent);
     setShowTimeoutModal(false);
   };
 
@@ -882,7 +883,7 @@ export default function Game() {
       playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
       details: 'Turn undone - reverted to previous state'
     };
-    cookieStorageAPI.addMatchEvent(undoEvent);
+    localStorageAPI.addMatchEvent(undoEvent);
     
     setUndoInProgress(true);
 
@@ -982,7 +983,7 @@ export default function Game() {
       playerName: gameWinner === 1 ? currentMatch.player1Name : currentMatch.player2Name,
       details: 'Rerack - New game started after 9-ball win'
     };
-    cookieStorageAPI.addMatchEvent(rerackEvent);
+    localStorageAPI.addMatchEvent(rerackEvent);
 
     setShowGameWin(false);
     setGameWinner(null);
