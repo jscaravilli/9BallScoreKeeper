@@ -12,6 +12,10 @@ build = ["sh", "-c", "node build-static-only.js"]
 publicDir = "dist"
 
 [[ports]]
+localPort = 3000
+externalPort = 3002
+
+[[ports]]
 localPort = 3001
 externalPort = 3001
 
