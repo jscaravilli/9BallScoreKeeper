@@ -41,67 +41,67 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
         {/* Overlay data on specific positions */}
         <div className="absolute inset-0" style={{ fontSize: '11px', fontFamily: 'Arial' }}>
           {/* Match Times - positioned at top right */}
-          <div className="absolute" style={{ top: '33px', right: '135px', fontSize: '10px' }}>
+          <div className="absolute" style={{ top: '0.45in', right: '1.5in', fontSize: '10px' }}>
             {startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
           </div>
-          <div className="absolute" style={{ top: '33px', right: '35px', fontSize: '10px' }}>
+          <div className="absolute" style={{ top: '0.45in', right: '0.4in', fontSize: '10px' }}>
             {matchDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
           </div>
           
-          {/* Player 1 (Top row) */}
-          <div className="absolute" style={{ top: '104px', left: '125px', fontSize: '12px', fontWeight: 'bold' }}>
+          {/* Player 1 (Top row) - Name in both Team Player boxes */}
+          <div className="absolute" style={{ top: '1.35in', left: '1.45in', fontSize: '12px', fontWeight: 'bold' }}>
             {lagWinner.name}
           </div>
-          <div className="absolute" style={{ top: '126px', left: '125px', fontSize: '12px', fontWeight: 'bold' }}>
+          <div className="absolute" style={{ top: '1.65in', left: '1.45in', fontSize: '12px', fontWeight: 'bold' }}>
             {lagWinner.name}
           </div>
           
-          {/* Player 1 Skill Level */}
-          <div className="absolute" style={{ top: '112px', left: '290px', fontSize: '10px' }}>
-            SL {lagWinner.skillLevel}
+          {/* Player 1 Skill Level - in the SL box */}
+          <div className="absolute text-center" style={{ top: '1.48in', left: '3.8in', width: '0.3in', fontSize: '12px', fontWeight: 'bold' }}>
+            {lagWinner.skillLevel}
           </div>
           
           {/* Player 1 Score marks in grid */}
-          {renderScoreMarks(player1RunningTotals, player1Target, 105)}
+          {renderScoreMarks(player1RunningTotals, player1Target, 104)}
           
           {/* Player 1 Defensive Shots */}
-          <div className="absolute text-center font-bold" style={{ top: '110px', right: '195px', width: '40px', fontSize: '14px' }}>
+          <div className="absolute text-center font-bold" style={{ top: '1.45in', right: '2.15in', width: '0.5in', fontSize: '14px' }}>
             {player1Safeties}
           </div>
           
           {/* Player 1 Total Points */}
-          <div className="absolute text-center font-bold" style={{ top: '110px', right: '125px', width: '40px', fontSize: '14px' }}>
+          <div className="absolute text-center font-bold" style={{ top: '1.45in', right: '1.45in', width: '0.5in', fontSize: '14px' }}>
             {match.player1Score}
           </div>
           
-          {/* Player 2 (Bottom row) */}
-          <div className="absolute" style={{ top: '208px', left: '125px', fontSize: '12px', fontWeight: 'bold' }}>
+          {/* Player 2 (Bottom row) - Name in both Team Player boxes */}
+          <div className="absolute" style={{ top: '2.72in', left: '1.45in', fontSize: '12px', fontWeight: 'bold' }}>
             {otherPlayer.name}
           </div>
-          <div className="absolute" style={{ top: '230px', left: '125px', fontSize: '12px', fontWeight: 'bold' }}>
+          <div className="absolute" style={{ top: '3.02in', left: '1.45in', fontSize: '12px', fontWeight: 'bold' }}>
             {otherPlayer.name}
           </div>
           
-          {/* Player 2 Skill Level */}
-          <div className="absolute" style={{ top: '216px', left: '290px', fontSize: '10px' }}>
-            SL {otherPlayer.skillLevel}
+          {/* Player 2 Skill Level - in the SL box */}
+          <div className="absolute text-center" style={{ top: '2.85in', left: '3.8in', width: '0.3in', fontSize: '12px', fontWeight: 'bold' }}>
+            {otherPlayer.skillLevel}
           </div>
           
           {/* Player 2 Score marks in grid */}
-          {renderScoreMarks(player2RunningTotals, player2Target, 209)}
+          {renderScoreMarks(player2RunningTotals, player2Target, 208)}
           
           {/* Player 2 Defensive Shots */}
-          <div className="absolute text-center font-bold" style={{ top: '214px', right: '195px', width: '40px', fontSize: '14px' }}>
+          <div className="absolute text-center font-bold" style={{ top: '2.82in', right: '2.15in', width: '0.5in', fontSize: '14px' }}>
             {player2Safeties}
           </div>
           
           {/* Player 2 Total Points */}
-          <div className="absolute text-center font-bold" style={{ top: '214px', right: '125px', width: '40px', fontSize: '14px' }}>
+          <div className="absolute text-center font-bold" style={{ top: '2.82in', right: '1.45in', width: '0.5in', fontSize: '14px' }}>
             {match.player2Score}
           </div>
           
           {/* Table checkbox - 4x8 Regulation */}
-          <div className="absolute" style={{ bottom: '52px', left: '580px' }}>
+          <div className="absolute" style={{ bottom: '0.58in', left: '7.2in', fontSize: '16px', fontWeight: 'bold' }}>
             ✓
           </div>
         </div>
@@ -127,66 +127,57 @@ function calculateRunningTotals(events: MatchEvent[], playerId: 1 | 2): number[]
 
 // Render score marks on the grid
 function renderScoreMarks(runningTotals: number[], targetScore: number, topPosition: number) {
-  const scorePoints = [1, 5, 10, 14, 19, 25, 31, 35, 38, 46, 50, 55, 60, 65, 70, 75];
   const marks: JSX.Element[] = [];
   
-  // Map score points to their grid positions (approximately 25px apart)
-  const gridStartX = 315;
-  const gridSpacing = 25.5;
+  // Grid starts at approximately 4.15 inches from left and each cell is about 0.25 inches wide
+  // Adjusted to match the actual APA scoresheet grid
+  const gridStartX = 4.15; // inches
+  const gridCellWidth = 0.25; // inches
   
-  // Track which scores have been marked
-  const markedScores = new Set<number>();
-  
+  // Draw running tally marks for each score
+  let runningScore = 0;
   runningTotals.forEach((total, index) => {
-    // Find the highest score point that doesn't exceed the total
-    let scoreToMark = 0;
-    for (const point of scorePoints) {
-      if (point <= total && point <= targetScore && !markedScores.has(point)) {
-        scoreToMark = point;
-      }
-    }
+    const pointsScored = total - runningScore;
+    runningScore = total;
     
-    if (scoreToMark > 0 && !markedScores.has(scoreToMark)) {
-      markedScores.add(scoreToMark);
-      const scoreIndex = scorePoints.indexOf(scoreToMark);
-      if (scoreIndex !== -1) {
-        // Alternate between forward slash and backslash
-        const markType = index % 2 === 0 ? '/' : '\\';
-        const xPosition = gridStartX + (scoreIndex * gridSpacing);
-        
-        marks.push(
-          <div
-            key={`mark-${scoreToMark}-${index}`}
-            className="absolute text-center"
-            style={{
-              left: `${xPosition}px`,
-              top: `${topPosition}px`,
-              fontSize: '20px',
-              fontWeight: 'bold',
-              width: '25px',
-              height: '40px',
-              lineHeight: '40px'
-            }}
-          >
-            {markType}
-          </div>
-        );
-      }
+    // For each point in the running total, mark a cell
+    for (let i = runningScore - pointsScored + 1; i <= runningScore && i <= 75; i++) {
+      // Calculate position - cells are numbered 1-75
+      const cellIndex = i - 1;
+      const xPosition = gridStartX + (cellIndex * gridCellWidth);
+      
+      marks.push(
+        <div
+          key={`mark-${i}-${index}`}
+          className="absolute text-center"
+          style={{
+            left: `${xPosition}in`,
+            top: `${topPosition}px`,
+            fontSize: '16px',
+            fontWeight: 'bold',
+            width: `${gridCellWidth}in`,
+            height: '22px',
+            lineHeight: '22px'
+          }}
+        >
+          /
+        </div>
+      );
     }
   });
   
   // Circle the target score
-  const targetIndex = scorePoints.indexOf(targetScore);
-  if (targetIndex !== -1) {
-    const xPosition = gridStartX + (targetIndex * gridSpacing) - 2;
+  if (targetScore <= 75) {
+    const targetCellIndex = targetScore - 1;
+    const xPosition = gridStartX + (targetCellIndex * gridCellWidth);
     marks.push(
       <div
         key="target-circle"
         className="absolute"
         style={{
-          left: `${xPosition}px`,
-          top: `${topPosition - 8}px`,
-          width: '28px',
+          left: `${xPosition - 0.02}in`,
+          top: `${topPosition - 4}px`,
+          width: `${gridCellWidth + 0.04}in`,
           height: '28px',
           border: '2px solid black',
           borderRadius: '50%',
