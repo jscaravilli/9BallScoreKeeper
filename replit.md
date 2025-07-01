@@ -230,6 +230,9 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - January 1, 2025: Implemented APA scoresheet printing system with precise overlay on official PDF format for league submission
 - January 1, 2025: Reorganized UI controls - End Turn, Safety, and Timeout horizontally on top row with proper spacing
 - January 1, 2025: New Match and Reset Match buttons positioned lower on page, vertically aligned with Safety button width
+- January 1, 2025: Updated APA scoresheet to new format with both players in top rectangle section and precise grid alignment
+- January 1, 2025: Fixed match history white screen issue with proper error handling for missing event data
+- January 1, 2025: Undo Action button repositioned between Safety and New Match buttons with consistent sizing
 
 ## User Preferences
 
