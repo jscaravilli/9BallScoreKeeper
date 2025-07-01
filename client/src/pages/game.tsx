@@ -20,10 +20,12 @@ import type { Match, BallInfo, MatchEvent } from "@shared/schema";
 // History Display Component
 function HistoryDisplay({ 
   expandedMatch, 
-  setExpandedMatch 
+  setExpandedMatch,
+  refreshKey 
 }: { 
   expandedMatch: number | null; 
   setExpandedMatch: (index: number | null) => void; 
+  refreshKey?: number;
 }) {
   const history = cookieStorageAPI.getMatchHistory();
   
@@ -157,6 +159,9 @@ export default function Game() {
 
   // Timeout modal state
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+
+  // History refresh trigger
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   // Check online/offline status
   const isOnline = useOnlineStatus();
@@ -475,8 +480,11 @@ export default function Game() {
           };
           cookieStorageAPI.addMatchEvent(matchCompletedEvent);
 
-          // Save completed match to local history
+          // Save completed match to local history immediately
           cookieStorageAPI.addToHistory(completedMatch);
+          
+          // Trigger history refresh to make it immediately visible
+          setHistoryRefreshKey(prev => prev + 1);
           
           console.log('Match win mutations sent and saved to history');
           return;
@@ -1292,7 +1300,8 @@ export default function Game() {
             
             <HistoryDisplay 
               expandedMatch={expandedMatch} 
-              setExpandedMatch={setExpandedMatch} 
+              setExpandedMatch={setExpandedMatch}
+              refreshKey={historyRefreshKey}
             />
           </div>
         </DialogContent>
