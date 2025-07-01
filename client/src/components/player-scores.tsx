@@ -22,8 +22,8 @@ export default function PlayerScores({ match, overrideScores }: PlayerScoresProp
     <section className="p-4 bg-gray-100">
       <div className="grid grid-cols-2 gap-3">
         {/* Player 1 Score Card */}
-        <div className={`bg-white rounded-lg p-3 shadow-sm border-2 ${
-          match.currentPlayer === 1 ? 'border-green-600' : 'border-transparent'
+        <div className={`bg-white rounded-lg p-3 shadow-sm border-2 transition-all duration-200 ${
+          match.currentPlayer === 1 ? 'border-yellow-500 bg-yellow-50/50 shadow-lg ring-2 ring-yellow-300/30' : 'border-transparent'
         }`}>
           <div className="text-center">
             <h3 className="font-semibold text-gray-800">{match.player1Name}</h3>
@@ -45,8 +45,8 @@ export default function PlayerScores({ match, overrideScores }: PlayerScoresProp
         </div>
 
         {/* Player 2 Score Card */}
-        <div className={`bg-white rounded-lg p-3 shadow-sm border-2 ${
-          match.currentPlayer === 2 ? 'border-green-600' : 'border-transparent'
+        <div className={`bg-white rounded-lg p-3 shadow-sm border-2 transition-all duration-200 ${
+          match.currentPlayer === 2 ? 'border-yellow-500 bg-yellow-50/50 shadow-lg ring-2 ring-yellow-300/30' : 'border-transparent'
         }`}>
           <div className="text-center">
             <h3 className="font-semibold text-gray-800">{match.player2Name}</h3>

@@ -12,6 +12,7 @@ import BallRack from "@/components/ball-rack";
 import PlayerScores from "@/components/player-scores";
 import { getPointsToWin } from "@/lib/apa-handicaps";
 import { cookieStorageAPI } from "@/lib/cookieStorage";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import type { Match, BallInfo, MatchEvent } from "@shared/schema";
 
 // History Display Component
@@ -151,6 +152,9 @@ export default function Game() {
   const [undoInProgress, setUndoInProgress] = useState(false);
   const [nineBallUndoInProgress, setNineBallUndoInProgress] = useState(false);
   const maxTurnHistory = 10; // Keep last 10 turns for undo
+
+  // Check online/offline status
+  const isOnline = useOnlineStatus();
 
   // Get current match
   const { data: currentMatch, isLoading } = useQuery<Match | null>({
@@ -934,10 +938,17 @@ export default function Game() {
             </button>
             <div>
               <h1 className="text-lg font-bold text-white">Joseph's Unofficial APA 9 Ball Scorekeeper</h1>
-              <p className="text-green-200 text-sm">Game {currentMatch.currentGame} • Inning {currentInning}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-green-200 text-sm">Game {currentMatch.currentGame} • Inning {currentInning}</p>
+                {!isOnline && (
+                  <span className="text-orange-300 text-xs font-medium px-2 py-0.5 bg-orange-900/30 rounded border border-orange-700/50">
+                    OFFLINE
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-          <span className="bg-green-800/50 text-green-100 px-3 py-1 rounded-full text-sm font-medium">
+          <span className="bg-yellow-600/90 text-yellow-50 px-3 py-1 rounded-full text-sm font-bold border-2 border-yellow-400/50 shadow-lg">
             {currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name}'s Turn
           </span>
         </div>
