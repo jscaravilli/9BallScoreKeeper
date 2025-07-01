@@ -33,15 +33,17 @@ function HistoryDisplay({
   // Force fresh data every render AND when refreshKey changes
   const [, forceRender] = useState(0);
   const { printElement } = usePrint();
-  const history = useMemo(() => {
-    console.log('HistoryDisplay: Fetching fresh match history');
-    return cookieStorageAPI.getMatchHistory();
-  }, [refreshKey, forceRender]);
   
-  // Force re-render every time component mounts
-  useEffect(() => {
-    forceRender(Date.now());
-  }, []);
+  try {
+    const history = useMemo(() => {
+      console.log('HistoryDisplay: Fetching fresh match history');
+      return cookieStorageAPI.getMatchHistory();
+    }, [refreshKey, forceRender]);
+    
+    // Force re-render every time component mounts
+    useEffect(() => {
+      forceRender(Date.now());
+    }, []);
   
   if (history.length === 0) {
     return (
@@ -55,10 +57,10 @@ function HistoryDisplay({
     );
   }
 
-  return (
-    <div className="overflow-y-auto max-h-96">
-      <div className="space-y-3">
-        {history.map((match, index) => {
+    return (
+      <div className="overflow-y-auto max-h-96">
+        <div className="space-y-3">
+          {history.map((match, index) => {
           const completedDate = new Date(match.completedAt);
           const winnerName = match.winnerId === 1 ? match.player1Name : match.player2Name;
           const player1Target = getPointsToWin(match.player1SkillLevel as any);
@@ -75,18 +77,20 @@ function HistoryDisplay({
                     🏆 {winnerName} Wins!
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        printElement(`scoresheet-${index}`, `APA 9-Ball Scoresheet - ${match.player1Name} vs ${match.player2Name}`);
-                      }}
-                      className="h-7 px-2 text-xs"
-                    >
-                      <Printer className="h-3 w-3 mr-1" />
-                      Print
-                    </Button>
+                    {match.events && match.completedAt && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          printElement(`scoresheet-${index}`, `APA 9-Ball Scoresheet - ${match.player1Name} vs ${match.player2Name}`);
+                        }}
+                        className="h-7 px-2 text-xs"
+                      >
+                        <Printer className="h-3 w-3 mr-1" />
+                        Print
+                      </Button>
+                    )}
                     <div className="text-xs text-gray-500">
                       {completedDate.toLocaleDateString()} {completedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </div>
@@ -147,13 +151,31 @@ function HistoryDisplay({
       </div>
       
       {/* Hidden scoresheet print components */}
-      {history.map((match, index) => (
-        <div key={`print-${match.historyId || index}`} id={`scoresheet-${index}`}>
-          <ScoresheetPrint match={match} />
-        </div>
-      ))}
+      {history.map((match, index) => {
+        // Only render if match has required data
+        if (!match.events || !match.completedAt) {
+          return null;
+        }
+        return (
+          <div key={`print-${match.historyId || index}`} id={`scoresheet-${index}`}>
+            <ScoresheetPrint match={match} />
+          </div>
+        );
+      })}
     </div>
   );
+  } catch (error) {
+    console.error('Error in HistoryDisplay:', error);
+    return (
+      <div className="overflow-y-auto max-h-96">
+        <div className="text-center py-8 text-gray-500">
+          <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
+          <p>Error loading match history</p>
+          <p className="text-sm">Please try again later</p>
+        </div>
+      </div>
+    );
+  }
 }
 
 export default function Game() {

@@ -7,6 +7,11 @@ interface ScoresheetPrintProps {
 }
 
 export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
+  // Ensure we have required data
+  if (!match || !match.events || !match.completedAt) {
+    return null;
+  }
+
   // Calculate target points for each player
   const player1Target = getPointsToWin(match.player1SkillLevel as any);
   const player2Target = getPointsToWin(match.player2SkillLevel as any);
