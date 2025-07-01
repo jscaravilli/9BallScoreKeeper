@@ -58,7 +58,7 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-sm mx-auto">
+      <DialogContent className="max-w-sm mx-auto [&>button]:hidden">
         <DialogHeader>
           <DialogTitle>Joseph's Unofficial APA 9 Ball Scorekeeper</DialogTitle>
           <DialogDescription>
