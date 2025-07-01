@@ -28,10 +28,17 @@ function HistoryDisplay({
   setExpandedMatch: (index: number | null) => void; 
   refreshKey?: number;
 }) {
-  // Use useMemo to make history reactive to refreshKey changes
+  // Force fresh data every render AND when refreshKey changes
+  const [, forceRender] = useState(0);
   const history = useMemo(() => {
+    console.log('HistoryDisplay: Fetching fresh match history');
     return cookieStorageAPI.getMatchHistory();
-  }, [refreshKey]);
+  }, [refreshKey, forceRender]);
+  
+  // Force re-render every time component mounts
+  useEffect(() => {
+    forceRender(Date.now());
+  }, []);
   
   if (history.length === 0) {
     return (
@@ -167,10 +174,17 @@ export default function Game() {
   // History refresh trigger
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
-  // Force history refresh when history modal opens
+  // Force history refresh when history modal opens and set up interval
   useEffect(() => {
     if (showHistory) {
       setHistoryRefreshKey(prev => prev + 1);
+      
+      // Set up interval to refresh every 2 seconds while modal is open
+      const interval = setInterval(() => {
+        setHistoryRefreshKey(prev => prev + 1);
+      }, 2000);
+      
+      return () => clearInterval(interval);
     }
   }, [showHistory]);
 
@@ -494,8 +508,18 @@ export default function Game() {
           // Save completed match to local history immediately
           cookieStorageAPI.addToHistory(completedMatch);
           
-          // Trigger history refresh to make it immediately visible
+          // Force multiple refresh triggers to ensure it happens
           setHistoryRefreshKey(prev => prev + 1);
+          
+          // Force refresh again after a small delay to ensure cookies are saved
+          setTimeout(() => {
+            setHistoryRefreshKey(prev => prev + 1);
+          }, 100);
+          
+          // Force refresh again after longer delay as backup
+          setTimeout(() => {
+            setHistoryRefreshKey(prev => prev + 1);
+          }, 500);
           
           console.log('Match win mutations sent and saved to history');
           return;
