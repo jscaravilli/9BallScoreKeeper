@@ -4,7 +4,7 @@ import { clientQueryFunctions, clientMutation, queryClient } from "@/lib/queryCl
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
-import { Menu, Users, History, Settings, Plus, RotateCcw, Info, X, Trash2, Clock, Minus } from "lucide-react";
+import { Menu, Users, History, Settings, Plus, RotateCcw, Info, X, Trash2, Clock, Minus, Shield } from "lucide-react";
 import PlayerSetupModal from "@/components/player-setup-modal";
 import GameWinModal from "@/components/game-win-modal";
 import MatchWinModal from "@/components/match-win-modal";
@@ -745,6 +745,32 @@ export default function Game() {
     setShowTimeoutModal(false);
   };
 
+  const handleSafety = () => {
+    if (!currentMatch) return;
+    
+    // Increment safety count for current player
+    const currentPlayerSafetiesUsed = currentMatch.currentPlayer === 1 
+      ? (currentMatch.player1SafetiesUsed || 0)
+      : (currentMatch.player2SafetiesUsed || 0);
+    
+    const updates = currentMatch.currentPlayer === 1 
+      ? { player1SafetiesUsed: currentPlayerSafetiesUsed + 1 }
+      : { player2SafetiesUsed: currentPlayerSafetiesUsed + 1 };
+    
+    updateMatchMutation.mutate({ id: currentMatch.id, updates });
+    
+    // Add to match history
+    const safetyEvent: MatchEvent = {
+      type: 'safety_taken',
+      timestamp: new Date().toISOString(),
+      player: currentMatch.currentPlayer as 1 | 2,
+      playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+      details: `Defensive shot (safety) played`
+    };
+    
+    cookieStorageAPI.addMatchEvent(safetyEvent);
+  };
+
   const confirmResetGame = () => {
     if (!currentMatch) return;
 
@@ -1157,13 +1183,36 @@ export default function Game() {
           );
         })()}
 
-        <div className="grid grid-cols-3 gap-3 mb-3">
+        {/* Safety Button - next to timeout */}
+        <div className="mb-3">
+          <Button 
+            variant="outline" 
+            className="w-full py-3 px-4 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
+            onClick={handleSafety}
+          >
+            <Shield className="h-4 w-4 mr-2" />
+            Safety ({currentMatch.currentPlayer === 1 ? (currentMatch.player1SafetiesUsed || 0) : (currentMatch.player2SafetiesUsed || 0)})
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 mb-3">
           <Button 
             variant="outline" 
             className="py-3 px-4 bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
             onClick={handleEndTurn}
           >
             End Turn
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <Button 
+            variant="outline" 
+            className="py-3 px-4 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+            onClick={handleNewGame}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Match
           </Button>
           <Button 
             variant="secondary" 
@@ -1172,14 +1221,6 @@ export default function Game() {
           >
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset
-          </Button>
-          <Button 
-            variant="outline" 
-            className="py-3 px-4 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-            onClick={handleNewGame}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New Match
           </Button>
         </div>
 

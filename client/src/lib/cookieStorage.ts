@@ -156,6 +156,8 @@ class CookieStorageAPI {
       winnerId: null,
       player1TimeoutsUsed: 0, // Initialize timeout counters
       player2TimeoutsUsed: 0, // Initialize timeout counters
+      player1SafetiesUsed: 0, // Initialize safety counters
+      player2SafetiesUsed: 0, // Initialize safety counters
       createdAt: new Date()
     };
 

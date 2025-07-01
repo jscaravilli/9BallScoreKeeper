@@ -12,6 +12,8 @@ export const matches = pgTable("matches", {
   player2Score: integer("player2_score").notNull().default(0),
   player1TimeoutsUsed: integer("player1_timeouts_used").notNull().default(0),
   player2TimeoutsUsed: integer("player2_timeouts_used").notNull().default(0),
+  player1SafetiesUsed: integer("player1_safeties_used").notNull().default(0),
+  player2SafetiesUsed: integer("player2_safeties_used").notNull().default(0),
   currentPlayer: integer("current_player").notNull().default(1), // 1 or 2
   currentGame: integer("current_game").notNull().default(1),
   ballStates: jsonb("ball_states").notNull().default([]), // Array of ball state objects
@@ -61,7 +63,7 @@ export type ApaSkillLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 // Match event tracking for detailed history
 export interface MatchEvent {
-  type: 'ball_scored' | 'ball_dead' | 'turn_ended' | 'match_completed' | 'timeout_taken';
+  type: 'ball_scored' | 'ball_dead' | 'turn_ended' | 'match_completed' | 'timeout_taken' | 'safety_taken';
   timestamp: string;
   player: 1 | 2;
   playerName: string;
