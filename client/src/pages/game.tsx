@@ -4,13 +4,15 @@ import { clientQueryFunctions, clientMutation, queryClient } from "@/lib/queryCl
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
-import { Menu, Users, History, Settings, Plus, RotateCcw, Info, X, Trash2 } from "lucide-react";
+import { Menu, Users, History, Settings, Plus, RotateCcw, Info, X, Trash2, Clock, Minus } from "lucide-react";
 import PlayerSetupModal from "@/components/player-setup-modal";
 import GameWinModal from "@/components/game-win-modal";
 import MatchWinModal from "@/components/match-win-modal";
 import BallRack from "@/components/ball-rack";
 import PlayerScores from "@/components/player-scores";
+import TimeoutModal from "@/components/timeout-modal";
 import { getPointsToWin } from "@/lib/apa-handicaps";
+import { getRemainingTimeouts } from "@/lib/timeout-utils";
 import { cookieStorageAPI } from "@/lib/cookieStorage";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import type { Match, BallInfo, MatchEvent } from "@shared/schema";
@@ -152,6 +154,9 @@ export default function Game() {
   const [undoInProgress, setUndoInProgress] = useState(false);
   const [nineBallUndoInProgress, setNineBallUndoInProgress] = useState(false);
   const maxTurnHistory = 10; // Keep last 10 turns for undo
+
+  // Timeout modal state
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
 
   // Check online/offline status
   const isOnline = useOnlineStatus();
@@ -634,6 +639,69 @@ export default function Game() {
     setShowResetConfirm(true);
   };
 
+  // Timeout functionality
+  const handleTakeTimeout = () => {
+    if (!currentMatch) return;
+    
+    const currentPlayerTimeoutsUsed = currentMatch.currentPlayer === 1 
+      ? (currentMatch.player1TimeoutsUsed || 0)
+      : (currentMatch.player2TimeoutsUsed || 0);
+    
+    const currentPlayerSkillLevel = currentMatch.currentPlayer === 1 
+      ? currentMatch.player1SkillLevel 
+      : currentMatch.player2SkillLevel;
+    
+    const remainingTimeouts = getRemainingTimeouts(currentPlayerSkillLevel as any, currentPlayerTimeoutsUsed);
+    
+    if (remainingTimeouts > 0) {
+      setShowTimeoutModal(true);
+    }
+  };
+
+  const handleUndoTimeout = () => {
+    if (!currentMatch) return;
+    
+    const currentPlayerTimeoutsUsed = currentMatch.currentPlayer === 1 
+      ? (currentMatch.player1TimeoutsUsed || 0)
+      : (currentMatch.player2TimeoutsUsed || 0);
+    
+    if (currentPlayerTimeoutsUsed > 0) {
+      const updates = currentMatch.currentPlayer === 1 
+        ? { player1TimeoutsUsed: currentPlayerTimeoutsUsed - 1 }
+        : { player2TimeoutsUsed: currentPlayerTimeoutsUsed - 1 };
+      
+      updateMatchMutation.mutate({ id: currentMatch.id, updates });
+    }
+  };
+
+  const handleTimeoutEnd = (timeoutDuration: string) => {
+    if (!currentMatch) return;
+    
+    // Increment timeout count
+    const currentPlayerTimeoutsUsed = currentMatch.currentPlayer === 1 
+      ? (currentMatch.player1TimeoutsUsed || 0)
+      : (currentMatch.player2TimeoutsUsed || 0);
+    
+    const updates = currentMatch.currentPlayer === 1 
+      ? { player1TimeoutsUsed: currentPlayerTimeoutsUsed + 1 }
+      : { player2TimeoutsUsed: currentPlayerTimeoutsUsed + 1 };
+    
+    updateMatchMutation.mutate({ id: currentMatch.id, updates });
+    
+    // Add to history
+    const timeoutEvent: MatchEvent = {
+      type: 'timeout_taken',
+      timestamp: new Date().toISOString(),
+      player: currentMatch.currentPlayer as 1 | 2,
+      playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+      timeoutDuration,
+      details: `Timeout taken for ${timeoutDuration}`
+    };
+    
+    cookieStorageAPI.addMatchEvent(timeoutEvent);
+    setShowTimeoutModal(false);
+  };
+
   const confirmResetGame = () => {
     if (!currentMatch) return;
 
@@ -1007,6 +1075,43 @@ export default function Game() {
 
       {/* Game Actions */}
       <section className="p-4 pb-20">
+        {/* Timeout Button */}
+        {(() => {
+          const currentPlayerTimeoutsUsed = currentMatch.currentPlayer === 1 
+            ? (currentMatch.player1TimeoutsUsed || 0)
+            : (currentMatch.player2TimeoutsUsed || 0);
+          
+          const currentPlayerSkillLevel = currentMatch.currentPlayer === 1 
+            ? currentMatch.player1SkillLevel 
+            : currentMatch.player2SkillLevel;
+          
+          const remainingTimeouts = getRemainingTimeouts(currentPlayerSkillLevel as any, currentPlayerTimeoutsUsed);
+          const maxTimeouts = currentPlayerSkillLevel <= 3 ? 2 : 1;
+          
+          return (
+            <div className="mb-3 flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleUndoTimeout}
+                disabled={currentPlayerTimeoutsUsed === 0}
+                className="p-2 bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-30"
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleTakeTimeout}
+                disabled={remainingTimeouts === 0}
+                className="flex-1 py-3 px-4 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Clock className="h-4 w-4 mr-2" />
+                {remainingTimeouts} of {maxTimeouts} timeouts remaining
+              </Button>
+            </div>
+          );
+        })()}
+
         <div className="grid grid-cols-3 gap-3 mb-3">
           <Button 
             variant="outline" 
@@ -1307,6 +1412,13 @@ export default function Game() {
           </div>
         </div>
       )}
+
+      {/* Timeout Modal */}
+      <TimeoutModal
+        isOpen={showTimeoutModal}
+        onClose={handleTimeoutEnd}
+        playerName={currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name}
+      />
 
     </div>
   );
