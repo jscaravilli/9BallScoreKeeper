@@ -24,7 +24,7 @@ export function usePrint() {
           <style>
             @media print {
               @page {
-                margin: 0.5in;
+                margin: 0;
                 size: letter;
               }
               body {
@@ -37,6 +37,13 @@ export function usePrint() {
               .no-print {
                 display: none !important;
               }
+              .print\\:block {
+                display: block !important;
+              }
+              img {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
             }
             
             body {
@@ -44,7 +51,30 @@ export function usePrint() {
               font-size: 12px;
               line-height: 1.2;
               margin: 0;
-              padding: 20px;
+              padding: 0;
+            }
+            
+            .relative {
+              position: relative;
+            }
+            
+            .absolute {
+              position: absolute;
+            }
+            
+            .inset-0 {
+              top: 0;
+              right: 0;
+              bottom: 0;
+              left: 0;
+            }
+            
+            .w-full {
+              width: 100%;
+            }
+            
+            .h-full {
+              height: 100%;
             }
             
             table {

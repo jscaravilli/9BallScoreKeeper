@@ -226,6 +226,10 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - July 1, 2025: Added offline indicator next to innings count and improved current player outline visibility with thicker green border and ring effect
 - July 1, 2025: RESOLVED match history cookie storage issue - implemented comprehensive debugging system with multi-tier fallback (cookie → localStorage) and 48-hour expiration
 - July 1, 2025: Fixed cookie verification failures with enhanced storage methods, overwrite detection, and automatic index rebuilding from orphaned cookies
+- January 1, 2025: Added safety tracking button for defensive shots per APA requirements with counter display showing current usage
+- January 1, 2025: Implemented APA scoresheet printing system with precise overlay on official PDF format for league submission
+- January 1, 2025: Reorganized UI controls - End Turn, Safety, and Timeout horizontally on top row with proper spacing
+- January 1, 2025: New Match and Reset Match buttons positioned lower on page, vertically aligned with Safety button width
 
 ## User Preferences
 

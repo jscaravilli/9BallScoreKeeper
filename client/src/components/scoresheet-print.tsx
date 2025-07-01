@@ -1,5 +1,6 @@
 import { Match, MatchEvent } from "@shared/schema";
 import { getPointsToWin } from "@/lib/apa-handicaps";
+import scoresheetPdf from "@assets/scoresheet_page_1.png";
 
 interface ScoresheetPrintProps {
   match: Match & { completedAt: string; events: MatchEvent[] };
@@ -11,113 +12,97 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
   const player2Target = getPointsToWin(match.player2SkillLevel as any);
   
   // Determine lag winner (player 1 is always lag winner in our system)
-  const lagWinner = { name: match.player1Name, skillLevel: match.player1SkillLevel, target: player1Target };
-  const otherPlayer = { name: match.player2Name, skillLevel: match.player2SkillLevel, target: player2Target };
-  
-  // Extract game data from events
-  const gameEvents = match.events.filter(event => 
-    event.type === 'ball_scored' || event.type === 'turn_ended'
-  );
-  
-  // Group events by games to create scoring marks
-  const games = extractGamesFromEvents(gameEvents, match);
+  const lagWinner = { name: match.player1Name, skillLevel: match.player1SkillLevel, target: player1Target, playerNumber: 1 };
+  const otherPlayer = { name: match.player2Name, skillLevel: match.player2SkillLevel, target: player2Target, playerNumber: 2 };
   
   // Calculate total safeties from events
   const player1Safeties = match.events.filter(e => e.type === 'safety_taken' && e.player === 1).length;
   const player2Safeties = match.events.filter(e => e.type === 'safety_taken' && e.player === 2).length;
   
-  // Calculate innings from turn_ended events
-  const totalInnings = Math.ceil(match.events.filter(e => e.type === 'turn_ended').length / 2);
+  // Calculate running totals from events
+  const player1RunningTotals = calculateRunningTotals(match.events, 1);
+  const player2RunningTotals = calculateRunningTotals(match.events, 2);
   
   // Match date formatting
   const matchDate = new Date(match.completedAt);
   const startTime = new Date(match.createdAt || match.completedAt);
   
   return (
-    <div className="print:block hidden">
-      <div className="bg-white p-8 text-black" style={{ width: '8.5in', minHeight: '11in' }}>
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-4">
-            <div className="text-2xl font-bold">APA</div>
-            <div className="text-xl font-bold">9 BALL SCORES</div>
-          </div>
-          <div className="text-sm">
-            <div>Match: Start Time: {startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} End Time: {matchDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-          </div>
-        </div>
-        
-        {/* Point Scale Headers */}
-        <div className="mb-2">
-          <PointScale target={lagWinner.target} />
-        </div>
-        
-        {/* Lag Winner (Top Player) */}
-        <PlayerRow 
-          player={lagWinner}
-          score={match.player1Score}
-          games={games.filter(g => g.winner === 1)}
-          safeties={player1Safeties}
-          target={lagWinner.target}
-          position="top"
+    <div className="print:block hidden" id="scoresheet-print">
+      <div className="relative bg-white" style={{ width: '8.5in', height: '11in', pageBreakAfter: 'always' }}>
+        {/* Background scoresheet image */}
+        <img 
+          src={scoresheetPdf} 
+          alt="APA Scoresheet"
+          className="absolute inset-0 w-full h-full"
+          style={{ objectFit: 'contain' }}
         />
         
-        {/* Point Scale for Bottom Player */}
-        <div className="my-2">
-          <PointScale target={otherPlayer.target} />
-        </div>
-        
-        {/* Other Player (Bottom) */}
-        <PlayerRow 
-          player={otherPlayer}
-          score={match.player2Score}
-          games={games.filter(g => g.winner === 2)}
-          safeties={player2Safeties}
-          target={otherPlayer.target}
-          position="bottom"
-        />
-        
-        {/* Bottom Point Scale */}
-        <div className="mt-2 mb-4">
-          <PointScale target={otherPlayer.target} />
-        </div>
-        
-        {/* Match Summary */}
-        <div className="grid grid-cols-4 gap-4 mt-8 text-sm">
-          <div className="border border-black p-2">
-            <div className="font-bold mb-1">Total Innings</div>
-            <div className="text-center text-xl">{totalInnings}</div>
+        {/* Overlay data on specific positions */}
+        <div className="absolute inset-0" style={{ fontSize: '11px', fontFamily: 'Arial' }}>
+          {/* Match Times - positioned at top right */}
+          <div className="absolute" style={{ top: '33px', right: '135px', fontSize: '10px' }}>
+            {startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
           </div>
-          <div className="border border-black p-2">
-            <div className="font-bold mb-1">Defensive Shots</div>
-            <div className="text-center">
-              <div>{match.player1Name}: {player1Safeties}</div>
-              <div>{match.player2Name}: {player2Safeties}</div>
-            </div>
+          <div className="absolute" style={{ top: '33px', right: '35px', fontSize: '10px' }}>
+            {matchDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
           </div>
-          <div className="border border-black p-2">
-            <div className="font-bold mb-1">Total Points</div>
-            <div className="text-center">
-              <div>{match.player1Name}: {match.player1Score}</div>
-              <div>{match.player2Name}: {match.player2Score}</div>
-            </div>
+          
+          {/* Player 1 (Top row) */}
+          <div className="absolute" style={{ top: '104px', left: '125px', fontSize: '12px', fontWeight: 'bold' }}>
+            {lagWinner.name}
           </div>
-          <div className="border border-black p-2">
-            <div className="font-bold mb-1">Match Points Earned</div>
-            <div className="text-center">
-              <div>{match.winnerId === 1 ? match.player1Name : match.player2Name}: Winner</div>
-            </div>
+          <div className="absolute" style={{ top: '126px', left: '125px', fontSize: '12px', fontWeight: 'bold' }}>
+            {lagWinner.name}
           </div>
-        </div>
-        
-        {/* Table Size Section */}
-        <div className="mt-6 text-sm">
-          <div className="font-bold mb-2">This week's match took place on:</div>
-          <div className="flex gap-4">
-            <label className="flex items-center">
-              <input type="checkbox" className="mr-2" defaultChecked />
-              4-1/2 x 9' Regulation
-            </label>
+          
+          {/* Player 1 Skill Level */}
+          <div className="absolute" style={{ top: '112px', left: '290px', fontSize: '10px' }}>
+            SL {lagWinner.skillLevel}
+          </div>
+          
+          {/* Player 1 Score marks in grid */}
+          {renderScoreMarks(player1RunningTotals, player1Target, 105)}
+          
+          {/* Player 1 Defensive Shots */}
+          <div className="absolute text-center font-bold" style={{ top: '110px', right: '195px', width: '40px', fontSize: '14px' }}>
+            {player1Safeties}
+          </div>
+          
+          {/* Player 1 Total Points */}
+          <div className="absolute text-center font-bold" style={{ top: '110px', right: '125px', width: '40px', fontSize: '14px' }}>
+            {match.player1Score}
+          </div>
+          
+          {/* Player 2 (Bottom row) */}
+          <div className="absolute" style={{ top: '208px', left: '125px', fontSize: '12px', fontWeight: 'bold' }}>
+            {otherPlayer.name}
+          </div>
+          <div className="absolute" style={{ top: '230px', left: '125px', fontSize: '12px', fontWeight: 'bold' }}>
+            {otherPlayer.name}
+          </div>
+          
+          {/* Player 2 Skill Level */}
+          <div className="absolute" style={{ top: '216px', left: '290px', fontSize: '10px' }}>
+            SL {otherPlayer.skillLevel}
+          </div>
+          
+          {/* Player 2 Score marks in grid */}
+          {renderScoreMarks(player2RunningTotals, player2Target, 209)}
+          
+          {/* Player 2 Defensive Shots */}
+          <div className="absolute text-center font-bold" style={{ top: '214px', right: '195px', width: '40px', fontSize: '14px' }}>
+            {player2Safeties}
+          </div>
+          
+          {/* Player 2 Total Points */}
+          <div className="absolute text-center font-bold" style={{ top: '214px', right: '125px', width: '40px', fontSize: '14px' }}>
+            {match.player2Score}
+          </div>
+          
+          {/* Table checkbox - 4x8 Regulation */}
+          <div className="absolute" style={{ bottom: '52px', left: '580px' }}>
+            ✓
           </div>
         </div>
       </div>
@@ -125,135 +110,91 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
   );
 }
 
-// Point scale component with circled target
-function PointScale({ target }: { target: number }) {
-  const points = [1, 5, 10, 14, 19, 25, 31, 35, 38, 46, 50, 55, 60, 65, 70, 75];
+// Calculate running totals from match events for score marking
+function calculateRunningTotals(events: MatchEvent[], playerId: 1 | 2): number[] {
+  const totals: number[] = [];
+  let runningTotal = 0;
   
-  return (
-    <div className="flex border border-black">
-      {points.map(point => (
-        <div 
-          key={point}
-          className={`flex-1 text-center py-1 border-r border-black text-sm ${
-            point === target ? 'bg-black text-white rounded-full mx-1 my-0.5' : ''
-          }`}
-        >
-          {point}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// Player row component
-function PlayerRow({ 
-  player, 
-  score, 
-  games, 
-  safeties, 
-  target, 
-  position 
-}: {
-  player: { name: string; skillLevel: number; target: number };
-  score: number;
-  games: Array<{ winner: number; points: number; gameNumber: number }>;
-  safeties: number;
-  target: number;
-  position: 'top' | 'bottom';
-}) {
-  return (
-    <div className="border border-black">
-      <div className="grid grid-cols-12 min-h-[60px]">
-        {/* Player Info */}
-        <div className="col-span-3 border-r border-black p-2">
-          <div className="grid grid-cols-2 gap-1 text-xs">
-            <div>Team No:</div>
-            <div>Player No:</div>
-            <div className="col-span-2 font-bold">{player.name}</div>
-            <div>SL: {player.skillLevel}</div>
-            <div>Score: {score}</div>
-          </div>
-        </div>
-        
-        {/* Scoring Grid */}
-        <div className="col-span-6 border-r border-black p-1">
-          <ScoringGrid games={games} target={target} />
-        </div>
-        
-        {/* Stats */}
-        <div className="col-span-3 p-2 bg-yellow-100">
-          <div className="grid grid-cols-3 gap-1 text-xs">
-            <div className="text-center">
-              <div>Defensive</div>
-              <div>Shots</div>
-              <div className="font-bold text-lg">{safeties}</div>
-            </div>
-            <div className="text-center">
-              <div>Total</div>
-              <div>Points</div>
-              <div className="font-bold text-lg">{score}</div>
-            </div>
-            <div className="text-center">
-              <div>Match</div>
-              <div>Points</div>
-              <div>Earned</div>
-              <div className="font-bold text-lg">-</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Scoring grid with marks
-function ScoringGrid({ games, target }: { games: Array<{ points: number; gameNumber: number }>; target: number }) {
-  const points = [1, 5, 10, 14, 19, 25, 31, 35, 38, 46, 50, 55, 60, 65, 70, 75];
-  
-  // Create scoring marks based on games
-  const marks: { [key: number]: string[] } = {};
-  
-  games.forEach((game, gameIndex) => {
-    // Add marks up to the points scored in this game
-    let currentPoints = 0;
-    for (const point of points) {
-      if (currentPoints < game.points && point <= target) {
-        if (!marks[point]) marks[point] = [];
-        // Alternate between / and \ for each game
-        const markType = gameIndex % 2 === 0 ? '/' : '\\';
-        marks[point].push(markType);
-        currentPoints = point;
-      }
-      if (currentPoints >= game.points) break;
+  events.forEach(event => {
+    if (event.type === 'ball_scored' && event.player === playerId && event.pointsAwarded) {
+      runningTotal += event.pointsAwarded;
+      totals.push(runningTotal);
     }
   });
   
-  return (
-    <div className="grid grid-cols-16 gap-0.5 h-full">
-      {points.map(point => (
-        <div key={point} className="text-center text-xs border-r border-gray-300 last:border-r-0">
-          <div className="h-8 flex flex-col justify-center">
-            {marks[point]?.map((mark, i) => (
-              <span key={i} className="text-lg font-bold">{mark}</span>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+  return totals;
 }
 
-// Extract game data from events
-function extractGamesFromEvents(events: MatchEvent[], match: Match) {
-  // For now, create simple game data based on final scores
-  // This is a simplified version - you may want to enhance this based on your event structure
-  const games = [];
+// Render score marks on the grid
+function renderScoreMarks(runningTotals: number[], targetScore: number, topPosition: number) {
+  const scorePoints = [1, 5, 10, 14, 19, 25, 31, 35, 38, 46, 50, 55, 60, 65, 70, 75];
+  const marks: JSX.Element[] = [];
   
-  if (match.winnerId === 1) {
-    games.push({ winner: 1, points: match.player1Score, gameNumber: 1 });
-  } else if (match.winnerId === 2) {
-    games.push({ winner: 2, points: match.player2Score, gameNumber: 1 });
+  // Map score points to their grid positions (approximately 25px apart)
+  const gridStartX = 315;
+  const gridSpacing = 25.5;
+  
+  // Track which scores have been marked
+  const markedScores = new Set<number>();
+  
+  runningTotals.forEach((total, index) => {
+    // Find the highest score point that doesn't exceed the total
+    let scoreToMark = 0;
+    for (const point of scorePoints) {
+      if (point <= total && point <= targetScore && !markedScores.has(point)) {
+        scoreToMark = point;
+      }
+    }
+    
+    if (scoreToMark > 0 && !markedScores.has(scoreToMark)) {
+      markedScores.add(scoreToMark);
+      const scoreIndex = scorePoints.indexOf(scoreToMark);
+      if (scoreIndex !== -1) {
+        // Alternate between forward slash and backslash
+        const markType = index % 2 === 0 ? '/' : '\\';
+        const xPosition = gridStartX + (scoreIndex * gridSpacing);
+        
+        marks.push(
+          <div
+            key={`mark-${scoreToMark}-${index}`}
+            className="absolute text-center"
+            style={{
+              left: `${xPosition}px`,
+              top: `${topPosition}px`,
+              fontSize: '20px',
+              fontWeight: 'bold',
+              width: '25px',
+              height: '40px',
+              lineHeight: '40px'
+            }}
+          >
+            {markType}
+          </div>
+        );
+      }
+    }
+  });
+  
+  // Circle the target score
+  const targetIndex = scorePoints.indexOf(targetScore);
+  if (targetIndex !== -1) {
+    const xPosition = gridStartX + (targetIndex * gridSpacing) - 2;
+    marks.push(
+      <div
+        key="target-circle"
+        className="absolute"
+        style={{
+          left: `${xPosition}px`,
+          top: `${topPosition - 8}px`,
+          width: '28px',
+          height: '28px',
+          border: '2px solid black',
+          borderRadius: '50%',
+          backgroundColor: 'transparent'
+        }}
+      />
+    );
   }
   
-  return games;
+  return marks;
 }

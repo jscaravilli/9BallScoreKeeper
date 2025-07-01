@@ -1229,34 +1229,34 @@ export default function Game() {
           })()}
         </div>
 
-        {/* Empty space after top row */}
-        <div className="mb-4"></div>
+        {/* Much larger space after top row */}
+        <div className="mb-16"></div>
         
-        {/* New Match Button */}
-        <div className="mb-3">
-          <Button 
-            variant="outline" 
-            className="w-full py-3 px-4 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-            onClick={handleNewGame}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New Match
-          </Button>
-        </div>
+        {/* New Match and Reset buttons in a grid aligned with Safety button width */}
+        <div className="grid grid-cols-3 gap-3">
+          <div></div> {/* Empty first column */}
+          <div className="space-y-3">
+            {/* New Match Button */}
+            <Button 
+              variant="outline" 
+              className="w-full py-3 px-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+              onClick={handleNewGame}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              New Match
+            </Button>
 
-        {/* Two empty spaces */}
-        <div className="mb-8"></div>
-
-        {/* Reset Match Button */}
-        <div className="mb-3">
-          <Button 
-            variant="secondary" 
-            className="w-full py-3 px-4"
-            onClick={handleResetGame}
-          >
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Reset Match
-          </Button>
+            {/* Reset Match Button */}
+            <Button 
+              variant="secondary" 
+              className="w-full py-3 px-2"
+              onClick={handleResetGame}
+            >
+              <RotateCcw className="h-4 w-4 mr-1" />
+              Reset Match
+            </Button>
+          </div>
+          <div></div> {/* Empty third column */}
         </div>
 
         {turnHistory.length > 0 && (
