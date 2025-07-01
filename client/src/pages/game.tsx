@@ -1191,7 +1191,7 @@ export default function Game() {
             Safety ({currentMatch.currentPlayer === 1 ? (currentMatch.player1SafetiesUsed || 0) : (currentMatch.player2SafetiesUsed || 0)})
           </Button>
 
-          {/* Timeout Button */}
+          {/* Timeout Button with Minus */}
           {(() => {
             const currentPlayerTimeoutsUsed = currentMatch.currentPlayer === 1 
               ? (currentMatch.player1TimeoutsUsed || 0)
@@ -1205,15 +1205,26 @@ export default function Game() {
             const maxTimeouts = currentPlayerSkillLevel <= 3 ? 2 : 1;
             
             return (
-              <Button
-                variant="outline"
-                onClick={handleTakeTimeout}
-                disabled={remainingTimeouts === 0}
-                className="py-3 px-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Clock className="h-4 w-4 mr-1" />
-                Timeout ({currentPlayerTimeoutsUsed}/{maxTimeouts})
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleUndoTimeout}
+                  disabled={currentPlayerTimeoutsUsed === 0}
+                  className="p-2 bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-30"
+                >
+                  <Minus className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleTakeTimeout}
+                  disabled={remainingTimeouts === 0}
+                  className="flex-1 py-3 px-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Clock className="h-4 w-4 mr-1" />
+                  Timeout ({currentPlayerTimeoutsUsed}/{maxTimeouts})
+                </Button>
+              </div>
             );
           })()}
         </div>
