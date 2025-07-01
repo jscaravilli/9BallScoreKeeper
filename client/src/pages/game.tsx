@@ -62,7 +62,7 @@ function HistoryDisplay({
           const player2Target = getPointsToWin(match.player2SkillLevel as any);
           
           return (
-            <div key={`${match.id}-${index}`} className="bg-gray-50 rounded-lg border">
+            <div key={match.historyId || `${match.id}-${index}`} className="bg-gray-50 rounded-lg border">
               <div 
                 className="p-4 cursor-pointer hover:bg-gray-100 transition-colors"
                 onClick={() => setExpandedMatch(expandedMatch === index ? null : index)}

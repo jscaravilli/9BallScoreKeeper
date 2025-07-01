@@ -152,9 +152,9 @@ class CookieStorageAPI {
   }
 
   // Multi-cookie history management - one cookie per match
-  getMatchHistory(): (Match & { completedAt: string; events: MatchEvent[] })[] {
+  getMatchHistory(): (Match & { completedAt: string; events: MatchEvent[]; historyId: string })[] {
     try {
-      const history: (Match & { completedAt: string; events: MatchEvent[] })[] = [];
+      const history: (Match & { completedAt: string; events: MatchEvent[]; historyId: string })[] = [];
       
       // Get the index of stored matches
       const indexCookie = this.getCookie('match_history_index');
@@ -170,6 +170,10 @@ class CookieStorageAPI {
         if (matchCookie) {
           try {
             const match = JSON.parse(matchCookie);
+            // Ensure historyId exists for older entries
+            if (!match.historyId) {
+              match.historyId = matchId;
+            }
             history.push(match);
             console.log(`Successfully loaded match: ${match.player1Name} vs ${match.player2Name}`);
           } catch (parseError) {
@@ -186,8 +190,15 @@ class CookieStorageAPI {
       
       console.log(`Final history array contains ${history.length} matches`);
       
+      // Remove duplicates based on historyId (in case of corruption or double-saves)
+      const uniqueHistory = history.filter((match, index, self) => 
+        index === self.findIndex(m => m.historyId === match.historyId)
+      );
+      
+      console.log(`After duplicate removal: ${uniqueHistory.length} matches`);
+      
       // Sort by completion date (newest first)
-      return history.sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime());
+      return uniqueHistory.sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime());
     } catch (error) {
       console.error('Error getting match history from cookies:', error);
       return [];
@@ -213,14 +224,18 @@ class CookieStorageAPI {
     try {
       const events = this.getCurrentMatchEvents();
       
+      // Create unique history ID (timestamp + match ID + random)
+      const uniqueHistoryId = `${Date.now()}_${match.id}_${Math.random().toString(36).substr(2, 9)}`;
+      
       const historyEntry = {
         ...match,
         completedAt: new Date().toISOString(),
-        events: events
+        events: events,
+        historyId: uniqueHistoryId  // Add unique ID to prevent duplicates
       };
       
-      // Create unique ID for this match (timestamp + match ID)
-      const matchKey = `${Date.now()}_${match.id}`;
+      // Create unique cookie key
+      const matchKey = uniqueHistoryId;
       
       // Store the match in its own cookie
       const historyData = JSON.stringify(historyEntry);
