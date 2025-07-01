@@ -49,6 +49,16 @@ class CookieStorageAPI {
     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
   }
 
+  // Set match history cookie with 48-hour expiration
+  private setMatchHistoryCookie(name: string, value: string): void {
+    this.setCookie(name, value, {
+      expires: 2, // 2 days = 48 hours
+      path: '/',
+      sameSite: 'strict' as const,
+      secure: window.location.protocol === 'https:'
+    });
+  }
+
   private getMatchCounter(): number {
     const counter = this.getCookie(COOKIE_KEYS.MATCH_COUNTER);
     return counter ? parseInt(counter, 10) : 1;
@@ -171,7 +181,7 @@ class CookieStorageAPI {
         if (matchCookies.length > 0) {
           console.log('Attempting to rebuild index from orphaned cookies...');
           const orphanedIds = matchCookies.map(c => c.split('=')[0].trim().replace('match_history_', ''));
-          this.setCookie('match_history_index', JSON.stringify(orphanedIds));
+          this.setMatchHistoryCookie('match_history_index', JSON.stringify(orphanedIds));
           console.log(`Rebuilt index with ${orphanedIds.length} matches: ${JSON.stringify(orphanedIds)}`);
           
           // Now try to load them
@@ -279,7 +289,14 @@ class CookieStorageAPI {
         console.warn(`Cookie size ${historyData.length} bytes may exceed browser limits!`);
       }
       
-      this.setCookie(cookieKey, historyData);
+      // Check if cookie already exists (overwrite detection)
+      const existingCookie = this.getCookie(cookieKey);
+      if (existingCookie) {
+        console.warn(`WARNING: Cookie ${cookieKey} already exists! This could be an overwrite.`);
+        console.warn(`Existing data length: ${existingCookie.length} characters`);
+      }
+      
+      this.setMatchHistoryCookie(cookieKey, historyData);
       
       // Verify the cookie was stored
       const verification = this.getCookie(cookieKey);
@@ -292,6 +309,12 @@ class CookieStorageAPI {
       } else {
         console.log(`Successfully stored cookie ${cookieKey}`);
         console.log(`Verified data length: ${verification.length} characters`);
+        
+        // Double-check that the stored data matches what we sent
+        if (verification.length !== historyData.length) {
+          console.error(`DATA MISMATCH: Sent ${historyData.length} chars, got back ${verification.length} chars`);
+          console.error(`This indicates cookie truncation or corruption!`);
+        }
       }
       
       // Update the index
@@ -311,7 +334,7 @@ class CookieStorageAPI {
         });
       }
       
-      this.setCookie('match_history_index', JSON.stringify(matchIds));
+      this.setMatchHistoryCookie('match_history_index', JSON.stringify(matchIds));
       
       // Verify index cookie was saved
       const verifyIndex = this.getCookie('match_history_index');
