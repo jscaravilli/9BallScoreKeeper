@@ -160,13 +160,18 @@ class CookieStorageAPI {
       const indexCookie = this.getCookie('match_history_index');
       const matchIds = indexCookie ? JSON.parse(indexCookie) : [];
       
+      console.log(`Getting match history. Index contains: ${matchIds.length} matches`);
+      console.log(`Match IDs: ${JSON.stringify(matchIds)}`);
+      
       // Load each match from its individual cookie
       for (const matchId of matchIds) {
         const matchCookie = this.getCookie(`match_history_${matchId}`);
+        console.log(`Loading match ${matchId}: ${matchCookie ? 'found' : 'missing'}`);
         if (matchCookie) {
           try {
             const match = JSON.parse(matchCookie);
             history.push(match);
+            console.log(`Successfully loaded match: ${match.player1Name} vs ${match.player2Name}`);
           } catch (parseError) {
             console.warn(`Error parsing match ${matchId}, removing from index`);
             // Remove corrupted match from index
@@ -174,9 +179,12 @@ class CookieStorageAPI {
           }
         } else {
           // Cookie missing, remove from index
+          console.warn(`Match cookie ${matchId} missing, removing from index`);
           this.removeMatchFromIndex(matchId);
         }
       }
+      
+      console.log(`Final history array contains ${history.length} matches`);
       
       // Sort by completion date (newest first)
       return history.sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime());
@@ -215,7 +223,14 @@ class CookieStorageAPI {
       const matchKey = `${Date.now()}_${match.id}`;
       
       // Store the match in its own cookie
-      this.setCookie(`match_history_${matchKey}`, JSON.stringify(historyEntry));
+      const historyData = JSON.stringify(historyEntry);
+      console.log(`Storing match cookie: match_history_${matchKey}`);
+      console.log(`Cookie size: ${historyData.length} bytes`);
+      this.setCookie(`match_history_${matchKey}`, historyData);
+      
+      // Verify the cookie was stored
+      const verification = this.getCookie(`match_history_${matchKey}`);
+      console.log(`Cookie verification: ${verification ? 'SUCCESS' : 'FAILED'}`);
       
       // Update the index
       const indexCookie = this.getCookie('match_history_index');
@@ -237,6 +252,8 @@ class CookieStorageAPI {
       this.clearCurrentMatchEvents();
       
       console.log(`Match ${matchKey} saved to history cookies`);
+      console.log(`Index now contains: ${matchIds.length} matches`);
+      console.log(`Match data size: ${JSON.stringify(historyEntry).length} characters`);
     } catch (error) {
       console.error('Error adding to match history in cookies:', error);
     }
