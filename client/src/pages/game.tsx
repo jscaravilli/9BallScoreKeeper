@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { clientQueryFunctions, clientMutation, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,10 @@ function HistoryDisplay({
   setExpandedMatch: (index: number | null) => void; 
   refreshKey?: number;
 }) {
-  const history = cookieStorageAPI.getMatchHistory();
+  // Use useMemo to make history reactive to refreshKey changes
+  const history = useMemo(() => {
+    return cookieStorageAPI.getMatchHistory();
+  }, [refreshKey]);
   
   if (history.length === 0) {
     return (
