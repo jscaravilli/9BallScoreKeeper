@@ -62,9 +62,11 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     let runningTotal = 0;
     
     match.events
-      .filter(event => event.type === 'score' && event.playerId === playerId)
+      .filter(event => event.type === 'ball_scored' && event.player === playerId)
       .forEach(event => {
-        runningTotal += event.points || 0;
+        // Add points based on ball number (balls 1-8 = 1 point, ball 9 = 2 points)
+        const points = event.ballNumber === 9 ? 2 : 1;
+        runningTotal += points;
         totals.push(runningTotal);
       });
     
@@ -75,8 +77,8 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
   const player2RunningTotals = calculateRunningTotals(2);
   
   // Count safety shots
-  const player1Safeties = match.events.filter(e => e.type === 'safety' && e.playerId === 1).length;
-  const player2Safeties = match.events.filter(e => e.type === 'safety' && e.playerId === 2).length;
+  const player1Safeties = match.events.filter(e => e.type === 'safety_taken' && e.player === 1).length;
+  const player2Safeties = match.events.filter(e => e.type === 'safety_taken' && e.player === 2).length;
 
   // Render score marks on the grid
   const renderScoreMarks = (runningTotals: number[], targetScore: number, playerRow: 'player1' | 'player2') => {
