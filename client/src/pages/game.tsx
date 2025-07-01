@@ -27,6 +27,10 @@ function HistoryDisplay({
 }) {
   const history = cookieStorageAPI.getMatchHistory();
   
+  // Debug logging
+  console.log('Match history data:', history);
+  console.log('History length:', history.length);
+  
   if (history.length === 0) {
     return (
       <div className="overflow-y-auto max-h-96">
@@ -43,6 +47,14 @@ function HistoryDisplay({
     <div className="overflow-y-auto max-h-96">
       <div className="space-y-3">
         {history.map((match, index) => {
+          console.log(`Rendering match ${index}:`, match);
+          
+          // Handle potential missing data gracefully
+          if (!match.completedAt || !match.winnerId || !match.player1Name || !match.player2Name) {
+            console.warn('Invalid match data:', match);
+            return null;
+          }
+          
           const completedDate = new Date(match.completedAt);
           const winnerName = match.winnerId === 1 ? match.player1Name : match.player2Name;
           const player1Target = getPointsToWin(match.player1SkillLevel as any);
