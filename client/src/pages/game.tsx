@@ -11,7 +11,7 @@ import MatchWinModal from "@/components/match-win-modal";
 import BallRack from "@/components/ball-rack";
 import PlayerScores from "@/components/player-scores";
 import { getPointsToWin } from "@/lib/apa-handicaps";
-import { cookieStorageAPI } from "@/lib/cookieStorage";
+import { localStorageAPI } from "@/lib/localStorage";
 import type { Match, BallInfo, MatchEvent } from "@shared/schema";
 
 // History Display Component
@@ -22,7 +22,7 @@ function HistoryDisplay({
   expandedMatch: number | null; 
   setExpandedMatch: (index: number | null) => void; 
 }) {
-  const history = cookieStorageAPI.getMatchHistory();
+  const history = localStorageAPI.getMatchHistory();
   
   if (history.length === 0) {
     return (
@@ -403,7 +403,7 @@ export default function Game() {
         newScore: newScore,
         details: `${ballNumber}-Ball scored for ${points} point${points > 1 ? 's' : ''}`
       };
-      cookieStorageAPI.addMatchEvent(ballScoredEvent);
+      localStorageAPI.addMatchEvent(ballScoredEvent);
 
       // Check if this scoring wins the match (reaches or exceeds handicap)
       const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
@@ -464,10 +464,10 @@ export default function Game() {
             playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
             details: `Match won by ${currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name} with final score ${currentMatch.currentPlayer === 1 ? newScore : currentMatch.player1Score}-${currentMatch.currentPlayer === 2 ? newScore : currentMatch.player2Score}`
           };
-          cookieStorageAPI.addMatchEvent(matchCompletedEvent);
+          localStorageAPI.addMatchEvent(matchCompletedEvent);
 
           // Save completed match to local history
-          cookieStorageAPI.addToHistory(completedMatch);
+          localStorageAPI.addToHistory(completedMatch);
           
           console.log('Match win mutations sent and saved to history');
           return;
@@ -539,7 +539,7 @@ export default function Game() {
           newScore: newScore,
           details: `${ballNumber}-Ball marked dead, ${points} point${points > 1 ? 's' : ''} deducted`
         };
-        cookieStorageAPI.addMatchEvent(ballDeadEvent);
+        localStorageAPI.addMatchEvent(ballDeadEvent);
 
         updateMatchMutation.mutate({
           id: currentMatch.id,
@@ -639,7 +639,7 @@ export default function Game() {
     }));
 
     // Reset match with all updates in single operation
-    const updatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, {
+    const updatedMatch = localStorageAPI.updateMatch(currentMatch.id, {
       currentPlayer: 1,
       player1Score: 0,
       player2Score: 0,
@@ -792,7 +792,7 @@ export default function Game() {
       playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
       details: 'Turn undone - reverted to previous state'
     };
-    cookieStorageAPI.addMatchEvent(undoEvent);
+    localStorageAPI.addMatchEvent(undoEvent);
     
     setUndoInProgress(true);
 
@@ -874,7 +874,7 @@ export default function Game() {
     }));
 
     // Update match with incremented game number and reset balls in single operation
-    const updatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, {
+    const updatedMatch = localStorageAPI.updateMatch(currentMatch.id, {
       currentGame: currentMatch.currentGame + 1,
       ballStates: initialBallStates
     });
@@ -890,7 +890,7 @@ export default function Game() {
       playerName: gameWinner === 1 ? currentMatch.player1Name : currentMatch.player2Name,
       details: 'Rerack - New game started after 9-ball win'
     };
-    cookieStorageAPI.addMatchEvent(rerackEvent);
+    localStorageAPI.addMatchEvent(rerackEvent);
 
     setShowGameWin(false);
     setGameWinner(null);
@@ -1160,7 +1160,7 @@ export default function Game() {
                 <button 
                   onClick={() => {
                     if (confirm('Clear all match history? This cannot be undone.')) {
-                      cookieStorageAPI.clearHistory();
+                      localStorageAPI.clearHistory();
                       setShowHistory(false);
                     }
                   }}

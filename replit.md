@@ -216,8 +216,6 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - June 30, 2025: Added Digital Asset Links (.well-known/assetlinks.json) for proper APK domain verification and browser bar removal
 - June 30, 2025: FIXED Android APK compatibility - added minSdkVersion 26 and android:exported="true" for Android 12+ support via pwabuilder.json configuration
 - June 30, 2025: ENHANCED offline functionality - upgraded service worker for true native-like APK experience with comprehensive caching, background sync, and full offline operation using existing localStorage implementation
-- July 1, 2025: UPGRADED to cookie-based storage system - replaced localStorage with more persistent browser cookies for reliable state preservation across browser refreshes and sessions
-- July 1, 2025: Cookie storage automatically migrates existing localStorage data on first load to ensure smooth user transition
 
 ## User Preferences
 
