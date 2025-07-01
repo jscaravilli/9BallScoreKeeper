@@ -1,4 +1,4 @@
-import type { Match, BallInfo, MatchEvent } from '@shared/schema';
+import type { Match, BallInfo, MatchEvent } from '../../../shared/schema';
 
 const COOKIE_KEYS = {
   CURRENT_MATCH: 'poolscorer_current_match',
