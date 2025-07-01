@@ -163,6 +163,13 @@ export default function Game() {
   // History refresh trigger
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
+  // Force history refresh when history modal opens
+  useEffect(() => {
+    if (showHistory) {
+      setHistoryRefreshKey(prev => prev + 1);
+    }
+  }, [showHistory]);
+
   // Check online/offline status
   const isOnline = useOnlineStatus();
 
