@@ -166,6 +166,20 @@ class CookieStorageAPI {
         const allCookies = document.cookie.split(';');
         const matchCookies = allCookies.filter(cookie => cookie.trim().startsWith('match_history_') && !cookie.trim().startsWith('match_history_index'));
         console.log(`Found ${matchCookies.length} orphaned match history cookies:`, matchCookies.map(c => c.split('=')[0].trim()));
+        
+        // If we have orphaned cookies, let's rebuild the index
+        if (matchCookies.length > 0) {
+          console.log('Attempting to rebuild index from orphaned cookies...');
+          const orphanedIds = matchCookies.map(c => c.split('=')[0].trim().replace('match_history_', ''));
+          this.setCookie('match_history_index', JSON.stringify(orphanedIds));
+          console.log(`Rebuilt index with ${orphanedIds.length} matches: ${JSON.stringify(orphanedIds)}`);
+          
+          // Now try to load them
+          const matchIds = orphanedIds;
+          console.log(`Using rebuilt match IDs: ${JSON.stringify(matchIds)}`);
+        } else {
+          return [];
+        }
         return [];
       }
       
@@ -194,6 +208,13 @@ class CookieStorageAPI {
         } else {
           // Cookie missing, remove from index
           console.warn(`Match cookie ${matchId} missing, removing from index`);
+          console.warn(`DEBUG: Looking for cookie with key: match_history_${matchId}`);
+          
+          // List all cookies that start with match_history_ to see what we actually have
+          const allCookies = document.cookie.split(';');
+          const allMatchCookies = allCookies.filter(cookie => cookie.trim().startsWith('match_history_'));
+          console.warn(`All available match history cookies:`, allMatchCookies.map(c => c.split('=')[0].trim()));
+          
           this.removeMatchFromIndex(matchId);
         }
       }
@@ -249,13 +270,29 @@ class CookieStorageAPI {
       
       // Store the match in its own cookie
       const historyData = JSON.stringify(historyEntry);
-      console.log(`Storing match cookie: match_history_${matchKey}`);
+      const cookieKey = `match_history_${matchKey}`;
+      console.log(`Storing match cookie: ${cookieKey}`);
       console.log(`Cookie size: ${historyData.length} bytes`);
-      this.setCookie(`match_history_${matchKey}`, historyData);
+      
+      // Check if cookie size is too large (browser limit is usually 4KB)
+      if (historyData.length > 4000) {
+        console.warn(`Cookie size ${historyData.length} bytes may exceed browser limits!`);
+      }
+      
+      this.setCookie(cookieKey, historyData);
       
       // Verify the cookie was stored
-      const verification = this.getCookie(`match_history_${matchKey}`);
+      const verification = this.getCookie(cookieKey);
       console.log(`Cookie verification: ${verification ? 'SUCCESS' : 'FAILED'}`);
+      
+      if (!verification) {
+        console.error(`CRITICAL: Cookie ${cookieKey} was not saved!`);
+        console.error(`Data length: ${historyData.length} characters`);
+        console.error(`First 200 chars of data: ${historyData.substring(0, 200)}...`);
+      } else {
+        console.log(`Successfully stored cookie ${cookieKey}`);
+        console.log(`Verified data length: ${verification.length} characters`);
+      }
       
       // Update the index
       const indexCookie = this.getCookie('match_history_index');
