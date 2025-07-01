@@ -35,6 +35,15 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
     }
   };
 
+  // Prevent closing modal unless form is complete
+  const handleOpenChange = (open: boolean) => {
+    // Only allow closing if both names are filled AND we're trying to close
+    if (!open && player1Name.trim() && player2Name.trim()) {
+      onClose();
+    }
+    // If trying to close but form is incomplete, do nothing (prevents dismissal)
+  };
+
   const handleReset = () => {
     setPlayer1Name("");
     setPlayer1SkillLevel(5);
@@ -48,12 +57,15 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
   }));
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-sm mx-auto">
         <DialogHeader>
           <DialogTitle>Joseph's Unofficial APA 9 Ball Scorekeeper</DialogTitle>
           <DialogDescription>
             Set up player names and APA skill levels to start tracking your 9-ball match.
+            <span className="block mt-2 text-sm font-medium text-orange-600">
+              Both player names are required to continue.
+            </span>
           </DialogDescription>
         </DialogHeader>
         
@@ -66,7 +78,7 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
               value={player1Name}
               onChange={(e) => setPlayer1Name(e.target.value)}
               placeholder="Enter name"
-              className="mt-1"
+              className={`mt-1 ${!player1Name.trim() ? 'border-orange-300 focus:border-orange-500' : 'border-green-300 focus:border-green-500'}`}
             />
           </div>
           
@@ -94,7 +106,7 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
               value={player2Name}
               onChange={(e) => setPlayer2Name(e.target.value)}
               placeholder="Enter name"
-              className="mt-1"
+              className={`mt-1 ${!player2Name.trim() ? 'border-orange-300 focus:border-orange-500' : 'border-green-300 focus:border-green-500'}`}
             />
           </div>
           
