@@ -817,6 +817,23 @@ export default function Game() {
     cookieStorageAPI.addMatchEvent(safetyEvent);
   };
 
+  const handleUndoSafety = () => {
+    if (!currentMatch) return;
+    
+    // Decrement safety count for current player
+    const currentPlayerSafetiesUsed = currentMatch.currentPlayer === 1 
+      ? (currentMatch.player1SafetiesUsed || 0)
+      : (currentMatch.player2SafetiesUsed || 0);
+    
+    if (currentPlayerSafetiesUsed > 0) {
+      const updates = currentMatch.currentPlayer === 1 
+        ? { player1SafetiesUsed: currentPlayerSafetiesUsed - 1 }
+        : { player2SafetiesUsed: currentPlayerSafetiesUsed - 1 };
+      
+      updateMatchMutation.mutate({ id: currentMatch.id, updates });
+    }
+  };
+
   const confirmResetGame = () => {
     if (!currentMatch) return;
 
@@ -1203,15 +1220,34 @@ export default function Game() {
             End Turn
           </Button>
 
-          {/* Safety Button */}
-          <Button 
-            variant="outline" 
-            className="py-3 px-2 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
-            onClick={handleSafety}
-          >
-            <Shield className="h-4 w-4 mr-1" />
-            Safety ({currentMatch.currentPlayer === 1 ? (currentMatch.player1SafetiesUsed || 0) : (currentMatch.player2SafetiesUsed || 0)})
-          </Button>
+          {/* Safety Button with Minus */}
+          {(() => {
+            const currentPlayerSafetiesUsed = currentMatch.currentPlayer === 1 
+              ? (currentMatch.player1SafetiesUsed || 0)
+              : (currentMatch.player2SafetiesUsed || 0);
+            
+            return (
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleUndoSafety}
+                  disabled={currentPlayerSafetiesUsed === 0}
+                  className="p-2 bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-30"
+                >
+                  <Minus className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleSafety}
+                  className="flex-1 py-3 px-2 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
+                >
+                  <Shield className="h-4 w-4 mr-1" />
+                  Safety ({currentPlayerSafetiesUsed})
+                </Button>
+              </div>
+            );
+          })()}
 
           {/* Timeout Button with Minus */}
           {(() => {
