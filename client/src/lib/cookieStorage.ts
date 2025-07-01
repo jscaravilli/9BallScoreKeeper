@@ -42,6 +42,18 @@ class CookieStorageAPI {
         return decodeURIComponent(c.substring(nameEQ.length, c.length));
       }
     }
+    
+    // Fallback to localStorage if cookie not found
+    try {
+      const localStorageValue = localStorage.getItem(name);
+      if (localStorageValue) {
+        console.log(`Found ${name} in localStorage fallback`);
+        return localStorageValue;
+      }
+    } catch (error) {
+      console.warn(`localStorage fallback failed for ${name}:`, error);
+    }
+    
     return null;
   }
 
@@ -51,12 +63,47 @@ class CookieStorageAPI {
 
   // Set match history cookie with 48-hour expiration
   private setMatchHistoryCookie(name: string, value: string): void {
-    this.setCookie(name, value, {
-      expires: 2, // 2 days = 48 hours
-      path: '/',
-      sameSite: 'strict' as const,
-      secure: window.location.protocol === 'https:'
+    console.log(`Attempting to set cookie with:`, {
+      name,
+      dataLength: value.length,
+      secure: window.location.protocol === 'https:',
+      protocol: window.location.protocol,
+      hostname: window.location.hostname
     });
+    
+    // Try a simpler cookie setting approach for debugging
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (2 * 24 * 60 * 60 * 1000)); // 48 hours
+    
+    const cookieString = `${name}=${encodeURIComponent(value)}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+    console.log(`Setting cookie string length: ${cookieString.length}`);
+    
+    document.cookie = cookieString;
+    
+    // Immediate verification
+    const testRead = this.getCookie(name);
+    console.log(`Immediate cookie test: ${testRead ? 'SUCCESS' : 'FAILED'}`);
+    
+    // If failed, try without URL encoding (sometimes helps with large data)
+    if (!testRead) {
+      console.log(`Retrying without URL encoding...`);
+      const simpleString = `${name}=${value}; expires=${expires.toUTCString()}; path=/`;
+      document.cookie = simpleString;
+      
+      const testRead2 = this.getCookie(name);
+      console.log(`Second attempt: ${testRead2 ? 'SUCCESS' : 'FAILED'}`);
+      
+      // If still failed, try localStorage as fallback
+      if (!testRead2) {
+        console.log(`Cookie failed, attempting localStorage fallback...`);
+        try {
+          localStorage.setItem(name, value);
+          console.log(`localStorage fallback: SUCCESS`);
+        } catch (error) {
+          console.error(`localStorage fallback failed:`, error);
+        }
+      }
+    }
   }
 
   private getMatchCounter(): number {
