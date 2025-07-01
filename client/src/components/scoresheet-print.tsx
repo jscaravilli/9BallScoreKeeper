@@ -32,7 +32,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       <div className="relative bg-white" style={{ width: '11in', height: '8.5in', pageBreakAfter: 'always' }}>
         {/* Background scoresheet image */}
         <img 
-          src={scoresheetPdf} 
+          src={scoresheetPng} 
           alt="APA Scoresheet"
           className="absolute inset-0 w-full h-full"
           style={{ objectFit: 'contain' }}
