@@ -158,8 +158,18 @@ class CookieStorageAPI {
       
       // Get the index of stored matches
       const indexCookie = this.getCookie('match_history_index');
-      const matchIds = indexCookie ? JSON.parse(indexCookie) : [];
+      console.log(`Raw index cookie value: ${indexCookie}`);
       
+      if (!indexCookie) {
+        console.log('DEBUG: No match history index found. Checking for orphaned match cookies...');
+        // Check if there are any match history cookies without an index
+        const allCookies = document.cookie.split(';');
+        const matchCookies = allCookies.filter(cookie => cookie.trim().startsWith('match_history_') && !cookie.trim().startsWith('match_history_index'));
+        console.log(`Found ${matchCookies.length} orphaned match history cookies:`, matchCookies.map(c => c.split('=')[0].trim()));
+        return [];
+      }
+      
+      const matchIds = indexCookie ? JSON.parse(indexCookie) : [];
       console.log(`Getting match history. Index contains: ${matchIds.length} matches`);
       console.log(`Match IDs: ${JSON.stringify(matchIds)}`);
       
@@ -249,8 +259,11 @@ class CookieStorageAPI {
       
       // Update the index
       const indexCookie = this.getCookie('match_history_index');
+      console.log(`Current index cookie: ${indexCookie}`);
       const matchIds = indexCookie ? JSON.parse(indexCookie) : [];
+      console.log(`Current match IDs in index: ${JSON.stringify(matchIds)}`);
       matchIds.unshift(matchKey); // Add to beginning (newest first)
+      console.log(`New match IDs after adding ${matchKey}: ${JSON.stringify(matchIds)}`);
       
       // Keep only last 20 matches to prevent too many cookies
       if (matchIds.length > 20) {
@@ -262,6 +275,11 @@ class CookieStorageAPI {
       }
       
       this.setCookie('match_history_index', JSON.stringify(matchIds));
+      
+      // Verify index cookie was saved
+      const verifyIndex = this.getCookie('match_history_index');
+      console.log(`Index cookie verification: ${verifyIndex ? 'SUCCESS' : 'FAILED'}`);
+      console.log(`Verified index content: ${verifyIndex}`);
       
       // Clear current match events after saving to history
       this.clearCurrentMatchEvents();
