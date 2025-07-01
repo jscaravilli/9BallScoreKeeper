@@ -4,18 +4,20 @@ import { clientQueryFunctions, clientMutation, queryClient } from "@/lib/queryCl
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
-import { Menu, Users, History, Settings, Plus, RotateCcw, Info, X, Trash2, Clock, Minus, Shield } from "lucide-react";
+import { Menu, Users, History, Settings, Plus, RotateCcw, Info, X, Trash2, Clock, Minus, Shield, Printer } from "lucide-react";
 import PlayerSetupModal from "@/components/player-setup-modal";
 import GameWinModal from "@/components/game-win-modal";
 import MatchWinModal from "@/components/match-win-modal";
 import BallRack from "@/components/ball-rack";
 import PlayerScores from "@/components/player-scores";
 import TimeoutModal from "@/components/timeout-modal";
+import ScoresheetPrint from "@/components/scoresheet-print";
 import { getPointsToWin } from "@/lib/apa-handicaps";
 import { getRemainingTimeouts } from "@/lib/timeout-utils";
 import { cookieStorageAPI } from "@/lib/cookieStorage";
 import { localStorageAPI } from "@/lib/localStorage";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { usePrint } from "@/hooks/usePrint";
 import type { Match, BallInfo, MatchEvent } from "@shared/schema";
 
 // History Display Component
@@ -30,6 +32,7 @@ function HistoryDisplay({
 }) {
   // Force fresh data every render AND when refreshKey changes
   const [, forceRender] = useState(0);
+  const { printElement } = usePrint();
   const history = useMemo(() => {
     console.log('HistoryDisplay: Fetching fresh match history');
     return cookieStorageAPI.getMatchHistory();
@@ -71,8 +74,22 @@ function HistoryDisplay({
                   <div className="font-semibold text-gray-800">
                     🏆 {winnerName} Wins!
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {completedDate.toLocaleDateString()} {completedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        printElement(`scoresheet-${index}`, `APA 9-Ball Scoresheet - ${match.player1Name} vs ${match.player2Name}`);
+                      }}
+                      className="h-7 px-2 text-xs"
+                    >
+                      <Printer className="h-3 w-3 mr-1" />
+                      Print
+                    </Button>
+                    <div className="text-xs text-gray-500">
+                      {completedDate.toLocaleDateString()} {completedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </div>
                   </div>
                 </div>
                 
@@ -128,6 +145,13 @@ function HistoryDisplay({
           );
         })}
       </div>
+      
+      {/* Hidden scoresheet print components */}
+      {history.map((match, index) => (
+        <div key={`print-${match.historyId || index}`} id={`scoresheet-${index}`}>
+          <ScoresheetPrint match={match} />
+        </div>
+      ))}
     </div>
   );
 }
