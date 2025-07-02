@@ -264,7 +264,7 @@ export async function printMatchScoresheet(match: any): Promise<void> {
         const coordinates = isPlayer1 ? PLAYER1_COORDINATES : PLAYER2_COORDINATES;
         const markIndex = isPlayer1 ? player1MarkIndex : player2MarkIndex;
         
-        console.log(`Event ${eventIndex}: Ball ${event.ballNumber} scored by player ${player}, markIndex: ${markIndex}`);
+        console.log(`Event ${eventIndex}: Ball ${event.ballNumber} scored by player ${player}, markIndex: ${markIndex}, event:`, event);
         
         const coord = coordinates[markIndex];
         if (coord && markIndex < coordinates.length) {

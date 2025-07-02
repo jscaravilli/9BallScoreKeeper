@@ -290,7 +290,23 @@ class CookieStorageAPI {
     try {
       const events = this.getCurrentMatchEvents();
       events.push(event);
-      this.setCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS, JSON.stringify(events));
+      const eventsJson = JSON.stringify(events);
+      
+      console.log(`Adding event: ${event.type} by player ${event.player}, ball ${event.ballNumber}`);
+      console.log(`Total events: ${events.length}, JSON size: ${eventsJson.length} chars`);
+      
+      // Check if events cookie is getting too large
+      if (eventsJson.length > 3000) {
+        console.warn(`Events cookie getting large (${eventsJson.length} chars), may cause data loss`);
+      }
+      
+      this.setCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS, eventsJson);
+      
+      // Verify the event was stored
+      const verifyEvents = this.getCurrentMatchEvents();
+      if (verifyEvents.length !== events.length) {
+        console.error(`Event storage verification failed! Expected ${events.length}, got ${verifyEvents.length}`);
+      }
     } catch (error) {
       console.error('Error adding match event to cookies:', error);
     }
@@ -422,9 +438,11 @@ class CookieStorageAPI {
     
     try {
       const events = this.getCurrentMatchEvents();
-      console.log('DEBUG: Events retrieved for history:', events);
-      console.log('DEBUG: Number of events:', events.length);
-      console.log('DEBUG: Ball scored events:', events.filter(e => e.type === 'ball_scored'));
+      console.log('DEBUG: Events retrieved for history:', events.length, 'events');
+      console.log('DEBUG: Ball scored events by player:', {
+        player1: events.filter(e => e.type === 'ball_scored' && e.player === 1).length,
+        player2: events.filter(e => e.type === 'ball_scored' && e.player === 2).length
+      });
       
       // Create unique history ID (timestamp + match ID + random)
       const uniqueHistoryId = `${Date.now()}_${match.id}_${Math.random().toString(36).substr(2, 9)}`;
