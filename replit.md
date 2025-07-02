@@ -288,6 +288,13 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Player 2 score coordinate updated to [1073,446] per specification
   - Text alignment uses bottom-left anchoring for precise positioning control
   - Both on-screen scoresheet and PDF generation use identical coordinate system for consistency
+- July 2, 2025: ADDED dynamic text sizing for player names to prevent overflow:
+  - Implemented font size calculation based on text width constraints
+  - Player 1 name constrained to right edge at [810,322]
+  - Player 2 name constrained to right edge at [810,465]
+  - Automatic font shrinking from 48px down to minimum 12px to fit within boundaries
+  - Both PDF generation (canvas) and scoresheet display use identical sizing algorithms
+  - Text measurements ensure proper fit while maintaining readability
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
 - January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
 - January 2, 2025: RESOLVED "431 Request Header Fields Too Large" service worker error:

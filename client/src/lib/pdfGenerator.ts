@@ -76,14 +76,35 @@ export async function renderScoresheetToCanvas(
   
   // Draw coordinate-based text markups if match data is provided
   if (matchData) {
-    ctx.font = 'bold 36px Arial';
     ctx.fillStyle = 'black';
     ctx.textAlign = 'left'; // Left-aligned for bottom-left anchoring
     ctx.textBaseline = 'bottom'; // Bottom baseline for bottom-left anchoring
     
-    // Player names - using points 0 and 1 as bottom-left anchors
-    ctx.fillText(`${matchData.player1Name} (LAG)`, 0, 1); // Point 0 - Player1 Name with LAG tag
-    ctx.fillText(matchData.player2Name, 1, 1); // Point 1 - Player2 Name
+    // Helper function to draw text with dynamic sizing to fit width
+    const drawTextWithSizing = (text: string, x: number, y: number, maxWidth: number, startFontSize: number = 36) => {
+      let fontSize = startFontSize;
+      ctx.font = `bold ${fontSize}px Arial`;
+      
+      // Shrink font size until text fits within maxWidth
+      while (ctx.measureText(text).width > maxWidth && fontSize > 12) {
+        fontSize -= 2;
+        ctx.font = `bold ${fontSize}px Arial`;
+      }
+      
+      ctx.fillText(text, x, y);
+    };
+    
+    // Player names - using points 0 and 1 as bottom-left anchors with width constraints
+    const player1Text = `${matchData.player1Name} (LAG)`;
+    const player2Text = matchData.player2Name;
+    const player1MaxWidth = 810; // Right edge at [810,322]
+    const player2MaxWidth = 810; // Right edge at [810,465]
+    
+    drawTextWithSizing(player1Text, 0, 322, player1MaxWidth); // Point 0 with y=322
+    drawTextWithSizing(player2Text, 1, 465, player2MaxWidth); // Point 1 with y=465
+    
+    // Reset to standard font for other elements
+    ctx.font = 'bold 36px Arial';
     
     // Skill levels
     ctx.fillText(matchData.player1SkillLevel.toString(), 841, 224); // [841,224] Player1 SL

@@ -387,12 +387,43 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     const startTime = new Date(match.createdAt || Date.now()).toLocaleString();
     const endTime = new Date(match.completedAt).toLocaleString();
 
+    // Helper function to calculate font size that fits within width
+    const calculateFontSize = (text: string, maxWidth: number, startFontSize: number = 48): number => {
+      const testElement = document.createElement('div');
+      testElement.style.position = 'absolute';
+      testElement.style.visibility = 'hidden';
+      testElement.style.fontFamily = 'Arial, sans-serif';
+      testElement.style.fontWeight = 'bold';
+      testElement.textContent = text;
+      document.body.appendChild(testElement);
+      
+      let fontSize = startFontSize;
+      testElement.style.fontSize = `${fontSize}px`;
+      
+      while (testElement.offsetWidth > maxWidth && fontSize > 12) {
+        fontSize -= 2;
+        testElement.style.fontSize = `${fontSize}px`;
+      }
+      
+      document.body.removeChild(testElement);
+      return fontSize;
+    };
+
+    // Calculate dynamic font sizes for player names
+    const player1Text = `${match.player1Name} (LAG)`;
+    const player2Text = match.player2Name;
+    const player1MaxWidth = 810; // Right edge at [810,322]
+    const player2MaxWidth = 810; // Right edge at [810,465]
+    
+    const player1FontSize = calculateFontSize(player1Text, player1MaxWidth);
+    const player2FontSize = calculateFontSize(player2Text, player2MaxWidth);
+
     // Coordinate definitions for precise positioning
     // Note: coordinates represent bottom-left anchor point of text
     const coordinates = {
-      // Player names - bottom-left anchored
-      player1Name: { x: 0, y: 1, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
-      player2Name: { x: 1, y: 1, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      // Player names - bottom-left anchored with dynamic sizing
+      player1Name: { x: 0, y: 322, fontSize: `${player1FontSize}px`, fontWeight: 'bold', color: 'blue' },
+      player2Name: { x: 1, y: 465, fontSize: `${player2FontSize}px`, fontWeight: 'bold', color: 'blue' },
       
       // Skill levels  
       player1SkillLevel: { x: 1200, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
@@ -423,8 +454,8 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
 
     // Create text overlays for each data point
     const dataPoints = [
-      { key: 'player1Name', value: `${match.player1Name} (LAG)`, coords: coordinates.player1Name },
-      { key: 'player2Name', value: match.player2Name, coords: coordinates.player2Name },
+      { key: 'player1Name', value: player1Text, coords: coordinates.player1Name },
+      { key: 'player2Name', value: player2Text, coords: coordinates.player2Name },
       { key: 'player1SkillLevel', value: `SL${match.player1SkillLevel}`, coords: coordinates.player1SkillLevel },
       { key: 'player2SkillLevel', value: `SL${match.player2SkillLevel}`, coords: coordinates.player2SkillLevel },
       { key: 'player1Target', value: `${player1Target}`, coords: coordinates.player1Target },
