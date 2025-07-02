@@ -279,7 +279,24 @@ class CookieStorageAPI {
   getCurrentMatchEvents(): MatchEvent[] {
     try {
       const events = this.getCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS);
-      return events ? JSON.parse(events) : [];
+      const cookieEvents = events ? JSON.parse(events) : [];
+      
+      // Check if localStorage backup has more complete data
+      try {
+        const backupEvents = localStorage.getItem('poolscorer_current_match_events_backup');
+        if (backupEvents) {
+          const parsedBackup = JSON.parse(backupEvents);
+          // Use backup if it has more events than cookie
+          if (parsedBackup.length > cookieEvents.length) {
+            console.log(`Using localStorage backup: ${parsedBackup.length} events vs ${cookieEvents.length} in cookie`);
+            return parsedBackup;
+          }
+        }
+      } catch (backupError) {
+        console.warn('Error reading localStorage backup:', backupError);
+      }
+      
+      return cookieEvents;
     } catch (error) {
       console.error('Error getting match events from cookies:', error);
       return [];
@@ -295,16 +312,35 @@ class CookieStorageAPI {
       console.log(`Adding event: ${event.type} by player ${event.player}, ball ${event.ballNumber}`);
       console.log(`Total events: ${events.length}, JSON size: ${eventsJson.length} chars`);
       
-      // Check if events cookie is getting too large
+      // Use localStorage as backup when cookie gets too large
       if (eventsJson.length > 3000) {
-        console.warn(`Events cookie getting large (${eventsJson.length} chars), may cause data loss`);
+        console.warn(`Events cookie too large (${eventsJson.length} chars), using localStorage backup`);
+        
+        // Store in localStorage as backup
+        try {
+          localStorage.setItem('poolscorer_current_match_events_backup', eventsJson);
+          console.log('Events stored in localStorage backup');
+        } catch (lsError) {
+          console.error('localStorage backup also failed:', lsError);
+        }
+        
+        // Keep only essential ball_scored events in cookies for scoresheet
+        const essentialEvents = events.filter(e => e.type === 'ball_scored');
+        const essentialJson = JSON.stringify(essentialEvents);
+        
+        if (essentialJson.length <= 3000) {
+          this.setCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS, essentialJson);
+          console.log(`Stored ${essentialEvents.length} essential events in cookie (${essentialJson.length} chars)`);
+        } else {
+          console.error('Even essential events too large for cookie storage');
+        }
+      } else {
+        this.setCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS, eventsJson);
       }
-      
-      this.setCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS, eventsJson);
       
       // Verify the event was stored
       const verifyEvents = this.getCurrentMatchEvents();
-      if (verifyEvents.length !== events.length) {
+      if (verifyEvents.length !== events.length && eventsJson.length <= 3000) {
         console.error(`Event storage verification failed! Expected ${events.length}, got ${verifyEvents.length}`);
       }
     } catch (error) {
@@ -314,6 +350,12 @@ class CookieStorageAPI {
 
   clearCurrentMatchEvents(): void {
     this.deleteCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS);
+    // Also clear localStorage backup
+    try {
+      localStorage.removeItem('poolscorer_current_match_events_backup');
+    } catch (error) {
+      console.warn('Error clearing localStorage backup:', error);
+    }
   }
 
   // Multi-cookie history management - one cookie per match
