@@ -262,6 +262,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Implemented centralized game tracking to synchronize slash directions between players
   - FIXED tally mark overlapping - simplified coordinate indexing to prevent rendering conflicts
   - Corrected target circle positioning with proper 0-indexed coordinate conversion for both players
+  - FIXED vertical bar placement for mixed game winners - both players now get vertical bars when ANY player wins a game
+  - Implemented centralized game ending detection to ensure consistent bar placement regardless of who wins each game
 - January 2, 2025: Implemented automated canvas-based PDF generation system:
   - Replaced HTML-based printing with direct PNG+markup rendering using HTML5 Canvas
   - Added jsPDF library for automatic single-page PDF creation and download

@@ -121,34 +121,57 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
           }
         }
         
-        // If this was a 9-ball, add vertical line after this game ends
+        // Vertical bars will be added separately after processing all events
+      }
+    });
+    
+    // Add vertical bars for game separations - track where Player 1's games end
+    const player1GameEndPositions: number[] = [];
+    let tempScorePosition = 0;
+    
+    match.events.forEach(event => {
+      if (event.type === 'ball_scored' && event.player === 1) {
+        const pointsWorth = event.ballNumber === 9 ? 2 : 1;
+        tempScorePosition += pointsWorth;
+        
+        // When a 9-ball is scored by this player, record the position for vertical bar
         if (event.ballNumber === 9) {
-          // Place vertical bar after the last tally mark of this game
-          const lastCoordIndex = scorePosition - 1;
-          if (lastCoordIndex < PLAYER1_COORDINATES.length) {
-            const [x, y] = PLAYER1_COORDINATES[lastCoordIndex];
-            marks.push(
-              <div
-                key={`game-separator-${currentGame}`}
-                className="absolute font-bold"
-                style={{
-                  left: `${x + 25}px`,
-                  top: `${y}px`,
-                  fontSize: '53.4px',
-                  color: 'black',
-                  fontWeight: '900',
-                  transform: 'translate(-50%, -50%)',
-                  pointerEvents: 'none'
-                }}
-              >
-                |
-              </div>
-            );
-          }
+          player1GameEndPositions.push(tempScorePosition - 1); // Position of last tally in game
+        }
+      }
+      // Also add bars when the OTHER player wins a game (Player 1 gets a bar at their current position)
+      else if (event.type === 'ball_scored' && event.player === 2 && event.ballNumber === 9) {
+        // Player 2 won the game, add a bar at Player 1's current position (if they have any tallies)
+        if (tempScorePosition > 0) {
+          player1GameEndPositions.push(tempScorePosition - 1);
         }
       }
     });
     
+    // Add vertical bars at game end positions
+    player1GameEndPositions.forEach((position, gameIndex) => {
+      if (position >= 0 && position < PLAYER1_COORDINATES.length) {
+        const [x, y] = PLAYER1_COORDINATES[position];
+        marks.push(
+          <div
+            key={`p1-game-bar-${gameIndex}`}
+            className="absolute font-bold"
+            style={{
+              left: `${x + 25}px`,
+              top: `${y}px`,
+              fontSize: '53.4px',
+              color: 'black',
+              fontWeight: '900',
+              transform: 'translate(-50%, -50%)',
+              pointerEvents: 'none'
+            }}
+          >
+            |
+          </div>
+        );
+      }
+    });
+
     // Circle the target score if it's an SL target position
     if (SL_TARGET_POSITIONS.includes(player1Target)) {
       const coordIndex = player1Target - 1; // Convert to 0-indexed
@@ -218,34 +241,57 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
           }
         }
         
-        // If this was a 9-ball scored by player 2, add vertical line after this game ends
+        // Vertical bars will be added separately after processing all events
+      }
+    });
+    
+    // Add vertical bars for game separations - track where Player 2's games end
+    const player2GameEndPositions: number[] = [];
+    let tempP2ScorePosition = 0;
+    
+    match.events.forEach(event => {
+      if (event.type === 'ball_scored' && event.player === 2) {
+        const pointsWorth = event.ballNumber === 9 ? 2 : 1;
+        tempP2ScorePosition += pointsWorth;
+        
+        // When a 9-ball is scored by this player, record the position for vertical bar
         if (event.ballNumber === 9) {
-          // Place vertical bar after the last tally mark of this game
-          const lastCoordIndex = scorePosition - 1;
-          if (lastCoordIndex < PLAYER2_COORDINATES.length) {
-            const [x, y] = PLAYER2_COORDINATES[lastCoordIndex];
-            marks.push(
-              <div
-                key={`p2-game-separator-${currentGame}`}
-                className="absolute font-bold"
-                style={{
-                  left: `${x + 25}px`,
-                  top: `${y}px`,
-                  fontSize: '53.4px',
-                  color: 'black',
-                  fontWeight: '900',
-                  transform: 'translate(-50%, -50%)',
-                  pointerEvents: 'none'
-                }}
-              >
-                |
-              </div>
-            );
-          }
+          player2GameEndPositions.push(tempP2ScorePosition - 1); // Position of last tally in game
+        }
+      }
+      // Also add bars when the OTHER player wins a game (Player 2 gets a bar at their current position)
+      else if (event.type === 'ball_scored' && event.player === 1 && event.ballNumber === 9) {
+        // Player 1 won the game, add a bar at Player 2's current position (if they have any tallies)
+        if (tempP2ScorePosition > 0) {
+          player2GameEndPositions.push(tempP2ScorePosition - 1);
         }
       }
     });
     
+    // Add vertical bars at game end positions
+    player2GameEndPositions.forEach((position, gameIndex) => {
+      if (position >= 0 && position < PLAYER2_COORDINATES.length) {
+        const [x, y] = PLAYER2_COORDINATES[position];
+        marks.push(
+          <div
+            key={`p2-game-bar-${gameIndex}`}
+            className="absolute font-bold"
+            style={{
+              left: `${x + 25}px`,
+              top: `${y}px`,
+              fontSize: '53.4px',
+              color: 'black',
+              fontWeight: '900',
+              transform: 'translate(-50%, -50%)',
+              pointerEvents: 'none'
+            }}
+          >
+            |
+          </div>
+        );
+      }
+    });
+
     // Circle the target score if it's an SL target position
     if (SL_TARGET_POSITIONS.includes(player2Target)) {
       const coordIndex = player2Target - 1; // Convert to 0-indexed
@@ -320,14 +366,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
           }
         }
         
-        // Add vertical separator after 9-ball
-        if (event.ballNumber === 9) {
-          const lastCoordIndex = player1ScorePosition - 1;
-          if (lastCoordIndex >= 0 && lastCoordIndex < PLAYER1_COORDINATES.length) {
-            const [x, y] = PLAYER1_COORDINATES[lastCoordIndex];
-            verticalLines.push({ x: x + 25 + 3, y: y });
-          }
-        }
+        // Vertical bars will be added separately after processing all events
       }
     });
 
@@ -348,12 +387,47 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
           }
         }
         
-        // Add vertical separator after 9-ball
-        if (event.ballNumber === 9) {
-          const lastCoordIndex = player2ScorePosition - 1;
-          if (lastCoordIndex >= 0 && lastCoordIndex < PLAYER2_COORDINATES.length) {
-            const [x, y] = PLAYER2_COORDINATES[lastCoordIndex];
-            verticalLines.push({ x: x + 25 + 3, y: y });
+        // Vertical bars will be added separately after processing all events
+      }
+    });
+
+    // Add vertical bars for both players based on game endings
+    let p1Position = 0;
+    let p2Position = 0;
+    
+    match.events.forEach(event => {
+      if (event.type === 'ball_scored') {
+        const pointsWorth = event.ballNumber === 9 ? 2 : 1;
+        
+        if (event.player === 1) {
+          p1Position += pointsWorth;
+          // When Player 1 wins (scores 9-ball), add bars for both players
+          if (event.ballNumber === 9) {
+            // Player 1 bar at their current position
+            if (p1Position > 0 && p1Position - 1 < PLAYER1_COORDINATES.length) {
+              const [x, y] = PLAYER1_COORDINATES[p1Position - 1];
+              verticalLines.push({ x: x + 25 + 3, y: y });
+            }
+            // Player 2 bar at their current position (if they have any tallies)
+            if (p2Position > 0 && p2Position - 1 < PLAYER2_COORDINATES.length) {
+              const [x, y] = PLAYER2_COORDINATES[p2Position - 1];
+              verticalLines.push({ x: x + 25 + 3, y: y });
+            }
+          }
+        } else if (event.player === 2) {
+          p2Position += pointsWorth;
+          // When Player 2 wins (scores 9-ball), add bars for both players
+          if (event.ballNumber === 9) {
+            // Player 1 bar at their current position (if they have any tallies)
+            if (p1Position > 0 && p1Position - 1 < PLAYER1_COORDINATES.length) {
+              const [x, y] = PLAYER1_COORDINATES[p1Position - 1];
+              verticalLines.push({ x: x + 25 + 3, y: y });
+            }
+            // Player 2 bar at their current position
+            if (p2Position > 0 && p2Position - 1 < PLAYER2_COORDINATES.length) {
+              const [x, y] = PLAYER2_COORDINATES[p2Position - 1];
+              verticalLines.push({ x: x + 25 + 3, y: y });
+            }
           }
         }
       }
