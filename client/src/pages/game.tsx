@@ -1117,6 +1117,23 @@ export default function Game() {
   };
 
   const confirmNewGame = () => {
+    // Check if there's existing match history
+    const existingHistory = cookieStorageAPI.getMatchHistory();
+    
+    if (existingHistory.length > 0) {
+      // Show warning about clearing match history
+      const confirmClear = window.confirm(
+        `Starting a new match will delete your previous match history (${existingHistory.length} match${existingHistory.length > 1 ? 'es' : ''}).\n\n` +
+        `Make sure you've printed or saved any scoresheets you need before continuing.\n\n` +
+        `Continue with new match?`
+      );
+      
+      if (!confirmClear) {
+        setShowNewGameConfirm(false);
+        return;
+      }
+    }
+    
     // Clear current match state and show player setup for new match
     setTurnHistory([]);
     setMatchWinner(null);
@@ -1568,7 +1585,7 @@ export default function Game() {
           <div className="text-center">
             <h2 className="text-xl font-bold text-gray-800 mb-2">Start New Match?</h2>
             <p className="text-gray-600 mb-6">
-              This will take you back to player setup to start a completely new match. Current progress will be lost.
+              This will take you back to player setup to start a completely new match. Current progress and match history will be cleared to prevent storage issues.
             </p>
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" onClick={() => setShowNewGameConfirm(false)}>

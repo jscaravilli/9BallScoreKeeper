@@ -537,10 +537,50 @@ class CookieStorageAPI {
     }
   }
 
+  clearAllMatchHistory(): void {
+    try {
+      console.log('Clearing all match history to prevent cookie overflow');
+      
+      // Get the index of stored matches
+      const indexCookie = this.getCookie('match_history_index');
+      if (indexCookie) {
+        const matchIds = JSON.parse(indexCookie);
+        console.log(`Clearing ${matchIds.length} match history cookies`);
+        
+        // Delete all match history cookies
+        matchIds.forEach((matchId: string) => {
+          this.deleteCookie(`match_history_${matchId}`);
+        });
+      }
+      
+      // Clear the index
+      this.deleteCookie('match_history_index');
+      
+      // Clear any orphaned match history cookies
+      const allCookies = document.cookie.split(';');
+      const matchCookies = allCookies.filter(cookie => 
+        cookie.trim().startsWith('match_history_') && 
+        !cookie.trim().startsWith('match_history_index')
+      );
+      
+      matchCookies.forEach(cookie => {
+        const cookieName = cookie.split('=')[0].trim();
+        this.deleteCookie(cookieName);
+      });
+      
+      console.log(`Cleared all match history data (${matchCookies.length} orphaned cookies removed)`);
+    } catch (error) {
+      console.error('Error clearing match history:', error);
+    }
+  }
+
   addToHistory(match: Match): void {
     if (!match.isComplete) return;
     
     try {
+      // SINGLE MATCH HISTORY: Clear any existing match history first
+      this.clearAllMatchHistory();
+      
       const events = this.getCurrentMatchEvents();
       console.log('DEBUG: Events retrieved for history:', events.length, 'events');
       console.log('DEBUG: Ball scored events by player:', {

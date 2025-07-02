@@ -276,6 +276,10 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - RESOLVED HTTP 431 "Request Header Fields Too Large" errors with emergency cookie cleanup system
   - Implemented automatic cookie size monitoring and cleanup to prevent browser header limit issues
   - Added proactive cookie management with reduced total size limits (8KB) and emergency cleanup on app startup
+  - SIMPLIFIED match history to single-match storage system to prevent cookie overflow
+  - Added confirmation dialog when starting new match that warns about clearing previous match history
+  - System now maintains only 1 match history at a time with automatic cleanup of old data
+  - New match creation automatically clears all previous match cookies to prevent 431 errors
 - January 2, 2025: Implemented automated canvas-based PDF generation system:
   - Replaced HTML-based printing with direct PNG+markup rendering using HTML5 Canvas
   - Added jsPDF library for automatic single-page PDF creation and download
