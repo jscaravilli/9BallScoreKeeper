@@ -327,13 +327,14 @@ export async function printMatchScoresheet(match: any): Promise<void> {
           
           if (event.ballNumber === 9) {
             // 9-ball gets 2 tally marks in consecutive positions
-            tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: gameNumber });
+            const xOffset = slashDirection === '╲' ? 0 : 3; // Shift backslash left by 3 pixels
+            tallies.push({ x: x + xOffset, y: y, symbol: slashDirection, game: gameNumber });
             
             // Get the next coordinate for the second tally mark
             const nextCoord = coordinates[markIndex + 1];
             if (nextCoord) {
               const [nextX, nextY] = nextCoord;
-              tallies.push({ x: nextX + 3, y: nextY, symbol: slashDirection, game: gameNumber });
+              tallies.push({ x: nextX + xOffset, y: nextY, symbol: slashDirection, game: gameNumber });
               console.log(`Added 2 tallies for 9-ball by player ${player} at positions ${markIndex} and ${markIndex + 1}`);
             } else {
               console.warn(`No next coordinate available for second 9-ball tally by player ${player}`);
@@ -390,7 +391,8 @@ export async function printMatchScoresheet(match: any): Promise<void> {
             gameNumber++;
           } else {
             // Regular balls get 1 tally mark
-            tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: gameNumber });
+            const xOffset = slashDirection === '╲' ? 0 : 3; // Shift backslash left by 3 pixels
+            tallies.push({ x: x + xOffset, y: y, symbol: slashDirection, game: gameNumber });
             console.log(`Added 1 tally for ball ${event.ballNumber} by player ${player} at position ${markIndex}, coords: ${x}, ${y}`);
             
             // Update mark index for ONLY the scoring player

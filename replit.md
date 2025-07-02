@@ -256,6 +256,10 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Second 9-ball tally mark now appears in the next consecutive position instead of overlapping the first
   - Both tally marks for 9-ball are now visible and properly spaced on printed scoresheets
   - Updated Unicode box drawing characters (╱ ╲) for cleaner tally mark appearance
+- July 2, 2025: ENHANCED tally mark positioning for better visual alignment:
+  - Backslash symbol (╲) for even-numbered games now shifted 3 pixels left on both player grids
+  - Forward slash symbol (╱) for odd-numbered games maintains original positioning
+  - Applied to both PDF generation and on-screen scoresheet display for consistency
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
 - January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
 - January 2, 2025: RESOLVED "431 Request Header Fields Too Large" service worker error:

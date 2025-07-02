@@ -116,13 +116,14 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
         for (let i = 0; i < pointsWorth; i++) {
           if (scorePosition < PLAYER1_COORDINATES.length) {
             const [x, y] = PLAYER1_COORDINATES[scorePosition];
+            const xOffset = slashDirection === '╲' ? -3 : 0; // Shift backslash left by 3 pixels
             
             marks.push(
               <div
                 key={`p1-tally-${scorePosition}`}
                 className="absolute text-center font-bold"
                 style={{
-                  left: `${x}px`,
+                  left: `${x + xOffset}px`,
                   top: `${y}px`,
                   fontSize: '48.5px',
                   color: 'blue',
@@ -236,13 +237,14 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
         for (let i = 0; i < pointsWorth; i++) {
           if (scorePosition < PLAYER2_COORDINATES.length) {
             const [x, y] = PLAYER2_COORDINATES[scorePosition];
+            const xOffset = slashDirection === '╲' ? -3 : 0; // Shift backslash left by 3 pixels
             
             marks.push(
               <div
                 key={`p2-tally-${scorePosition}`}
                 className="absolute text-center font-bold"
                 style={{
-                  left: `${x}px`,
+                  left: `${x + xOffset}px`,
                   top: `${y}px`,
                   fontSize: '48.5px',
                   color: 'blue',
