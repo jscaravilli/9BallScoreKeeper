@@ -27,7 +27,7 @@ export default function PDFTest() {
       <p>Click the button below to test automatic PDF generation with sample markup:</p>
       
       <Button onClick={handleTestPDF} className="bg-blue-600 hover:bg-blue-700">
-        Generate Test PDF
+        Generate Test PDF (Print)
       </Button>
       
       <div className="text-sm text-gray-600">

@@ -163,8 +163,40 @@ export async function printScoresheetImage(
     const timestamp = new Date().toISOString().slice(0, 16).replace(/[:-]/g, '');
     const filename = `APA-Scoresheet-${timestamp}.pdf`;
     
-    // Download the PDF
-    pdf.save(filename);
+    // Print the PDF instead of downloading
+    const pdfBlob = pdf.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    
+    // Open in new window for printing
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>APA Scoresheet - ${filename}</title>
+            <style>
+              @page { size: letter landscape; margin: 0.25in; }
+              body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+              embed { width: 100%; height: 100vh; }
+            </style>
+          </head>
+          <body>
+            <embed src="${pdfUrl}" type="application/pdf" />
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      
+      setTimeout(() => {
+        printWindow.print();
+        // Clean up URL after printing
+        setTimeout(() => {
+          URL.revokeObjectURL(pdfUrl);
+          printWindow.close();
+        }, 1000);
+      }, 1000);
+    }
     
     console.log(`PDF generated: ${filename}`);
     
@@ -207,10 +239,14 @@ export async function printMatchScoresheet(match: any): Promise<void> {
       return gameNum % 2 === 1 ? '/' : '\\';
     };
 
-    match.events.forEach((event: any) => {
+    console.log('Processing match events for PDF:', match.events.length, 'events');
+
+    match.events.forEach((event: any, eventIndex: number) => {
       if (event.type === 'ball_scored' && event.player === 1) {
+        console.log(`Event ${eventIndex}: Ball ${event.ballNumber} scored by player 1, markIndex: ${markIndex}`);
+        
         const coord = PLAYER1_COORDINATES[markIndex];
-        if (coord) {
+        if (coord && markIndex < PLAYER1_COORDINATES.length) {
           const [x, y] = coord;
           const slashDirection = getSlashDirection(gameNumber);
           
@@ -218,18 +254,25 @@ export async function printMatchScoresheet(match: any): Promise<void> {
             // 9-ball gets 2 tally marks
             tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: gameNumber });
             tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: gameNumber });
+            console.log(`Added 2 tallies for 9-ball at position ${markIndex}, coords: ${x}, ${y}`);
             
-            // Add vertical line after game ends
+            // Add vertical line after game ends (use last position for reference)
             verticalLines.push({ x: x + 25, y: y });
             gameNumber++;
+            markIndex += 2; // 9-ball takes 2 positions
           } else {
             // Regular balls get 1 tally mark
             tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: gameNumber });
+            console.log(`Added 1 tally for ball ${event.ballNumber} at position ${markIndex}, coords: ${x}, ${y}`);
+            markIndex += 1; // Regular ball takes 1 position
           }
-          markIndex++;
+        } else {
+          console.warn(`No coordinate available for markIndex ${markIndex}, max is ${PLAYER1_COORDINATES.length - 1}`);
         }
       }
     });
+
+    console.log(`Final tally count: ${tallies.length}, vertical lines: ${verticalLines.length}, circles: ${circles.length}`);
 
     // Add target circle if needed (skill level positions)
     const SL_TARGET_POSITIONS = [1, 5, 10, 14, 19, 25, 31, 35, 38, 46, 50, 55, 60, 65, 70, 75];
@@ -305,10 +348,42 @@ async function printScoresheetImageWithFilename(
     // Add the image to PDF
     pdf.addImage(dataURL, 'PNG', xPos, yPos, imgWidth, imgHeight);
     
-    // Download the PDF
-    pdf.save(filename);
+    // Print the PDF instead of downloading
+    const pdfBlob = pdf.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
     
-    console.log(`PDF generated: ${filename}`);
+    // Open in new window for printing
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>APA Scoresheet - ${filename}</title>
+            <style>
+              @page { size: letter landscape; margin: 0.25in; }
+              body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+              embed { width: 100%; height: 100vh; }
+            </style>
+          </head>
+          <body>
+            <embed src="${pdfUrl}" type="application/pdf" />
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      
+      setTimeout(() => {
+        printWindow.print();
+        // Clean up URL after printing
+        setTimeout(() => {
+          URL.revokeObjectURL(pdfUrl);
+          printWindow.close();
+        }, 1000);
+      }, 1000);
+    }
+    
+    console.log(`PDF generated for printing: ${filename}`);
     
   } catch (error) {
     console.error('PDF generation failed:', error);
