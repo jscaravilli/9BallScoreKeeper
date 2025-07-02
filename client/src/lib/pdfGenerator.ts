@@ -1,3 +1,4 @@
+import jsPDF from 'jspdf';
 import scoresheetPng from "@assets/9B Blank-0_1751450594313.png";
 
 // Canvas-based image rendering with markup burned into PNG
@@ -109,7 +110,7 @@ export async function downloadScoresheetPDF(
   }
 }
 
-// Simple print function that opens the rendered image
+// Automatic PDF generation and download
 export async function printScoresheetImage(
   tallies: Array<{ x: number; y: number; symbol: string; game: number }>,
   circles: Array<{ x: number; y: number }>,
@@ -117,38 +118,57 @@ export async function printScoresheetImage(
 ): Promise<void> {
   
   try {
+    // Render to canvas with markup
     const canvas = await renderScoresheetToCanvas(tallies, circles, verticalLines);
     
-    // Convert to data URL
+    // Convert canvas to data URL
     const dataURL = canvas.toDataURL('image/png');
     
-    // Open in new window for printing
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>APA Scoresheet</title>
-            <style>
-              @page { size: letter landscape; margin: 0.25in; }
-              body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-              img { max-width: 100%; max-height: 100%; }
-            </style>
-          </head>
-          <body>
-            <img src="${dataURL}" alt="APA Scoresheet" />
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      
-      setTimeout(() => {
-        printWindow.print();
-      }, 1000);
+    // Create PDF document (letter size landscape: 11" x 8.5")
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'in',
+      format: 'letter'
+    });
+    
+    // Calculate dimensions to fit the full scoresheet on one page
+    const pageWidth = 11;  // 11 inches
+    const pageHeight = 8.5; // 8.5 inches
+    const margin = 0.25;   // 0.25 inch margin
+    
+    const availableWidth = pageWidth - (2 * margin);
+    const availableHeight = pageHeight - (2 * margin);
+    
+    // Scoresheet aspect ratio: 3300/2550 = 1.294
+    const aspectRatio = 3300 / 2550;
+    
+    // Calculate dimensions to fit within available space
+    let imgWidth = availableWidth;
+    let imgHeight = availableWidth / aspectRatio;
+    
+    // If height exceeds available space, scale down
+    if (imgHeight > availableHeight) {
+      imgHeight = availableHeight;
+      imgWidth = imgHeight * aspectRatio;
     }
     
+    // Center the image on the page
+    const xPos = (pageWidth - imgWidth) / 2;
+    const yPos = (pageHeight - imgHeight) / 2;
+    
+    // Add the image to PDF
+    pdf.addImage(dataURL, 'PNG', xPos, yPos, imgWidth, imgHeight);
+    
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().slice(0, 16).replace(/[:-]/g, '');
+    const filename = `APA-Scoresheet-${timestamp}.pdf`;
+    
+    // Download the PDF
+    pdf.save(filename);
+    
+    console.log(`PDF generated: ${filename}`);
+    
   } catch (error) {
-    console.error('Print generation failed:', error);
+    console.error('PDF generation failed:', error);
   }
 }
