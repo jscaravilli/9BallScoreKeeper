@@ -24,16 +24,16 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch, 
 
   useEffect(() => {
     if (currentMatch) {
-      setPlayer1Name(currentMatch.player1Name);
+      setPlayer1Name(currentMatch.player1Name.slice(0, 20));
       setPlayer1SkillLevel(currentMatch.player1SkillLevel);
-      setPlayer2Name(currentMatch.player2Name);
+      setPlayer2Name(currentMatch.player2Name.slice(0, 20));
       setPlayer2SkillLevel(currentMatch.player2SkillLevel);
     }
   }, [currentMatch]);
 
   const handleSave = () => {
     if (player1Name.trim() && player2Name.trim()) {
-      onSave(player1Name.trim(), player1SkillLevel, player2Name.trim(), player2SkillLevel);
+      onSave(player1Name.trim().slice(0, 20), player1SkillLevel, player2Name.trim().slice(0, 20), player2SkillLevel);
     }
   };
 
@@ -78,8 +78,9 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch, 
             <Input
               id="player1Name"
               value={player1Name}
-              onChange={(e) => setPlayer1Name(e.target.value)}
+              onChange={(e) => setPlayer1Name(e.target.value.slice(0, 20))}
               placeholder="Enter name"
+              maxLength={20}
               className={`mt-1 ${!player1Name.trim() ? 'border-orange-300 focus:border-orange-500' : 'border-green-300 focus:border-green-500'}`}
             />
           </div>
@@ -106,8 +107,9 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch, 
             <Input
               id="player2Name"
               value={player2Name}
-              onChange={(e) => setPlayer2Name(e.target.value)}
+              onChange={(e) => setPlayer2Name(e.target.value.slice(0, 20))}
               placeholder="Enter name"
+              maxLength={20}
               className={`mt-1 ${!player2Name.trim() ? 'border-orange-300 focus:border-orange-500' : 'border-green-300 focus:border-green-500'}`}
             />
           </div>

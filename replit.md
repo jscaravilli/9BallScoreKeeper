@@ -271,6 +271,11 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Added "View Match History" button to player setup modal for easy access without clearing current state
   - Button appears below form controls with History icon and navigation to /match-history route
   - Allows users to review past matches while maintaining current match data
+- July 2, 2025: IMPLEMENTED 20-character limit for player names:
+  - Added maxLength={20} HTML attribute to both player name input fields
+  - Real-time truncation using .slice(0, 20) in onChange handlers prevents typing beyond limit
+  - State initialization and save function also apply 20-character truncation for data consistency
+  - Multi-layer validation ensures names never exceed 20 characters in UI or storage
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
 - January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
 - January 2, 2025: RESOLVED "431 Request Header Fields Too Large" service worker error:
