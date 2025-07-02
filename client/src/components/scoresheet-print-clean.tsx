@@ -111,20 +111,19 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       WebkitPrintColorAdjust: 'exact'
     }}>
       <div className="relative w-full" style={{ 
-        aspectRatio: '11/8.5', 
-        width: '1056px', 
-        height: '816px',
-        transform: 'scale(1)',
+        width: '3300px', 
+        height: '2550px',
+        transform: 'scale(0.32)',
         transformOrigin: 'top left'
       }}>
-        {/* Background scoresheet image - fixed dimensions to match coordinate system */}
+        {/* Background scoresheet image - actual PNG dimensions 3300x2550 at 300 DPI */}
         <img 
           src={scoresheetPng} 
           alt="APA Scoresheet"
           className="absolute inset-0"
           style={{ 
-            width: '1056px', 
-            height: '816px',
+            width: '3300px', 
+            height: '2550px',
             objectFit: 'fill',
             imageRendering: 'crisp-edges'
           }}
