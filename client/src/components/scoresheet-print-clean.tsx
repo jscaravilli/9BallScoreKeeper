@@ -110,11 +110,9 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       printColorAdjust: 'exact',
       WebkitPrintColorAdjust: 'exact'
     }}>
-      <div className="relative w-full" style={{ 
+      <div className="relative" style={{ 
         width: '3300px', 
-        height: '2550px',
-        transform: 'scale(0.32)',
-        transformOrigin: 'top left'
+        height: '2550px'
       }}>
         {/* Background scoresheet image - actual PNG dimensions 3300x2550 at 300 DPI */}
         <img 
@@ -124,8 +122,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
           style={{ 
             width: '3300px', 
             height: '2550px',
-            objectFit: 'fill',
-            imageRendering: 'crisp-edges'
+            objectFit: 'fill'
           }}
         />
         
