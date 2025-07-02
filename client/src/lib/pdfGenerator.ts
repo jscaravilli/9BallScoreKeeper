@@ -120,6 +120,7 @@ export async function renderScoresheetToCanvas(
     
     // Match statistics
     ctx.fillText(matchData.totalInnings.toString(), 1075, 302); // [1075,302] Total Innings
+    ctx.fillText(matchData.totalInnings.toString(), 2533, 333); // [2533,333] Total Innings (second location)
     ctx.fillText(matchData.totalDeadBalls.toString(), 1075, 378); // [1075,378] Total dead balls
     ctx.fillText(matchData.player1Safeties.toString(), 2727, 244); // [2727,244] Player1 safeties
     ctx.fillText(matchData.player2Safeties.toString(), 2733, 435); // [2733,435] Player2 safeties

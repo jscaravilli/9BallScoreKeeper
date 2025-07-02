@@ -439,6 +439,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       
       // Innings
       innings: { x: 1800, y: 75, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      innings2: { x: 2533, y: 333, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Dead balls
       deadBalls: { x: 2000, y: 75, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
@@ -463,6 +464,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       { key: 'player1Score', value: `${match.player1Score}`, coords: coordinates.player1Score },
       { key: 'player2Score', value: `${match.player2Score}`, coords: coordinates.player2Score },
       { key: 'innings', value: `${totalInnings}`, coords: coordinates.innings },
+      { key: 'innings2', value: `${totalInnings}`, coords: coordinates.innings2 },
       { key: 'deadBalls', value: `${totalDeadBalls}`, coords: coordinates.deadBalls },
       { key: 'player1Safeties', value: `${player1Safeties}`, coords: coordinates.player1Safeties },
       { key: 'player2Safeties', value: `${player2Safeties}`, coords: coordinates.player2Safeties },
