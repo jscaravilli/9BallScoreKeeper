@@ -255,16 +255,12 @@ export async function printMatchScoresheet(match: any): Promise<void> {
       return gameNum % 2 === 1 ? '/' : '\\';
     };
 
-    console.log('Processing match events for PDF:', match.events.length, 'events');
-
     match.events.forEach((event: any, eventIndex: number) => {
       if (event.type === 'ball_scored') {
         const player = event.player;
         const isPlayer1 = player === 1;
         const coordinates = isPlayer1 ? PLAYER1_COORDINATES : PLAYER2_COORDINATES;
         let markIndex = isPlayer1 ? player1MarkIndex : player2MarkIndex;
-        
-        console.log(`Event ${eventIndex}: Ball ${event.ballNumber} scored by player ${player}, markIndex: ${markIndex}, points: ${event.pointsAwarded || (event.ballNumber === 9 ? 2 : 1)}`);
         
         // Calculate points for this ball
         const points = event.ballNumber === 9 ? 2 : 1;
@@ -277,9 +273,6 @@ export async function printMatchScoresheet(match: any): Promise<void> {
             const slashDirection = getSlashDirection(gameNumber);
             
             tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: gameNumber });
-            console.log(`Added tally ${i + 1}/${points} for ball ${event.ballNumber} by player ${player} at position ${markIndex + i}, coords: ${x}, ${y}`);
-          } else {
-            console.warn(`No coordinate available for player ${player} markIndex ${markIndex + i}, max is ${coordinates.length - 1}`);
           }
         }
         
@@ -292,8 +285,6 @@ export async function printMatchScoresheet(match: any): Promise<void> {
         
         // If this was a 9-ball, add vertical lines and increment game
         if (event.ballNumber === 9) {
-          console.log(`Game ${gameNumber} ended with 9-ball by player ${player}`);
-          
           // Add vertical lines after game ends for both players at their current positions
           // Player 1 vertical line
           if (player1MarkIndex > 0 && player1MarkIndex <= PLAYER1_COORDINATES.length) {
@@ -301,7 +292,6 @@ export async function printMatchScoresheet(match: any): Promise<void> {
             if (p1Coord) {
               const [p1x, p1y] = p1Coord;
               verticalLines.push({ x: p1x + 25, y: p1y });
-              console.log(`Added vertical line for Player 1 at game ${gameNumber}, coords: ${p1x + 25}, ${p1y}`);
             }
           }
           
@@ -311,7 +301,6 @@ export async function printMatchScoresheet(match: any): Promise<void> {
             if (p2Coord) {
               const [p2x, p2y] = p2Coord;
               verticalLines.push({ x: p2x + 25, y: p2y });
-              console.log(`Added vertical line for Player 2 at game ${gameNumber}, coords: ${p2x + 25}, ${p2y}`);
             }
           }
           
@@ -319,10 +308,6 @@ export async function printMatchScoresheet(match: any): Promise<void> {
         }
       }
     });
-
-    console.log(`Final tally count: ${tallies.length}, vertical lines: ${verticalLines.length}, circles: ${circles.length}`);
-    console.log(`Player 1 final score: ${player1MarkIndex} tallies, Player 2 final score: ${player2MarkIndex} tallies`);
-    console.log(`Expected: Player 1: ${match.player1Score}, Player 2: ${match.player2Score}`);
 
     // Add target circles for both players (skill level positions)
     const SL_TARGET_POSITIONS = [1, 5, 10, 14, 19, 25, 31, 35, 38, 46, 50, 55, 60, 65, 70, 75];
