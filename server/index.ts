@@ -83,9 +83,9 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Serve the app on port 3000 to avoid conflicts
+  // Serve the app on port 8080 to avoid conflicts
   // this serves both the API and the client.
-  const port = Number(process.env.PORT) || 3000;
+  const port = Number(process.env.PORT) || 8080;
   server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
     console.log(`Server accessible at http://0.0.0.0:${port}`);
