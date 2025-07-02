@@ -13,82 +13,12 @@ import PlayerScores from "@/components/player-scores";
 import TimeoutModal from "@/components/timeout-modal";
 import ScoresheetPrint from "@/components/scoresheet-print-clean";
 import { getPointsToWin } from "@/lib/apa-handicaps";
-import scoresheetPng from "@assets/9B Blank-0_1751450594313.png";
 import { getRemainingTimeouts } from "@/lib/timeout-utils";
 import { cookieStorageAPI } from "@/lib/cookieStorage";
 import { localStorageAPI } from "@/lib/localStorage";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { usePrint } from "@/hooks/usePrint";
 import type { Match, BallInfo, MatchEvent } from "@shared/schema";
-
-// Function to print match scoresheet dynamically using existing component
-function printMatchScoresheet(match: any, filename: string) {
-  // Create a temporary container and render the existing scoresheet component
-  const tempContainer = document.createElement('div');
-  tempContainer.id = `temp-scoresheet-${Date.now()}`;
-  tempContainer.style.position = 'absolute';
-  tempContainer.style.left = '-9999px';
-  tempContainer.style.top = '-9999px';
-  tempContainer.style.backgroundColor = 'white';
-  document.body.appendChild(tempContainer);
-
-  // Use React to render the scoresheet component
-  import('react-dom/client').then((ReactDOMClient) => {
-    import('react').then((React) => {
-      const root = ReactDOMClient.createRoot(tempContainer);
-      const scoresheetElement = React.createElement(ScoresheetPrint, { match });
-      
-      root.render(scoresheetElement);
-      
-      // Wait for rendering, then print
-      setTimeout(() => {
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
-          const scoresheetHTML = tempContainer.innerHTML;
-          printWindow.document.write(`
-            <html>
-              <head>
-                <title>${filename}</title>
-                <style>
-                  @page { 
-                    size: landscape;
-                    margin: 0.5in;
-                  }
-                  body { 
-                    margin: 0; 
-                    padding: 20px; 
-                    font-family: Arial, sans-serif;
-                    background: white;
-                  }
-                  @media print { 
-                    body { padding: 0; margin: 0; }
-                    * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
-                  }
-                </style>
-              </head>
-              <body>
-                ${scoresheetHTML}
-              </body>
-            </html>
-          `);
-          printWindow.document.close();
-          
-          // Print after ensuring everything loads
-          setTimeout(() => {
-            printWindow.print();
-            printWindow.onafterprint = () => printWindow.close();
-          }, 1500);
-        }
-        
-        // Clean up
-        setTimeout(() => {
-          root.unmount();
-          document.body.removeChild(tempContainer);
-        }, 2000);
-      }, 1500);
-    });
-  });
-}
 
 // History Display Component
 function HistoryDisplay({ 
@@ -153,7 +83,7 @@ function HistoryDisplay({
                         variant="outline"
                         onClick={(e) => {
                           e.stopPropagation();
-                          printMatchScoresheet(match, `APA 9-Ball Scoresheet - ${match.player1Name} vs ${match.player2Name}`);
+                          printElement(`scoresheet-${index}`, `APA 9-Ball Scoresheet - ${match.player1Name} vs ${match.player2Name}`);
                         }}
                         className="h-7 px-2 text-xs"
                       >
@@ -220,7 +150,18 @@ function HistoryDisplay({
         })}
       </div>
       
-
+      {/* Hidden scoresheet print components */}
+      {history.map((match, index) => {
+        // Only render if match has required data
+        if (!match.events || !match.completedAt) {
+          return null;
+        }
+        return (
+          <div key={`print-${match.historyId || index}`} id={`scoresheet-${index}`}>
+            <ScoresheetPrint match={match} />
+          </div>
+        );
+      })}
     </div>
   );
   } catch (error) {
