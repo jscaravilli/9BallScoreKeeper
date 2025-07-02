@@ -113,7 +113,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       <div className="relative" style={{ 
         width: '3300px', 
         height: '2550px',
-        transform: 'scale(0.25)',
+        transform: 'scale(0.77)',
         transformOrigin: 'top left'
       }}>
         {/* Background scoresheet image - actual PNG dimensions 3300x2550 at 300 DPI */}
