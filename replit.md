@@ -239,6 +239,13 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - January 2, 2025: Added game-based slash direction system (forward slashes for odd games, backslashes for even games)
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
 - January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
+- January 2, 2025: Implemented automated canvas-based PDF generation system:
+  - Replaced HTML-based printing with direct PNG+markup rendering using HTML5 Canvas
+  - Added jsPDF library for automatic single-page PDF creation and download
+  - Canvas renders scoresheet PNG as base, then burns in blue tally marks and circles at exact pixel coordinates
+  - PDF automatically sized for letter paper (landscape) with proper margins and centering
+  - Match history print buttons now generate timestamped PDFs with player names in filename
+  - No more browser print dialogs - direct PDF download with canvas-rendered scoresheet image
 
 ## User Preferences
 

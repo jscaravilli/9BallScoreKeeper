@@ -18,6 +18,7 @@ import { cookieStorageAPI } from "@/lib/cookieStorage";
 import { localStorageAPI } from "@/lib/localStorage";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { usePrint } from "@/hooks/usePrint";
+import { printMatchScoresheet } from "@/lib/pdfGenerator";
 import type { Match, BallInfo, MatchEvent } from "@shared/schema";
 
 // History Display Component
@@ -81,9 +82,9 @@ function HistoryDisplay({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          printElement(`scoresheet-${index}`, `APA 9-Ball Scoresheet - ${match.player1Name} vs ${match.player2Name}`);
+                          await printMatchScoresheet(match);
                         }}
                         className="h-7 px-2 text-xs"
                       >
