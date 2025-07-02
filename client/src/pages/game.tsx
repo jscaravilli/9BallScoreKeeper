@@ -666,19 +666,18 @@ export default function Game() {
         }
       }
 
-      // Update match with new score (not winning yet)
-      updateMatchMutation.mutate({
-        id: currentMatch.id,
-        updates: {
-          [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: newScore,
-        }
-      });
-
-      // Update ball states first
-      updateBallsMutation.mutate({
-        id: currentMatch.id,
+      // Skip React Query mutations - update storage directly to avoid cache issues
+      const directUpdatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, {
+        [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: newScore,
         ballStates,
       });
+
+      console.log('Direct storage update result:', directUpdatedMatch?.id);
+      
+      // Update React Query cache with the direct result
+      if (directUpdatedMatch) {
+        queryClient.setQueryData(["/api/match/current"], directUpdatedMatch);
+      }
 
       // Check for special 9-ball win (9-ball pocketed during game)
       if (ballNumber === 9) {
@@ -731,33 +730,48 @@ export default function Game() {
         };
         cookieStorageAPI.addMatchEvent(ballDeadEvent);
 
-        updateMatchMutation.mutate({
-          id: currentMatch.id,
-          updates: {
-            [ball.scoredBy === 1 ? 'player1Score' : 'player2Score']: newScore,
-          }
+        // Direct storage update to avoid cache issues
+        const directUpdatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, {
+          [ball.scoredBy === 1 ? 'player1Score' : 'player2Score']: newScore,
+          ballStates: ballStates.map(b => b.number === ballNumber ? 
+            { ...b, state: 'dead' as const, inning: currentInning } : b)
         });
+
+        console.log('Dead ball direct update result:', directUpdatedMatch?.id);
+        
+        if (directUpdatedMatch) {
+          queryClient.setQueryData(["/api/match/current"], directUpdatedMatch);
+        }
+      } else {
+        ball.state = 'dead';
+        ball.inning = currentInning;
+        
+        // Direct storage update for ball states only
+        const directUpdatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, {
+          ballStates,
+        });
+
+        console.log('Dead ball (no score) direct update result:', directUpdatedMatch?.id);
+        
+        if (directUpdatedMatch) {
+          queryClient.setQueryData(["/api/match/current"], directUpdatedMatch);
+        }
       }
-      
-      ball.state = 'dead';
-      // Keep scoredBy to track who marked it dead for turn completion logic
-      ball.inning = currentInning; // Track which inning ball was marked dead
-      
-      // Update ball states
-      updateBallsMutation.mutate({
-        id: currentMatch.id,
-        ballStates,
-      });
     } else {
       // Third tap - reset to active
       ball.state = 'active';
       ball.scoredBy = undefined;
       
-      // Update ball states
-      updateBallsMutation.mutate({
-        id: currentMatch.id,
+      // Direct storage update for ball states
+      const directUpdatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, {
         ballStates,
       });
+
+      console.log('Reset to active direct update result:', directUpdatedMatch?.id);
+      
+      if (directUpdatedMatch) {
+        queryClient.setQueryData(["/api/match/current"], directUpdatedMatch);
+      }
     }
   };
 
