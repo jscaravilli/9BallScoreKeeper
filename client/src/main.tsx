@@ -42,81 +42,22 @@ const checkForUpdates = () => {
   }
 };
 
-// Emergency cookie cleanup to prevent 431 errors
-const emergencyCleanup = () => {
-  const cookies = document.cookie.split(';');
-  let totalSize = 0;
+// Initialize storage system
+const initializeStorage = async () => {
+  console.log('Initializing storage system...');
   
-  cookies.forEach(cookie => {
-    totalSize += cookie.length;
-  });
+  // Import storage manager to trigger initialization
+  const { storageManager } = await import('./lib/storageManager');
   
-  console.log(`Total cookie size: ${totalSize} characters`);
+  console.log(`Storage initialized: ${storageManager.getStorageType()}`);
   
-  if (totalSize > 10000) { // If cookies are too large
-    console.log('Cookies too large, performing emergency cleanup');
-    
-    // Clear all cookies except essential ones
-    const essentialCookies = [
-      'poolscorer_current_match', 
-      'poolscorer_match_counter',
-      'match_history_index'  // Preserve match history index
-    ];
-    
-    cookies.forEach(cookie => {
-      const [name] = cookie.split('=');
-      const cookieName = name.trim();
-      
-      // Keep essential cookies and match history cookies
-      const isEssential = essentialCookies.includes(cookieName);
-      const isMatchHistory = cookieName.startsWith('match_history_');
-      const isMatchHistoryFlag = cookieName.endsWith('_flag');
-      
-      if (!isEssential && !isMatchHistory && !isMatchHistoryFlag) {
-        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-        console.log(`Emergency cleared cookie: ${cookieName}`);
-      } else if (isMatchHistory || isEssential || isMatchHistoryFlag) {
-        console.log(`Preserved essential cookie: ${cookieName}`);
-      }
-    });
-  }
+  return storageManager;
 };
 
-// Emergency cleanup before anything else
-emergencyCleanup();
+// Initialize storage asynchronously
+initializeStorage().catch(console.error);
 
-// Force match history recovery check
-console.log('=== MATCH HISTORY RECOVERY CHECK ===');
-const checkHistory = () => {
-  const indexCookie = document.cookie.split(';').find(c => c.trim().startsWith('match_history_index='));
-  const localHistory = localStorage.getItem('poolscorer_match_history');
-  
-  console.log('Index cookie exists:', !!indexCookie);
-  console.log('localStorage history exists:', !!localHistory);
-  
-  if (localHistory) {
-    try {
-      const parsed = JSON.parse(localHistory);
-      console.log(`localStorage has ${parsed.length} matches`);
-      
-      // If no index cookie but localStorage has data, trigger recovery
-      if (!indexCookie && parsed.length > 0) {
-        console.log('TRIGGERING EMERGENCY RECOVERY...');
-        // Force re-import
-        import('./lib/cookieStorage').then(module => {
-          module.cookieStorageAPI.migrateFromLocalStorage();
-          console.log('Recovery migration triggered');
-        });
-      }
-    } catch (e) {
-      console.error('Error parsing localStorage history:', e);
-    }
-  }
-};
-
-// Check immediately and after a short delay
-checkHistory();
-setTimeout(checkHistory, 1000);
+// No migration needed - using IndexedDB storage system
 
 // Check for updates before rendering
 checkForUpdates();
