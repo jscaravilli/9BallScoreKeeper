@@ -280,6 +280,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Small green tag (light green background, darker green text) appears next to Player 1's name
   - Indicates Player 1 won the lag (break) in pool terminology
   - Uses flexbox layout to maintain centered alignment without disrupting existing score card design
+  - LAG tag is visual-only element, not included in actual name data values
 - July 2, 2025: IMPLEMENTED coordinate-based markup system for comprehensive scoresheet PDF generation:
   - Enhanced renderScoresheetToCanvas to support matchData parameter with player names, skill levels, handicaps, scores, innings, dead balls, safeties, and timestamps
   - Added precise coordinate positioning for all match data elements using bottom-left text anchoring

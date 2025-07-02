@@ -410,6 +410,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     };
 
     // Calculate dynamic font sizes for player names
+    // Note: LAG tag is visual-only, not part of underlying name data
     const player1Text = `${match.player1Name} (LAG)`;
     const player2Text = match.player2Name;
     const player1MaxWidth = 810; // Right edge at [810,322]

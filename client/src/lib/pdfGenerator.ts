@@ -95,6 +95,7 @@ export async function renderScoresheetToCanvas(
     };
     
     // Player names - using points 0 and 1 as bottom-left anchors with width constraints
+    // LAG tag is added for display only, not part of the actual name data
     const player1Text = `${matchData.player1Name} (LAG)`;
     const player2Text = matchData.player2Name;
     const player1MaxWidth = 810; // Right edge at [810,322]
