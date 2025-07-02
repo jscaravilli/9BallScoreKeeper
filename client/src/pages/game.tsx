@@ -1184,8 +1184,25 @@ export default function Game() {
       player2TimeoutsUsed: 0  // Reset timeouts for new game
     });
 
-    // Invalidate cache to trigger re-render
-    queryClient.setQueryData(["/api/match/current"], updatedMatch);
+    console.log('Rerack - updatedMatch:', updatedMatch);
+    console.log('Rerack - currentMatch.id:', currentMatch.id);
+    console.log('Rerack - new game number:', currentMatch.currentGame + 1);
+
+    if (!updatedMatch) {
+      console.error('ERROR: updateMatch returned null during rerack!');
+      // Fallback: keep current match and manually update
+      const fallbackMatch = {
+        ...currentMatch,
+        currentGame: currentMatch.currentGame + 1,
+        ballStates: initialBallStates,
+        player1TimeoutsUsed: 0,
+        player2TimeoutsUsed: 0
+      };
+      queryClient.setQueryData(["/api/match/current"], fallbackMatch);
+    } else {
+      // Invalidate cache to trigger re-render
+      queryClient.setQueryData(["/api/match/current"], updatedMatch);
+    }
 
     // Create rerack event
     const rerackEvent: MatchEvent = {
