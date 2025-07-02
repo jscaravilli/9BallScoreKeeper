@@ -22,56 +22,59 @@ import type { Match, BallInfo, MatchEvent } from "@shared/schema";
 
 // Function to print match scoresheet dynamically
 function printMatchScoresheet(match: any, filename: string) {
-  // Create a temporary div to hold the scoresheet
-  const printDiv = document.createElement('div');
-  printDiv.id = `temp-scoresheet-${Date.now()}`;
-  printDiv.style.position = 'absolute';
-  printDiv.style.left = '-9999px';
-  printDiv.style.top = '-9999px';
-  
-  // Create scoresheet HTML with match data
-  printDiv.innerHTML = `
-    <div style="width: 100%; max-width: 1000px; margin: 0 auto; background: white; padding: 20px;">
-      <div style="position: relative; width: 100%; aspect-ratio: 11/8.5;">
-        <div style="position: absolute; inset: 0; font-size: 11px; font-family: Arial;">
-          <div style="position: absolute; top: 97px; left: 166px; font-size: 12px; font-weight: bold;">${match.player1Name}</div>
-          <div style="position: absolute; top: 124px; left: 166px; font-size: 12px; font-weight: bold;">${match.player2Name}</div>
-          <div style="position: absolute; top: 97px; left: 277px; width: 20px; font-size: 11px; font-weight: bold; text-align: center;">${match.player1SkillLevel}</div>
-          <div style="position: absolute; top: 124px; left: 277px; width: 20px; font-size: 11px; font-weight: bold; text-align: center;">${match.player2SkillLevel}</div>
-          <div style="position: absolute; top: 97px; right: 245px; width: 30px; font-size: 11px; font-weight: bold; text-align: center;">${match.player1Score}</div>
-          <div style="position: absolute; top: 124px; right: 245px; width: 30px; font-size: 11px; font-weight: bold; text-align: center;">${match.player2Score}</div>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  document.body.appendChild(printDiv);
-  
-  // Print after a short delay to ensure rendering
-  setTimeout(() => {
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>${filename}</title>
-            <style>
-              body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-              @media print { body { padding: 0; } }
-            </style>
-          </head>
-          <body>
-            ${printDiv.innerHTML}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
-    }
-    
-    // Clean up
-    document.body.removeChild(printDiv);
-  }, 500);
+  // Create a temporary container with the scoresheet component
+  const tempId = `temp-scoresheet-${Date.now()}`;
+  const tempContainer = document.createElement('div');
+  tempContainer.id = tempId;
+  tempContainer.style.position = 'absolute';
+  tempContainer.style.left = '-9999px';
+  tempContainer.style.top = '-9999px';
+  document.body.appendChild(tempContainer);
+
+  // Create React root and render the scoresheet
+  import('react-dom/client').then((ReactDOMClient) => {
+    import('react').then((React) => {
+      const root = ReactDOMClient.createRoot(tempContainer);
+      const scoresheetElement = React.createElement(ScoresheetPrint, { match });
+      
+      root.render(scoresheetElement);
+      
+      // Wait for rendering then trigger print
+      setTimeout(() => {
+        // Use the existing printElement function from usePrint hook
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+          const scoresheetHTML = tempContainer.innerHTML;
+          printWindow.document.write(`
+            <html>
+              <head>
+                <title>${filename}</title>
+                <style>
+                  body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+                  @media print { 
+                    body { padding: 0; margin: 0; } 
+                    * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
+                  }
+                </style>
+              </head>
+              <body>
+                ${scoresheetHTML}
+              </body>
+            </html>
+          `);
+          printWindow.document.close();
+          printWindow.print();
+          printWindow.onafterprint = () => printWindow.close();
+        }
+        
+        // Clean up
+        setTimeout(() => {
+          root.unmount();
+          document.body.removeChild(tempContainer);
+        }, 1000);
+      }, 1000);
+    });
+  });
 }
 
 // History Display Component
