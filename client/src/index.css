@@ -294,12 +294,13 @@ button {
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
-    width: fit-content !important;
-    height: fit-content !important;
+    width: 3300px !important;
+    height: 2550px !important;
     margin: 0 !important;
     padding: 0 !important;
     page-break-inside: avoid !important;
     page-break-after: avoid !important;
+    overflow: hidden !important;
   }
   
   .scoresheet-content {
@@ -315,8 +316,11 @@ button {
     size: landscape !important;
   }
   
+  html,
   body {
     margin: 0 !important;
     padding: 0 !important;
+    height: auto !important;
+    overflow: hidden !important;
   }
 }
