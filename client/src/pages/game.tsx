@@ -423,12 +423,9 @@ export default function Game() {
     
     if (!storageMatch || isProcessing || storageMatch.isComplete || matchWinner) return;
     
-    // Use storage match instead of React Query match
-    const currentMatch = storageMatch;
-    
     // Special handling for 9-ball undo - ONLY when 9-ball is already scored
     if (ballNumber === 9 && turnHistory.length > 0) {
-      const currentNineBall = (currentMatch.ballStates as BallInfo[]).find((b: BallInfo) => b.number === 9);
+      const currentNineBall = (storageMatch.ballStates as BallInfo[]).find((b: BallInfo) => b.number === 9);
       
       // Only handle undo if 9-ball is currently scored (not active)
       if (currentNineBall?.state === 'scored') {
@@ -670,8 +667,8 @@ export default function Game() {
       }
 
       // Skip React Query mutations - update storage directly to avoid cache issues
-      const directUpdatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, {
-        [currentMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: newScore,
+      const directUpdatedMatch = cookieStorageAPI.updateMatch(storageMatch.id, {
+        [storageMatch.currentPlayer === 1 ? 'player1Score' : 'player2Score']: newScore,
         ballStates,
       });
 
