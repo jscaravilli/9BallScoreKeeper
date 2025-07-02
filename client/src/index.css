@@ -281,29 +281,36 @@ button {
 
 /* Print optimization for scoresheet */
 @media print {
-  .scoresheet-container {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    page-break-inside: avoid;
-    page-break-after: avoid;
-    overflow: hidden;
+  * {
+    visibility: hidden;
   }
   
-  .scoresheet-content {
-    transform: scale(0.62) !important;
+  .scoresheet-container,
+  .scoresheet-container * {
+    visibility: visible;
+  }
+  
+  .scoresheet-container {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: scale(0.77) !important;
     transform-origin: top left !important;
+    page-break-inside: avoid !important;
+    page-break-after: avoid !important;
   }
   
   @page {
-    margin: 0.25in;
-    size: 11in 8.5in; /* Landscape orientation */
+    margin: 0 !important;
+    size: landscape !important;
   }
   
-  /* Hide everything else when printing */
-  body > *:not(.scoresheet-container) {
-    display: none !important;
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
