@@ -303,9 +303,11 @@ button {
   }
   
   .scoresheet-content {
-    transform: none !important;
-    width: fit-content !important;
-    height: fit-content !important;
+    transform: scale(0.73) !important;
+    transform-origin: top left !important;
+    width: 3300px !important;
+    height: 2550px !important;
+    overflow: hidden !important;
   }
   
   @page {
