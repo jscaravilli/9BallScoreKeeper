@@ -76,7 +76,7 @@ export async function renderScoresheetToCanvas(
   
   // Draw coordinate-based text markups if match data is provided
   if (matchData) {
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = 'blue';
     ctx.textAlign = 'left'; // Left-aligned for bottom-left anchoring
     ctx.textBaseline = 'bottom'; // Bottom baseline for bottom-left anchoring
     

@@ -295,6 +295,10 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Automatic font shrinking from 48px down to minimum 12px to fit within boundaries
   - Both PDF generation (canvas) and scoresheet display use identical sizing algorithms
   - Text measurements ensure proper fit while maintaining readability
+- July 2, 2025: STANDARDIZED scoresheet markup color to blue:
+  - Updated PDF generation canvas context to use blue fillStyle for all text markups
+  - Scoresheet display component already configured with blue color for all coordinate-based text overlays
+  - Consistent blue appearance across both visual preview and generated PDF output
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
 - January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
 - January 2, 2025: RESOLVED "431 Request Header Fields Too Large" service worker error:
