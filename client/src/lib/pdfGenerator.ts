@@ -277,16 +277,35 @@ export async function printMatchScoresheet(match: any): Promise<void> {
             tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: gameNumber });
             console.log(`Added 2 tallies for 9-ball by player ${player} at position ${markIndex}, coords: ${x}, ${y}`);
             
-            // Add vertical line after game ends (use last position for reference)
-            verticalLines.push({ x: x + 25, y: y });
-            gameNumber++;
-            
-            // Update mark index for the scoring player
+            // Update mark index for the scoring player first
             if (isPlayer1) {
               player1MarkIndex += 2; // 9-ball takes 2 positions
             } else {
               player2MarkIndex += 2;
             }
+            
+            // Add vertical lines after game ends for both players at their current positions
+            // Player 1 vertical line
+            if (player1MarkIndex > 0 && player1MarkIndex <= PLAYER1_COORDINATES.length) {
+              const p1Coord = PLAYER1_COORDINATES[Math.min(player1MarkIndex - 1, PLAYER1_COORDINATES.length - 1)];
+              if (p1Coord) {
+                const [p1x, p1y] = p1Coord;
+                verticalLines.push({ x: p1x + 25, y: p1y });
+                console.log(`Added vertical line for Player 1 at game ${gameNumber}, coords: ${p1x + 25}, ${p1y}`);
+              }
+            }
+            
+            // Player 2 vertical line
+            if (player2MarkIndex > 0 && player2MarkIndex <= PLAYER2_COORDINATES.length) {
+              const p2Coord = PLAYER2_COORDINATES[Math.min(player2MarkIndex - 1, PLAYER2_COORDINATES.length - 1)];
+              if (p2Coord) {
+                const [p2x, p2y] = p2Coord;
+                verticalLines.push({ x: p2x + 25, y: p2y });
+                console.log(`Added vertical line for Player 2 at game ${gameNumber}, coords: ${p2x + 25}, ${p2y}`);
+              }
+            }
+            
+            gameNumber++;
           } else {
             // Regular balls get 1 tally mark
             tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: gameNumber });
