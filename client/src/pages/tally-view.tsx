@@ -207,12 +207,10 @@ export default function TallyView() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p><strong>{currentMatch.player1Name}</strong> (SL {currentMatch.player1SkillLevel})</p>
-                <p>Current Score: {currentMatch.player1Score}</p>
                 <p>Tallies: {player1Tallies.length} ({totalPlayer1Points} points)</p>
               </div>
               <div>
                 <p><strong>{currentMatch.player2Name}</strong> (SL {currentMatch.player2SkillLevel})</p>
-                <p>Current Score: {currentMatch.player2Score}</p>
                 <p>Tallies: {player2Tallies.length} ({totalPlayer2Points} points)</p>
               </div>
             </div>
