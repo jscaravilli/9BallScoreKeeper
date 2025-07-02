@@ -1185,9 +1185,18 @@ export default function Game() {
       state: 'active' as const,
     }));
 
+    // Get the actual current match from storage (don't trust React Query cache)
+    const actualCurrentMatch = cookieStorageAPI.getCurrentMatch();
+    console.log('Rerack - actualCurrentMatch from storage:', actualCurrentMatch);
+    
+    if (!actualCurrentMatch) {
+      console.error('No current match found in storage!');
+      return;
+    }
+
     // Start new game: increment game number, reset balls to rack, reset timeouts
-    const updatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, {
-      currentGame: currentMatch.currentGame + 1,
+    const updatedMatch = cookieStorageAPI.updateMatch(actualCurrentMatch.id, {
+      currentGame: actualCurrentMatch.currentGame + 1,
       ballStates: initialBallStates,
       player1TimeoutsUsed: 0, // Reset timeouts for new game
       player2TimeoutsUsed: 0  // Reset timeouts for new game
