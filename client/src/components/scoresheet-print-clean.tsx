@@ -1,5 +1,7 @@
 import { Match, MatchEvent } from "@shared/schema";
 import { getPointsToWin } from "@/lib/apa-handicaps";
+import { generateScoresheetPDF } from "@/lib/pdfGenerator";
+import { Button } from "@/components/ui/button";
 import scoresheetPng from "@assets/9B Blank-0_1751450594313.png";
 
 interface ScoresheetPrintProps {
@@ -147,11 +149,23 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     return marks;
   }
 
+  const handlePDFExport = async () => {
+    await generateScoresheetPDF('scoresheet-container');
+  };
+
   return (
-    <div className="scoresheet-container w-full max-w-4xl mx-auto bg-white" style={{ 
-      printColorAdjust: 'exact',
-      WebkitPrintColorAdjust: 'exact'
-    }}>
+    <div className="space-y-4">
+      {/* PDF Export Button */}
+      <div className="flex justify-center">
+        <Button onClick={handlePDFExport} variant="outline">
+          Export as PDF (Letter Size)
+        </Button>
+      </div>
+      
+      <div id="scoresheet-container" className="scoresheet-container w-full max-w-4xl mx-auto bg-white" style={{ 
+        printColorAdjust: 'exact',
+        WebkitPrintColorAdjust: 'exact'
+      }}>
       <div className="scoresheet-content relative" style={{ 
         width: '3300px', 
         height: '2550px',
