@@ -220,10 +220,11 @@ class IndexedDBStorageAPI {
   updateMatch(matchId: string, updates: Partial<Match>): Match | null {
     const currentMatch = this.getCurrentMatch();
     console.log('=== STORAGE UPDATE MATCH DEBUG ===');
-    console.log('Requested matchId:', matchId);
+    console.log('Requested matchId:', matchId, typeof matchId);
     console.log('Current stored match:', currentMatch);
-    console.log('Current match ID:', currentMatch?.id);
+    console.log('Current match ID:', currentMatch?.id, typeof currentMatch?.id);
     console.log('IDs match?:', currentMatch?.id === matchId);
+    console.log('Raw stored match JSON:', this.getItem('poolscorer_current_match'));
     console.log('=== END STORAGE DEBUG ===');
     
     if (!currentMatch || currentMatch.id !== matchId) {
