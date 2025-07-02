@@ -14,6 +14,19 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// Add CORS headers for Replit preview compatibility
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -71,8 +84,8 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled and works with Replit preview.
   const port = Number(process.env.PORT) || 5000;
-  server.listen(port, "0.0.0.0", () => {
+  server.listen(port, "localhost", () => {
     log(`serving on port ${port}`);
-    console.log(`Server accessible at http://0.0.0.0:${port}`);
+    console.log(`Server accessible at http://localhost:${port}`);
   });
 })();
