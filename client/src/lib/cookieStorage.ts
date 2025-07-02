@@ -20,19 +20,18 @@ class CookieStorageAPI {
   private static readonly MAX_TOTAL_COOKIE_SIZE = 15000; // Prevent total header size issues
 
   private setCookie(name: string, value: string, options = COOKIE_OPTIONS): void {
-    // Check cookie size before setting
+    // EMERGENCY FIX: Always use localStorage to prevent 431 errors
+    console.log(`Using localStorage for ${name} to prevent 431 error`);
+    this.useLocalStorageFallback(name, value);
+    return;
+    
+    // Original cookie code disabled to prevent app crashes
+    /*
     const encodedValue = encodeURIComponent(value);
     if (encodedValue.length > CookieStorageAPI.MAX_COOKIE_SIZE) {
       console.warn(`Cookie ${name} is too large (${encodedValue.length} chars), using localStorage fallback`);
       this.useLocalStorageFallback(name, value);
       return;
-    }
-
-    // Check total cookie size to prevent 431 errors
-    const totalSize = this.getTotalCookieSize() + encodedValue.length;
-    if (totalSize > CookieStorageAPI.MAX_TOTAL_COOKIE_SIZE) {
-      console.warn(`Total cookie size would exceed limit, cleaning up old cookies`);
-      this.cleanupOldCookies();
     }
 
     const expires = new Date();
@@ -47,6 +46,7 @@ class CookieStorageAPI {
     ].filter(Boolean).join('; ');
     
     document.cookie = cookieString;
+    */
   }
 
   private useLocalStorageFallback(name: string, value: string): void {
