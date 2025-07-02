@@ -373,6 +373,95 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     return totals;
   }
 
+  // Coordinate-based markup system for match data display
+  function renderMatchDataMarkup() {
+    const markups: JSX.Element[] = [];
+
+    // Calculate match statistics
+    const totalInnings = Math.ceil(match.events.filter(e => e.type === 'ball_scored' && e.ballNumber === 9).length / 2);
+    const totalDeadBalls = match.events.filter(e => e.type === 'ball_dead').length;
+    const player1Safeties = match.player1SafetiesUsed || 0;  
+    const player2Safeties = match.player2SafetiesUsed || 0;
+
+    // Format timestamps
+    const startTime = new Date(match.createdAt || Date.now()).toLocaleString();
+    const endTime = new Date(match.completedAt).toLocaleString();
+
+    // Coordinate definitions for precise positioning
+    const coordinates = {
+      // Player names
+      player1Name: { x: 300, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      player2Name: { x: 300, y: 100, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      
+      // Skill levels  
+      player1SkillLevel: { x: 1200, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      player2SkillLevel: { x: 1200, y: 100, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      
+      // Handicaps (targets)
+      player1Target: { x: 1400, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      player2Target: { x: 1400, y: 100, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      
+      // Final scores
+      player1Score: { x: 1600, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      player2Score: { x: 1600, y: 100, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      
+      // Innings
+      innings: { x: 1800, y: 75, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      
+      // Dead balls
+      deadBalls: { x: 2000, y: 75, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      
+      // Safeties
+      player1Safeties: { x: 2200, y: 50, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      player2Safeties: { x: 2200, y: 100, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      
+      // Timestamps
+      startTime: { x: 300, y: 200, fontSize: '24px', fontWeight: 'normal', color: 'blue' },
+      endTime: { x: 300, y: 250, fontSize: '24px', fontWeight: 'normal', color: 'blue' }
+    };
+
+    // Create text overlays for each data point
+    const dataPoints = [
+      { key: 'player1Name', value: `${match.player1Name} (LAG)`, coords: coordinates.player1Name },
+      { key: 'player2Name', value: match.player2Name, coords: coordinates.player2Name },
+      { key: 'player1SkillLevel', value: `SL${match.player1SkillLevel}`, coords: coordinates.player1SkillLevel },
+      { key: 'player2SkillLevel', value: `SL${match.player2SkillLevel}`, coords: coordinates.player2SkillLevel },
+      { key: 'player1Target', value: `${player1Target}`, coords: coordinates.player1Target },
+      { key: 'player2Target', value: `${player2Target}`, coords: coordinates.player2Target },
+      { key: 'player1Score', value: `${match.player1Score}`, coords: coordinates.player1Score },
+      { key: 'player2Score', value: `${match.player2Score}`, coords: coordinates.player2Score },
+      { key: 'innings', value: `${totalInnings}`, coords: coordinates.innings },
+      { key: 'deadBalls', value: `${totalDeadBalls}`, coords: coordinates.deadBalls },
+      { key: 'player1Safeties', value: `${player1Safeties}`, coords: coordinates.player1Safeties },
+      { key: 'player2Safeties', value: `${player2Safeties}`, coords: coordinates.player2Safeties },
+      { key: 'startTime', value: `Start: ${startTime}`, coords: coordinates.startTime },
+      { key: 'endTime', value: `End: ${endTime}`, coords: coordinates.endTime }
+    ];
+
+    dataPoints.forEach(({ key, value, coords }) => {
+      markups.push(
+        <div
+          key={key}
+          className="absolute select-none pointer-events-none"
+          style={{
+            left: `${coords.x}px`,
+            top: `${coords.y}px`,
+            fontSize: coords.fontSize,
+            fontWeight: coords.fontWeight,
+            color: coords.color,
+            fontFamily: 'Arial, sans-serif',
+            lineHeight: '1',
+            textShadow: '1px 1px 1px rgba(255,255,255,0.8)'
+          }}
+        >
+          {value}
+        </div>
+      );
+    });
+
+    return markups;
+  }
+
   // Handle print functionality with canvas rendering
   const handlePrint = async () => {
     // Extract data for canvas rendering
@@ -483,8 +572,26 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       }
     }
 
+    // Prepare match data for canvas rendering
+    const matchData = {
+      player1Name: match.player1Name,
+      player2Name: match.player2Name,
+      player1SkillLevel: match.player1SkillLevel,
+      player2SkillLevel: match.player2SkillLevel,
+      player1Target: getPointsToWin(match.player1SkillLevel as any),
+      player2Target: getPointsToWin(match.player2SkillLevel as any),
+      player1FinalScore: match.player1Score,
+      player2FinalScore: match.player2Score,
+      totalInnings: Math.ceil(match.events.filter(e => e.type === 'ball_scored' && e.ballNumber === 9).length / 2),
+      totalDeadBalls: match.events.filter(e => e.type === 'ball_dead').length,
+      player1Safeties: match.player1SafetiesUsed || 0,
+      player2Safeties: match.player2SafetiesUsed || 0,
+      matchStartTime: new Date(match.createdAt || Date.now()).toLocaleString(),
+      matchEndTime: new Date(match.completedAt).toLocaleString()
+    };
+
     // Call canvas-based print function
-    await printScoresheetImage(tallies, circles, verticalLines);
+    await printScoresheetImage(tallies, circles, verticalLines, matchData);
   };
 
   // Add print event listener
@@ -528,6 +635,9 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
           {renderPlayer1Marks()}
           {/* Player 2 score marks using exact pixel coordinates */}
           {renderPlayer2Marks()}
+          
+          {/* Coordinate-based match data markup */}
+          {renderMatchDataMarkup()}
         </div>
       </div>
     </div>

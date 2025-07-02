@@ -5,7 +5,23 @@ import scoresheetPng from "@assets/9B Blank-0_1751450594313.png";
 export async function renderScoresheetToCanvas(
   tallies: Array<{ x: number; y: number; symbol: string; game: number }>,
   circles: Array<{ x: number; y: number }>,
-  verticalLines: Array<{ x: number; y: number }>
+  verticalLines: Array<{ x: number; y: number }>,
+  matchData?: {
+    player1Name: string;
+    player2Name: string;
+    player1SkillLevel: number;
+    player2SkillLevel: number;
+    player1Target: number;
+    player2Target: number;
+    player1FinalScore: number;
+    player2FinalScore: number;
+    totalInnings: number;
+    totalDeadBalls: number;
+    player1Safeties: number;
+    player2Safeties: number;
+    matchStartTime: string;
+    matchEndTime: string;
+  }
 ): Promise<HTMLCanvasElement> {
   
   // Create canvas with exact PNG dimensions
@@ -57,6 +73,41 @@ export async function renderScoresheetToCanvas(
     ctx.arc(circle.x, circle.y, 34.5, 0, 2 * Math.PI); // 69px diameter = 34.5px radius
     ctx.stroke();
   });
+  
+  // Draw coordinate-based text markups if match data is provided
+  if (matchData) {
+    ctx.font = 'bold 36px Arial';
+    ctx.fillStyle = 'black';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Player names
+    ctx.fillText(matchData.player1Name, 492, 315); // [492,315] Player1 Name
+    ctx.fillText(matchData.player2Name, 492, 460); // [492,460] Player2 Name
+    
+    // Skill levels
+    ctx.fillText(matchData.player1SkillLevel.toString(), 841, 224); // [841,224] Player1 SL
+    ctx.fillText(matchData.player2SkillLevel.toString(), 843, 370); // [843,370] Player2 SL
+    
+    // Handicaps (targets)
+    ctx.fillText(matchData.player1Target.toString(), 898, 307); // [898,307] Player1 Handicap
+    ctx.fillText(matchData.player2Target.toString(), 898, 442); // [898,442] Player2 Handicap
+    
+    // Final scores
+    ctx.fillText(matchData.player1FinalScore.toString(), 1073, 230); // [1073,230] Player1 final score
+    ctx.fillText(matchData.player2FinalScore.toString(), 1077, 446); // [1077,446] Player2 final score
+    
+    // Match statistics
+    ctx.fillText(matchData.totalInnings.toString(), 1075, 302); // [1075,302] Total Innings
+    ctx.fillText(matchData.totalDeadBalls.toString(), 1075, 378); // [1075,378] Total dead balls
+    ctx.fillText(matchData.player1Safeties.toString(), 2727, 244); // [2727,244] Player1 safeties
+    ctx.fillText(matchData.player2Safeties.toString(), 2733, 435); // [2733,435] Player2 safeties
+    
+    // Timestamps (smaller font for dates/times)
+    ctx.font = 'bold 32px Arial';
+    ctx.fillText(matchData.matchStartTime, 2465, 76); // [2465,76] Match start time
+    ctx.fillText(matchData.matchEndTime, 2941, 76); // [2941,76] Match end time
+  }
   
   return canvas;
 }
@@ -118,12 +169,28 @@ export async function downloadScoresheetPDF(
 export async function printScoresheetImage(
   tallies: Array<{ x: number; y: number; symbol: string; game: number }>,
   circles: Array<{ x: number; y: number }>,
-  verticalLines: Array<{ x: number; y: number }>
+  verticalLines: Array<{ x: number; y: number }>,
+  matchData?: {
+    player1Name: string;
+    player2Name: string;
+    player1SkillLevel: number;
+    player2SkillLevel: number;
+    player1Target: number;
+    player2Target: number;
+    player1FinalScore: number;
+    player2FinalScore: number;
+    totalInnings: number;
+    totalDeadBalls: number;
+    player1Safeties: number;
+    player2Safeties: number;
+    matchStartTime: string;
+    matchEndTime: string;
+  }
 ): Promise<void> {
   
   try {
     // Render to canvas with markup
-    const canvas = await renderScoresheetToCanvas(tallies, circles, verticalLines);
+    const canvas = await renderScoresheetToCanvas(tallies, circles, verticalLines, matchData);
     
     // Convert canvas to data URL
     const dataURL = canvas.toDataURL('image/png');
@@ -439,12 +506,42 @@ export async function printMatchScoresheet(match: any): Promise<void> {
       }
     }
 
+    // Calculate match statistics for coordinate-based markups
+    const totalInnings = Math.ceil(events.filter((e: any) => e.type === 'ball_scored' && e.ballNumber === 9).length / 2);
+    const totalDeadBalls = events.filter((e: any) => e.type === 'ball_dead').length;
+    const player1Safeties = match.player1SafetiesUsed || 0;
+    const player2Safeties = match.player2SafetiesUsed || 0;
+    
+    // Format timestamps
+    const matchStart = new Date(match.createdAt);
+    const matchEnd = new Date(match.completedAt);
+    const startTime = `${(matchStart.getMonth() + 1).toString().padStart(2, '0')}/${matchStart.getDate().toString().padStart(2, '0')}/${matchStart.getFullYear()}, ${matchStart.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+    const endTime = matchEnd.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    
+    // Create match data object for coordinate markups
+    const matchData = {
+      player1Name: match.player1Name,
+      player2Name: match.player2Name,
+      player1SkillLevel: match.player1SkillLevel,
+      player2SkillLevel: match.player2SkillLevel,
+      player1Target: player1Target,
+      player2Target: player2Target,
+      player1FinalScore: match.player1Score,
+      player2FinalScore: match.player2Score,
+      totalInnings: totalInnings,
+      totalDeadBalls: totalDeadBalls,
+      player1Safeties: player1Safeties,
+      player2Safeties: player2Safeties,
+      matchStartTime: startTime,
+      matchEndTime: endTime
+    };
+
     // Generate filename with player names and timestamp
     const timestamp = new Date().toISOString().slice(0, 16).replace(/[:-]/g, '');
     const filename = `APA-Scoresheet-${match.player1Name}-vs-${match.player2Name}-${timestamp}.pdf`;
 
-    // Call canvas-based print function with custom filename
-    await printScoresheetImageWithFilename(tallies, circles, verticalLines, filename);
+    // Call canvas-based print function with custom filename and match data
+    await printScoresheetImageWithFilename(tallies, circles, verticalLines, filename, matchData);
     
   } catch (error) {
     console.error('Match scoresheet PDF generation failed:', error);
@@ -456,12 +553,28 @@ async function printScoresheetImageWithFilename(
   tallies: Array<{ x: number; y: number; symbol: string; game: number }>,
   circles: Array<{ x: number; y: number }>,
   verticalLines: Array<{ x: number; y: number }>,
-  filename: string
+  filename: string,
+  matchData?: {
+    player1Name: string;
+    player2Name: string;
+    player1SkillLevel: number;
+    player2SkillLevel: number;
+    player1Target: number;
+    player2Target: number;
+    player1FinalScore: number;
+    player2FinalScore: number;
+    totalInnings: number;
+    totalDeadBalls: number;
+    player1Safeties: number;
+    player2Safeties: number;
+    matchStartTime: string;
+    matchEndTime: string;
+  }
 ): Promise<void> {
   
   try {
     // Render to canvas with markup
-    const canvas = await renderScoresheetToCanvas(tallies, circles, verticalLines);
+    const canvas = await renderScoresheetToCanvas(tallies, circles, verticalLines, matchData);
     
     // Convert canvas to data URL
     const dataURL = canvas.toDataURL('image/png');
