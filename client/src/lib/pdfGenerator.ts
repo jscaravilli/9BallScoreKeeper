@@ -99,9 +99,9 @@ export async function renderScoresheetToCanvas(
     const player1Text = `${matchData.player1Name} (LAG)`;
     const player2Text = matchData.player2Name;
     
-    // Use points as starting positions without width constraints
-    ctx.fillText(player1Text, 0, 322); // Player 1: Point 0 (x=0, y=322)
-    ctx.fillText(player2Text, 1, 465); // Player 2: Point 1 (x=1, y=465)
+    // Use correct markup coordinates for player names
+    ctx.fillText(player1Text, 492, 315); // Player 1: [492,315]
+    ctx.fillText(player2Text, 492, 460); // Player 2: [492,460]
     
     // Reset to standard font for other elements
     ctx.font = 'bold 36px Arial';

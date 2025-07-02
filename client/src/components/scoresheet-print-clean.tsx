@@ -409,22 +409,17 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       return fontSize;
     };
 
-    // Calculate dynamic font sizes for player names
+    // Player names with correct markup coordinates
     // Note: LAG tag is visual-only, not part of underlying name data
     const player1Text = `${match.player1Name} (LAG)`;
     const player2Text = match.player2Name;
-    const player1MaxWidth = 810; // Right edge at [810,322]
-    const player2MaxWidth = 810; // Right edge at [810,465]
-    
-    const player1FontSize = calculateFontSize(player1Text, player1MaxWidth);
-    const player2FontSize = calculateFontSize(player2Text, player2MaxWidth);
 
     // Coordinate definitions for precise positioning
     // Note: coordinates represent bottom-left anchor point of text
     const coordinates = {
-      // Player names - bottom-left anchored with dynamic sizing
-      player1Name: { x: 0, y: 322, fontSize: `${player1FontSize}px`, fontWeight: 'bold', color: 'blue' },
-      player2Name: { x: 1, y: 465, fontSize: `${player2FontSize}px`, fontWeight: 'bold', color: 'blue' },
+      // Player names - using correct markup coordinates
+      player1Name: { x: 492, y: 315, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      player2Name: { x: 492, y: 460, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
       
       // Skill levels  
       player1SkillLevel: { x: 1200, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
