@@ -776,14 +776,16 @@ export default function Game() {
   };
 
   const handleEndTurn = () => {
-    if (!currentMatch) return;
+    // Get current match from storage to ensure consistency
+    const storageMatch = cookieStorageAPI.getCurrentMatch();
+    if (!storageMatch) return;
 
     // Save current state before switching turns
     const currentState = {
-      ballStates: JSON.parse(JSON.stringify(currentMatch.ballStates as BallInfo[] || [])),
-      currentPlayer: currentMatch.currentPlayer,
-      player1Score: currentMatch.player1Score,
-      player2Score: currentMatch.player2Score,
+      ballStates: JSON.parse(JSON.stringify(storageMatch.ballStates as BallInfo[] || [])),
+      currentPlayer: storageMatch.currentPlayer,
+      player1Score: storageMatch.player1Score,
+      player2Score: storageMatch.player2Score,
     };
     
     setTurnHistory(prev => {
@@ -792,12 +794,12 @@ export default function Game() {
     });
 
     // Mark all balls scored by current player as turn completed
-    const ballStates = [...(currentMatch.ballStates as BallInfo[])];
+    const ballStates = [...(storageMatch.ballStates as BallInfo[])];
     let ballStatesChanged = false;
     
     ballStates.forEach(ball => {
       if ((ball.state === 'scored' || ball.state === 'dead') && 
-          ball.scoredBy === currentMatch.currentPlayer && 
+          ball.scoredBy === storageMatch.currentPlayer && 
           !ball.turnCompleted) {
 
         ball.turnCompleted = true;
@@ -806,28 +808,27 @@ export default function Game() {
     });
 
     // Switch to the other player
-    const nextPlayer = currentMatch.currentPlayer === 1 ? 2 : 1;
+    const nextPlayer = storageMatch.currentPlayer === 1 ? 2 : 1;
     
     // Only increment inning when player 2 finishes their turn (completing the full inning)
-    if (currentMatch.currentPlayer === 2) {
+    if (storageMatch.currentPlayer === 2) {
       setCurrentInning(prev => prev + 1);
     }
 
-    // Update ball states if any were marked as turn completed
-    if (ballStatesChanged) {
-      updateBallsMutation.mutate({
-        id: currentMatch.id,
-        ballStates,
-      });
-    }
+    console.log('End Turn - switching from player', storageMatch.currentPlayer, 'to player', nextPlayer);
+    console.log('Current inning after end turn:', currentInning);
 
-    // Switch to the other player - locked balls will be updated automatically by useEffect
-    updateMatchMutation.mutate({
-      id: currentMatch.id,
-      updates: {
-        currentPlayer: nextPlayer,
-      }
+    // Direct storage update to avoid cache issues
+    const directUpdatedMatch = cookieStorageAPI.updateMatch(storageMatch.id, {
+      currentPlayer: nextPlayer,
+      ballStates: ballStatesChanged ? ballStates : storageMatch.ballStates
     });
+
+    console.log('End turn direct storage update result:', directUpdatedMatch?.id);
+    
+    if (directUpdatedMatch) {
+      queryClient.setQueryData(["/api/match/current"], directUpdatedMatch);
+    }
   };
 
   const handleResetGame = () => {
