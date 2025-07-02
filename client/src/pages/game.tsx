@@ -150,18 +150,7 @@ function HistoryDisplay({
         })}
       </div>
       
-      {/* Hidden scoresheet print components */}
-      {history.map((match, index) => {
-        // Only render if match has required data
-        if (!match.events || !match.completedAt) {
-          return null;
-        }
-        return (
-          <div key={`print-${match.historyId || index}`} id={`scoresheet-${index}`}>
-            <ScoresheetPrint match={match} />
-          </div>
-        );
-      })}
+
     </div>
   );
   } catch (error) {
