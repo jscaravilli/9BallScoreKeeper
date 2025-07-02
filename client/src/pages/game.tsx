@@ -320,10 +320,25 @@ export default function Game() {
   // Check online/offline status
   const isOnline = useOnlineStatus();
 
-  // Get current match
-  const { data: currentMatch, isLoading } = useQuery<Match | null>({
-    queryKey: ["/api/match/current"],
-  });
+  // Get current match directly from storage instead of React Query cache
+  const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Load current match from storage on component mount and periodically
+  useEffect(() => {
+    const loadCurrentMatch = () => {
+      const match = cookieStorageAPI.getCurrentMatch();
+      console.log('Loading current match from storage:', match?.id);
+      setCurrentMatch(match);
+      setIsLoading(false);
+    };
+    
+    loadCurrentMatch();
+    
+    // Set up periodic refresh to ensure React state stays in sync with storage
+    const interval = setInterval(loadCurrentMatch, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
 
 
@@ -532,6 +547,9 @@ export default function Game() {
 
     const ball = ballStates[ballIndex];
     
+    // Capture original ball state before any modifications
+    const originalBallState = ball.state;
+    
     if (ball.state === 'active') {
       // Store current state for undo functionality BEFORE modifying the ball
       // Deep clone the ball states to prevent any reference issues
@@ -679,15 +697,13 @@ export default function Game() {
         queryClient.setQueryData(["/api/match/current"], directUpdatedMatch);
       }
 
-      // Check for special 9-ball win (9-ball pocketed during game)
-      // Only trigger win if ball is transitioning FROM not-scored TO scored by current player
-      if (ballNumber === 9 && originalBallState !== 'scored' && ball.state === 'scored' && ball.scoredBy === storageMatch.currentPlayer) {
-        console.log('LEGITIMATE 9-ball win triggered by player', storageMatch.currentPlayer, 'ball transitioned from', originalBallState, 'to scored');
+      // Check for special 9-ball win (only when ball 9 is freshly scored)
+      if (ballNumber === 9 && ball.state === 'scored' && ball.scoredBy === storageMatch.currentPlayer) {
+        console.log('LEGITIMATE 9-ball win triggered by player', storageMatch.currentPlayer);
         setGameWinner(storageMatch.currentPlayer as 1 | 2);
         setShowGameWin(true);
-        // Don't return - let the mutation complete
-      } else if (ballNumber === 9) {
-        console.log('9-ball clicked but NOT triggering win. Original state:', originalBallState, 'New state:', ball.state, 'scoredBy:', ball.scoredBy, 'currentPlayer:', storageMatch.currentPlayer);
+        // Update current match state immediately for the modal
+        setCurrentMatch(directUpdatedMatch);
       }
     } else if (ball.state === 'scored') {
       // Prevent 9-ball from being marked dead
