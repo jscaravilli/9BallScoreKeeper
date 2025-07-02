@@ -264,6 +264,9 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Replaced standard vertical line | with Unicode box drawing character │ for cleaner appearance
   - Applied to both PDF generation and scoresheet display for consistent visual separation between games
   - Enhanced boldness with increased line width in PDFs and text shadow effects in scoresheet display
+  - ENHANCED vertical bar boldness with double │ character technique: positioned second │ character 1 pixel to the right
+  - Applied double character method to both scoresheet display (using CSS absolute positioning) and PDF generation (canvas rendering)
+  - Creates significantly bolder game separators while maintaining clean Unicode character appearance
 - July 2, 2025: ADDED match history access from player setup screen:
   - Added "View Match History" button to player setup modal for easy access without clearing current state
   - Button appears below form controls with History icon and navigation to /match-history route

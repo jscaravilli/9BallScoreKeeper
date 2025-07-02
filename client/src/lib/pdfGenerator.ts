@@ -35,13 +35,16 @@ export async function renderScoresheetToCanvas(
     ctx.fillText(tally.symbol, tally.x, tally.y);
   });
   
-  // Draw vertical game separators
+  // Draw vertical game separators - double │ with 1px spacing
   ctx.font = '900 53.4px Arial';
   ctx.fillStyle = 'black';
   ctx.lineWidth = 3; // Make the character thicker
   
   verticalLines.forEach(line => {
+    // Draw first │ character
     ctx.fillText('│', line.x, line.y);
+    // Draw second │ character 1 pixel to the right
+    ctx.fillText('│', line.x + 1, line.y);
   });
   
   // Draw target circles

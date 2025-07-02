@@ -182,10 +182,16 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
               fontWeight: '900',
               textShadow: '1px 0 0 black, -1px 0 0 black, 0 1px 0 black, 0 -1px 0 black',
               transform: 'translate(-50%, -50%)',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              position: 'relative'
             }}
           >
             │
+            <span style={{
+              position: 'absolute',
+              left: '1px',
+              top: '0'
+            }}>│</span>
           </div>
         );
       }
@@ -304,10 +310,16 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
               fontWeight: '900',
               textShadow: '1px 0 0 black, -1px 0 0 black, 0 1px 0 black, 0 -1px 0 black',
               transform: 'translate(-50%, -50%)',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              position: 'relative'
             }}
           >
             │
+            <span style={{
+              position: 'absolute',
+              left: '1px',
+              top: '0'
+            }}>│</span>
           </div>
         );
       }
