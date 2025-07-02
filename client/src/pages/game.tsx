@@ -680,11 +680,14 @@ export default function Game() {
       }
 
       // Check for special 9-ball win (9-ball pocketed during game)
-      if (ballNumber === 9 && ball.state === 'scored' && ball.scoredBy === storageMatch.currentPlayer) {
-        console.log('9-ball win triggered, ball states should be:', ballStates);
+      // Only trigger win if ball is transitioning FROM not-scored TO scored by current player
+      if (ballNumber === 9 && originalBallState !== 'scored' && ball.state === 'scored' && ball.scoredBy === storageMatch.currentPlayer) {
+        console.log('LEGITIMATE 9-ball win triggered by player', storageMatch.currentPlayer, 'ball transitioned from', originalBallState, 'to scored');
         setGameWinner(storageMatch.currentPlayer as 1 | 2);
         setShowGameWin(true);
         // Don't return - let the mutation complete
+      } else if (ballNumber === 9) {
+        console.log('9-ball clicked but NOT triggering win. Original state:', originalBallState, 'New state:', ball.state, 'scoredBy:', ball.scoredBy, 'currentPlayer:', storageMatch.currentPlayer);
       }
     } else if (ball.state === 'scored') {
       // Prevent 9-ball from being marked dead
