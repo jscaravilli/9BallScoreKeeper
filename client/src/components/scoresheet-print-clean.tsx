@@ -64,7 +64,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
             style={{
               left: `${x}px`,
               top: `${y}px`,
-              fontSize: '14px',
+              fontSize: '42px',
               color: 'black',
               transform: 'translate(-50%, -50%)',
               pointerEvents: 'none'
@@ -89,9 +89,9 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
             style={{
               left: `${x}px`,
               top: `${y}px`,
-              width: '20px',
-              height: '20px',
-              border: '2px solid black',
+              width: '60px',
+              height: '60px',
+              border: '6px solid black',
               borderRadius: '50%',
               backgroundColor: 'transparent',
               transform: 'translate(-50%, -50%)',
@@ -113,7 +113,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       <div className="relative" style={{ 
         width: '3300px', 
         height: '2550px',
-        transform: 'scale(0.77)',
+        transform: 'scale(0.62)',
         transformOrigin: 'top left'
       }}>
         {/* Background scoresheet image - actual PNG dimensions 3300x2550 at 300 DPI */}
@@ -128,52 +128,10 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
           }}
         />
         
-        {/* Overlay data using only your provided coordinates */}
-        <div className="absolute inset-0" style={{ fontSize: '11px', fontFamily: 'Arial' }}>
-          {/* Player 1 (lag winner) name */}
-          <div className="absolute" style={{ top: '97px', left: '166px', fontSize: '12px', fontWeight: 'bold' }}>
-            {match.player1Name}
-          </div>
-          
-          {/* Player 2 name */}
-          <div className="absolute" style={{ top: '124px', left: '166px', fontSize: '12px', fontWeight: 'bold' }}>
-            {match.player2Name}
-          </div>
-          
-          {/* Skill Levels */}
-          <div className="absolute text-center" style={{ top: '97px', left: '277px', width: '20px', fontSize: '11px', fontWeight: 'bold' }}>
-            {match.player1SkillLevel}
-          </div>
-          <div className="absolute text-center" style={{ top: '124px', left: '277px', width: '20px', fontSize: '11px', fontWeight: 'bold' }}>
-            {match.player2SkillLevel}
-          </div>
-          
+        {/* Only tally marks and circles - all other markings removed */}
+        <div className="absolute inset-0">
           {/* Player 1 score marks using your exact pixel coordinates */}
           {renderPlayer1Marks()}
-          
-          {/* Match information */}
-          <div className="absolute" style={{ top: '22px', right: '165px', fontSize: '10px' }}>
-            {startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-          </div>
-          <div className="absolute" style={{ top: '22px', right: '50px', fontSize: '10px' }}>
-            {matchDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-          </div>
-          
-          {/* Defensive shots count */}
-          <div className="absolute text-center font-bold" style={{ top: '97px', right: '355px', width: '30px', fontSize: '11px' }}>
-            {match.player1SafetiesUsed || 0}
-          </div>
-          <div className="absolute text-center font-bold" style={{ top: '124px', right: '355px', width: '30px', fontSize: '11px' }}>
-            {match.player2SafetiesUsed || 0}
-          </div>
-          
-          {/* Final scores */}
-          <div className="absolute text-center font-bold" style={{ top: '97px', right: '245px', width: '30px', fontSize: '11px' }}>
-            {match.player1Score}
-          </div>
-          <div className="absolute text-center font-bold" style={{ top: '124px', right: '245px', width: '30px', fontSize: '11px' }}>
-            {match.player2Score}
-          </div>
         </div>
       </div>
     </div>
