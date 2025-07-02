@@ -35,7 +35,8 @@ const PLAYER2_COORDINATES = [
 ];
 
 // Skill level target positions that should be circled
-const SL_TARGET_POSITIONS = [1, 5, 10, 14, 19, 25, 31, 35, 38, 46, 50, 55, 60, 65, 70, 75];
+// SL1=14, SL2=19, SL3=25, SL4=31, SL5=38, SL6=46, SL7=55, SL8=65, SL9=75
+const SL_TARGET_POSITIONS = [14, 19, 25, 31, 38, 46, 55, 65, 75];
 
 // Get slash direction based on game number
 function getSlashDirection(gameNumber: number): string {
@@ -99,9 +100,13 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
         // 9-ball is worth 2 points, so it gets 2 tally marks
         const pointsWorth = event.ballNumber === 9 ? 2 : 1;
         
+        console.log(`DEBUG P1: Ball ${event.ballNumber} worth ${pointsWorth} points, game ${currentGame}`);
+        
         for (let i = 0; i < pointsWorth; i++) {
           const coordIndex = scorePosition;
           scorePosition++;
+          
+          console.log(`DEBUG P1: Placing tally ${i + 1}/${pointsWorth} at position ${scorePosition} (coord ${coordIndex})`);
           
           if (coordIndex < PLAYER1_COORDINATES.length) {
             const [x, y] = PLAYER1_COORDINATES[coordIndex];
@@ -197,9 +202,13 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
         // 9-ball is worth 2 points, so it gets 2 tally marks
         const pointsWorth = event.ballNumber === 9 ? 2 : 1;
         
+        console.log(`DEBUG P2: Ball ${event.ballNumber} worth ${pointsWorth} points, game ${currentGame}`);
+        
         for (let i = 0; i < pointsWorth; i++) {
           const coordIndex = scorePosition;
           scorePosition++;
+          
+          console.log(`DEBUG P2: Placing tally ${i + 1}/${pointsWorth} at position ${scorePosition} (coord ${coordIndex})`);
           
           if (coordIndex < PLAYER2_COORDINATES.length) {
             const [x, y] = PLAYER2_COORDINATES[coordIndex];
