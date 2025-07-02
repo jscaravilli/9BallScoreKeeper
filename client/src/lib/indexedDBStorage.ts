@@ -1,4 +1,5 @@
 import type { Match, MatchEvent, BallInfo } from '@shared/schema';
+import { nanoid } from 'nanoid';
 
 // IndexedDB wrapper that maintains cookie storage interface
 class IndexedDBStorageAPI {
@@ -192,7 +193,7 @@ class IndexedDBStorageAPI {
     ballStates?: BallInfo[];
   }): Match {
     const match: Match = {
-      id: this.getMatchCounter(),
+      id: nanoid(),
       player1Name: matchData.player1Name,
       player1SkillLevel: matchData.player1SkillLevel,
       player2Name: matchData.player2Name,
@@ -211,12 +212,12 @@ class IndexedDBStorageAPI {
       createdAt: new Date()
     };
 
-    this.incrementMatchCounter();
     this.setItem('poolscorer_current_match', JSON.stringify(match));
+    console.log('Created new match with GUID:', match.id);
     return match;
   }
 
-  updateMatch(matchId: number, updates: Partial<Match>): Match | null {
+  updateMatch(matchId: string, updates: Partial<Match>): Match | null {
     const currentMatch = this.getCurrentMatch();
     console.log('=== STORAGE UPDATE MATCH DEBUG ===');
     console.log('Requested matchId:', matchId);
@@ -236,7 +237,7 @@ class IndexedDBStorageAPI {
     return updatedMatch;
   }
 
-  updateBallStates(matchId: number, ballStates: BallInfo[]): Match | null {
+  updateBallStates(matchId: string, ballStates: BallInfo[]): Match | null {
     return this.updateMatch(matchId, { ballStates });
   }
 

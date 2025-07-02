@@ -3,7 +3,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const matches = pgTable("matches", {
-  id: serial("id").primaryKey(),
+  id: text("id").primaryKey(),
   player1Name: text("player1_name").notNull(),
   player1SkillLevel: integer("player1_skill_level").notNull(),
   player1Score: integer("player1_score").notNull().default(0),

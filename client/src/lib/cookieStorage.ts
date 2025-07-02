@@ -1,4 +1,5 @@
 import type { Match, BallInfo, MatchEvent } from '@shared/schema';
+import { nanoid } from 'nanoid';
 
 const COOKIE_KEYS = {
   CURRENT_MATCH: 'poolscorer_current_match',
@@ -641,7 +642,7 @@ class CookieStorageAPI {
     ballStates?: BallInfo[];
   }): Match {
     const match: Match = {
-      id: this.getMatchCounter(),
+      id: nanoid(),
       player1Name: matchData.player1Name,
       player1SkillLevel: matchData.player1SkillLevel,
       player2Name: matchData.player2Name,
@@ -660,12 +661,12 @@ class CookieStorageAPI {
       createdAt: new Date()
     };
 
-    this.incrementMatchCounter();
     this.setCookie(COOKIE_KEYS.CURRENT_MATCH, JSON.stringify(match));
+    console.log('Created new match with GUID:', match.id);
     return match;
   }
 
-  updateMatch(matchId: number, updates: Partial<Match>): Match | null {
+  updateMatch(matchId: string, updates: Partial<Match>): Match | null {
     const currentMatch = this.getCurrentMatch();
     if (!currentMatch || currentMatch.id !== matchId) {
       return null;
@@ -676,7 +677,7 @@ class CookieStorageAPI {
     return updatedMatch;
   }
 
-  updateBallStates(matchId: number, ballStates: BallInfo[]): Match | null {
+  updateBallStates(matchId: string, ballStates: BallInfo[]): Match | null {
     return this.updateMatch(matchId, { ballStates });
   }
 

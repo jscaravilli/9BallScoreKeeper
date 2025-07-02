@@ -146,11 +146,11 @@ class AdaptiveStorageAPI {
     return this.getActiveStorage().createMatch(matchData);
   }
 
-  updateMatch(matchId: number, updates: Partial<Match>): Match | null {
+  updateMatch(matchId: string, updates: Partial<Match>): Match | null {
     return this.getActiveStorage().updateMatch(matchId, updates);
   }
 
-  updateBallStates(matchId: number, ballStates: BallInfo[]): Match | null {
+  updateBallStates(matchId: string, ballStates: BallInfo[]): Match | null {
     return this.getActiveStorage().updateBallStates(matchId, ballStates);
   }
 
