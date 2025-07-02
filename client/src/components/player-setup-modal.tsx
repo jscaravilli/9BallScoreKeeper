@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { APA_HANDICAPS } from "@/lib/apa-handicaps";
+import { History } from "lucide-react";
 import type { Match } from "@shared/schema";
 
 interface PlayerSetupModalProps {
@@ -12,9 +13,10 @@ interface PlayerSetupModalProps {
   onClose: () => void;
   onSave: (player1Name: string, player1SkillLevel: number, player2Name: string, player2SkillLevel: number) => void;
   currentMatch?: Match | null;
+  onShowHistory?: () => void;
 }
 
-export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }: PlayerSetupModalProps) {
+export default function PlayerSetupModal({ open, onClose, onSave, currentMatch, onShowHistory }: PlayerSetupModalProps) {
   const [player1Name, setPlayer1Name] = useState("");
   const [player1SkillLevel, setPlayer1SkillLevel] = useState(5);
   const [player2Name, setPlayer2Name] = useState("");
@@ -138,6 +140,20 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch }
               Save
             </Button>
           </div>
+
+          {/* Match History Access */}
+          {onShowHistory && (
+            <div className="pt-4 border-t border-gray-200">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-gray-600 hover:text-gray-800"
+                onClick={onShowHistory}
+              >
+                <History className="h-4 w-4 mr-2" />
+                View Match History
+              </Button>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

@@ -180,11 +180,12 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
               fontSize: '53.4px',
               color: 'black',
               fontWeight: '900',
+              textShadow: '1px 0 0 black, -1px 0 0 black, 0 1px 0 black, 0 -1px 0 black',
               transform: 'translate(-50%, -50%)',
               pointerEvents: 'none'
             }}
           >
-            |
+            │
           </div>
         );
       }
@@ -301,11 +302,12 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
               fontSize: '53.4px',
               color: 'black',
               fontWeight: '900',
+              textShadow: '1px 0 0 black, -1px 0 0 black, 0 1px 0 black, 0 -1px 0 black',
               transform: 'translate(-50%, -50%)',
               pointerEvents: 'none'
             }}
           >
-            |
+            │
           </div>
         );
       }

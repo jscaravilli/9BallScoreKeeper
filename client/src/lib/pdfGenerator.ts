@@ -38,9 +38,10 @@ export async function renderScoresheetToCanvas(
   // Draw vertical game separators
   ctx.font = '900 53.4px Arial';
   ctx.fillStyle = 'black';
+  ctx.lineWidth = 3; // Make the character thicker
   
   verticalLines.forEach(line => {
-    ctx.fillText('|', line.x, line.y);
+    ctx.fillText('│', line.x, line.y);
   });
   
   // Draw target circles

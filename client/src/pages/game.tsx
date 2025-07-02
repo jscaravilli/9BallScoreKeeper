@@ -1338,6 +1338,7 @@ export default function Game() {
           open={showPlayerSetup}
           onClose={() => setShowPlayerSetup(false)}
           onSave={handlePlayerSetupSave}
+          onShowHistory={() => setShowHistory(true)}
         />
       </div>
     );
@@ -1556,6 +1557,7 @@ export default function Game() {
         onClose={() => setShowPlayerSetup(false)}
         onSave={handlePlayerSetupSave}
         currentMatch={currentMatch}
+        onShowHistory={() => setShowHistory(true)}
       />
 
       <GameWinModal 
