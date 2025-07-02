@@ -4,7 +4,8 @@ import { clientQueryFunctions, clientMutation, queryClient } from "@/lib/queryCl
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
-import { Menu, Users, History, Settings, Plus, RotateCcw, Info, X, Trash2, Clock, Minus, Shield, Printer } from "lucide-react";
+import { Menu, Users, History, Settings, Plus, RotateCcw, Info, X, Trash2, Clock, Minus, Shield, Printer, FileText } from "lucide-react";
+import { Link } from "wouter";
 import PlayerSetupModal from "@/components/player-setup-modal";
 import GameWinModal from "@/components/game-win-modal";
 import MatchWinModal from "@/components/match-win-modal";
@@ -1592,6 +1593,16 @@ export default function Game() {
                 <History className="h-5 w-5 text-purple-600" />
                 <span className="font-medium">Match History</span>
               </button>
+
+              <Link href="/tally-view">
+                <button
+                  onClick={() => setShowMenu(false)}
+                  className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <FileText className="h-5 w-5 text-blue-600" />
+                  <span className="font-medium">View Tallies</span>
+                </button>
+              </Link>
               
               <button
                 onClick={() => {
