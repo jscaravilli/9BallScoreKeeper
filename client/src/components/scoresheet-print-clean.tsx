@@ -72,7 +72,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
                 left: `${x}px`,
                 top: `${y}px`,
                 fontSize: '44.1px',
-                color: 'black',
+                color: 'blue',
                 transform: 'translate(-50%, -50%)',
                 pointerEvents: 'none'
               }}
@@ -104,7 +104,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
               top: `${y}px`,
               width: '63px',
               height: '63px',
-              border: '6px solid black',
+              border: '6px solid blue',
               borderRadius: '50%',
               backgroundColor: 'transparent',
               transform: 'translate(-50%, -50%)',
