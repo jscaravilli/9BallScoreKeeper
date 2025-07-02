@@ -72,7 +72,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
               style={{
                 left: `${x}px`,
                 top: `${y}px`,
-                fontSize: '29.5px',
+                fontSize: '44.1px',
                 color: 'blue',
                 transform: 'translate(-50%, -50%)',
                 pointerEvents: 'none'
@@ -95,7 +95,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
                 style={{
                   left: `${x + 25}px`,
                   top: `${y}px`,
-                  fontSize: '29.5px',
+                  fontSize: '44.1px',
                   color: 'black',
                   transform: 'translate(-50%, -50%)',
                   pointerEvents: 'none'
@@ -123,9 +123,9 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
             style={{
               left: `${x}px`,
               top: `${y}px`,
-              width: '42px',
-              height: '42px',
-              border: '4px solid blue',
+              width: '63px',
+              height: '63px',
+              border: '6px solid blue',
               borderRadius: '50%',
               backgroundColor: 'transparent',
               transform: 'translate(-50%, -50%)',
@@ -147,7 +147,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       <div className="relative" style={{ 
         width: '3300px', 
         height: '2550px',
-        transform: 'scale(0.62)',
+        transform: 'scale(0.67)',
         transformOrigin: 'top left'
       }}>
         {/* Background scoresheet image - actual PNG dimensions 3300x2550 at 300 DPI */}
