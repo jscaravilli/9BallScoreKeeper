@@ -294,18 +294,22 @@ button {
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
+    width: fit-content !important;
+    height: fit-content !important;
     margin: 0 !important;
     padding: 0 !important;
-    transform: scale(0.77) !important;
-    transform-origin: top left !important;
     page-break-inside: avoid !important;
     page-break-after: avoid !important;
   }
   
+  .scoresheet-content {
+    transform: none !important;
+    width: fit-content !important;
+    height: fit-content !important;
+  }
+  
   @page {
-    margin: 0 !important;
+    margin: 0.25in !important;
     size: landscape !important;
   }
   
