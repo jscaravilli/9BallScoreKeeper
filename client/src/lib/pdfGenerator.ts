@@ -78,16 +78,16 @@ export async function renderScoresheetToCanvas(
   if (matchData) {
     ctx.font = 'bold 36px Arial';
     ctx.fillStyle = 'black';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left'; // Left-aligned for bottom-left anchoring
+    ctx.textBaseline = 'bottom'; // Bottom baseline for bottom-left anchoring
     
-    // Player names
-    ctx.fillText(matchData.player1Name, 492, 315); // [492,315] Player1 Name
-    ctx.fillText(matchData.player2Name, 492, 460); // [492,460] Player2 Name
+    // Player names - using points 0 and 1 as bottom-left anchors
+    ctx.fillText(`${matchData.player1Name} (LAG)`, 0, 1); // Point 0 - Player1 Name with LAG tag
+    ctx.fillText(matchData.player2Name, 1, 1); // Point 1 - Player2 Name
     
     // Skill levels
     ctx.fillText(matchData.player1SkillLevel.toString(), 841, 224); // [841,224] Player1 SL
-    ctx.fillText(matchData.player2SkillLevel.toString(), 843, 370); // [843,370] Player2 SL
+    ctx.fillText(matchData.player2SkillLevel.toString(), 1073, 446); // [1073,446] Player2 SL - updated coordinate
     
     // Handicaps (targets)
     ctx.fillText(matchData.player1Target.toString(), 898, 307); // [898,307] Player1 Handicap
@@ -95,7 +95,7 @@ export async function renderScoresheetToCanvas(
     
     // Final scores
     ctx.fillText(matchData.player1FinalScore.toString(), 1073, 230); // [1073,230] Player1 final score
-    ctx.fillText(matchData.player2FinalScore.toString(), 1077, 446); // [1077,446] Player2 final score
+    ctx.fillText(matchData.player2FinalScore.toString(), 1073, 446); // [1073,446] Player2 final score - updated coordinate
     
     // Match statistics
     ctx.fillText(matchData.totalInnings.toString(), 1075, 302); // [1075,302] Total Innings
@@ -103,10 +103,10 @@ export async function renderScoresheetToCanvas(
     ctx.fillText(matchData.player1Safeties.toString(), 2727, 244); // [2727,244] Player1 safeties
     ctx.fillText(matchData.player2Safeties.toString(), 2733, 435); // [2733,435] Player2 safeties
     
-    // Timestamps (smaller font for dates/times)
+    // Timestamps - using points 0 and 1 as bottom-left anchors
     ctx.font = 'bold 32px Arial';
-    ctx.fillText(matchData.matchStartTime, 2465, 76); // [2465,76] Match start time
-    ctx.fillText(matchData.matchEndTime, 2941, 76); // [2941,76] Match end time
+    ctx.fillText(`Start: ${matchData.matchStartTime}`, 0, 1); // Point 0 - Match start time
+    ctx.fillText(`End: ${matchData.matchEndTime}`, 1, 1); // Point 1 - Match end time
   }
   
   return canvas;

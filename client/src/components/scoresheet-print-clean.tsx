@@ -388,14 +388,15 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     const endTime = new Date(match.completedAt).toLocaleString();
 
     // Coordinate definitions for precise positioning
+    // Note: coordinates represent bottom-left anchor point of text
     const coordinates = {
-      // Player names
-      player1Name: { x: 300, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
-      player2Name: { x: 300, y: 100, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      // Player names - bottom-left anchored
+      player1Name: { x: 0, y: 1, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      player2Name: { x: 1, y: 1, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
       
       // Skill levels  
       player1SkillLevel: { x: 1200, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
-      player2SkillLevel: { x: 1200, y: 100, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      player2SkillLevel: { x: 1073, y: 446, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
       
       // Handicaps (targets)
       player1Target: { x: 1400, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
@@ -415,9 +416,9 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       player1Safeties: { x: 2200, y: 50, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       player2Safeties: { x: 2200, y: 100, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
-      // Timestamps
-      startTime: { x: 300, y: 200, fontSize: '24px', fontWeight: 'normal', color: 'blue' },
-      endTime: { x: 300, y: 250, fontSize: '24px', fontWeight: 'normal', color: 'blue' }
+      // Timestamps - bottom-left anchored
+      startTime: { x: 0, y: 1, fontSize: '24px', fontWeight: 'normal', color: 'blue' },
+      endTime: { x: 1, y: 1, fontSize: '24px', fontWeight: 'normal', color: 'blue' }
     };
 
     // Create text overlays for each data point
@@ -445,13 +446,14 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
           className="absolute select-none pointer-events-none"
           style={{
             left: `${coords.x}px`,
-            top: `${coords.y}px`,
+            bottom: `${coords.y}px`,
             fontSize: coords.fontSize,
             fontWeight: coords.fontWeight,
             color: coords.color,
             fontFamily: 'Arial, sans-serif',
             lineHeight: '1',
-            textShadow: '1px 1px 1px rgba(255,255,255,0.8)'
+            textShadow: '1px 1px 1px rgba(255,255,255,0.8)',
+            transformOrigin: 'bottom left'
           }}
         >
           {value}

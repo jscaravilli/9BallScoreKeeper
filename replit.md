@@ -280,6 +280,14 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Small green tag (light green background, darker green text) appears next to Player 1's name
   - Indicates Player 1 won the lag (break) in pool terminology
   - Uses flexbox layout to maintain centered alignment without disrupting existing score card design
+- July 2, 2025: IMPLEMENTED coordinate-based markup system for comprehensive scoresheet PDF generation:
+  - Enhanced renderScoresheetToCanvas to support matchData parameter with player names, skill levels, handicaps, scores, innings, dead balls, safeties, and timestamps
+  - Added precise coordinate positioning for all match data elements using bottom-left text anchoring
+  - Updated scoresheet display component with renderMatchDataMarkup function for visual preview
+  - Player 1 gets "(LAG)" designation on both display and PDF output
+  - Player 2 score coordinate updated to [1073,446] per specification
+  - Text alignment uses bottom-left anchoring for precise positioning control
+  - Both on-screen scoresheet and PDF generation use identical coordinate system for consistency
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
 - January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
 - January 2, 2025: RESOLVED "431 Request Header Fields Too Large" service worker error:
