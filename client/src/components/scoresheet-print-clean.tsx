@@ -65,6 +65,12 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     return null;
   }
 
+  // Debug: Log the match events to see what's actually being processed
+  console.log('Scoresheet Debug - Match Events:', match.events);
+  console.log('Scoresheet Debug - Player 1 Events:', match.events.filter(e => e.type === 'ball_scored' && e.player === 1));
+  console.log('Scoresheet Debug - Player 2 Events:', match.events.filter(e => e.type === 'ball_scored' && e.player === 2));
+  console.log('Scoresheet Debug - 9-ball Events:', match.events.filter(e => e.type === 'ball_scored' && e.ballNumber === 9));
+
   // Calculate target points for both players
   const player1Target = getPointsToWin(match.player1SkillLevel as any);
   const player2Target = getPointsToWin(match.player2SkillLevel as any);
