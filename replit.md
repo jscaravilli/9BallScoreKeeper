@@ -235,6 +235,10 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - January 1, 2025: Undo Action button repositioned between Safety and New Match buttons with consistent sizing
 - January 1, 2025: Enhanced safety button with undo functionality - added minus button to decrement safety count matching timeout system design
 - January 1, 2025: Updated development environment to use memory storage while keeping production database unchanged
+- January 2, 2025: Implemented pixel-perfect scoresheet system using exact coordinate arrays for precise mark placement
+- January 2, 2025: Added game-based slash direction system (forward slashes for odd games, backslashes for even games)
+- January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
+- January 2, 2025: Changed development server port from 5000 to 3000 to resolve port conflicts
 
 ## User Preferences
 
