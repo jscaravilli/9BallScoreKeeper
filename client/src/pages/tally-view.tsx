@@ -69,7 +69,19 @@ export default function TallyView() {
   // Get match events and filter for scoring events
   const events = adaptiveStorageAPI.getCurrentMatchEvents() || [];
   
-  // Build proper tally data by tracking games and unique ball scores
+  // Track final state of each ball to determine valid tallies
+  const ballStates = new Map();
+  events.forEach((event: any) => {
+    if (event.type === 'ball_scored' || event.type === 'ball_dead') {
+      const key = `${event.ballNumber}-${event.player}`;
+      if (!ballStates.has(key)) {
+        ballStates.set(key, []);
+      }
+      ballStates.get(key).push(event);
+    }
+  });
+
+  // Build tally data - only include balls that end up scored (not dead)
   const tallyData: Array<{
     playerName: string;
     player: number;
@@ -81,41 +93,33 @@ export default function TallyView() {
   }> = [];
 
   let currentGame = 1;
-  const seenBallsInGame = new Set<string>(); // Track "game-ball-player" combinations
   
   events.forEach((event: any) => {
     if (event.type === 'ball_scored') {
-      const ballKey = `${currentGame}-${event.ballNumber}-${event.player}`;
+      const key = `${event.ballNumber}-${event.player}`;
+      const ballEvents = ballStates.get(key) || [];
+      const lastEvent = ballEvents[ballEvents.length - 1];
+      const isValid = lastEvent && lastEvent.type === 'ball_scored';
       
-      // Only add if we haven't seen this ball scored by this player in this game
-      if (!seenBallsInGame.has(ballKey)) {
-        const pointsAwarded = event.ballNumber === 9 ? 2 : 1;
-        const playerName = event.player === 1 ? currentMatch.player1Name : currentMatch.player2Name;
-        
-        tallyData.push({
-          playerName,
-          player: event.player,
-          gameNumber: currentGame,
-          ballNumber: event.ballNumber,
-          pointsAwarded,
-          timestamp: event.timestamp,
-          isValid: true
-        });
-        
-        seenBallsInGame.add(ballKey);
-      }
-    } else if (event.type === 'game_won' || (event.type === 'turn_ended' && event.details?.includes('won'))) {
+      const pointsAwarded = event.ballNumber === 9 ? 2 : 1;
+      const playerName = event.player === 1 ? currentMatch.player1Name : currentMatch.player2Name;
+      
+      tallyData.push({
+        playerName,
+        player: event.player,
+        gameNumber: currentGame,
+        ballNumber: event.ballNumber,
+        pointsAwarded,
+        timestamp: event.timestamp,
+        isValid
+      });
+    } else if (event.type === 'turn_ended' && event.details?.includes('won')) {
       currentGame++;
-      // Clear seen balls for new game
-      seenBallsInGame.clear();
-    } else if (event.type === 'rerack') {
-      currentGame++;
-      seenBallsInGame.clear();
     }
   });
 
-  // All tallies are now valid due to proper filtering above
-  const validTallies = tallyData;
+  // Filter to only valid tallies and group by player
+  const validTallies = tallyData.filter(t => t.isValid);
   const player1Tallies = validTallies.filter(t => t.player === 1);
   const player2Tallies = validTallies.filter(t => t.player === 2);
 
