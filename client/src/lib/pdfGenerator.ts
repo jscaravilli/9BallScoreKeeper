@@ -326,10 +326,18 @@ export async function printMatchScoresheet(match: any): Promise<void> {
           const slashDirection = getSlashDirection(gameNumber);
           
           if (event.ballNumber === 9) {
-            // 9-ball gets 2 tally marks
+            // 9-ball gets 2 tally marks in consecutive positions
             tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: gameNumber });
-            tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: gameNumber });
-            console.log(`Added 2 tallies for 9-ball by player ${player} at position ${markIndex}, coords: ${x}, ${y}`);
+            
+            // Get the next coordinate for the second tally mark
+            const nextCoord = coordinates[markIndex + 1];
+            if (nextCoord) {
+              const [nextX, nextY] = nextCoord;
+              tallies.push({ x: nextX + 3, y: nextY, symbol: slashDirection, game: gameNumber });
+              console.log(`Added 2 tallies for 9-ball by player ${player} at positions ${markIndex} and ${markIndex + 1}`);
+            } else {
+              console.warn(`No next coordinate available for second 9-ball tally by player ${player}`);
+            }
             
             // Update mark index for ONLY the scoring player
             if (isPlayer1) {

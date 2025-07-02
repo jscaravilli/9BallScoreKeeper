@@ -252,6 +252,10 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Dead balls no longer generate tally marks on scoresheet
   - Fixed excessive tally mark counts by filtering out invalid ball_scored events
   - Added validation to ensure only legitimate scores appear on APA scoresheet
+- July 2, 2025: FIXED 9-ball second tally mark positioning in PDF generator:
+  - Second 9-ball tally mark now appears in the next consecutive position instead of overlapping the first
+  - Both tally marks for 9-ball are now visible and properly spaced on printed scoresheets
+  - Updated Unicode box drawing characters (╱ ╲) for cleaner tally mark appearance
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
 - January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
 - January 2, 2025: RESOLVED "431 Request Header Fields Too Large" service worker error:
