@@ -168,14 +168,11 @@ class CookieStorageAPI {
     const compressed = this.compressJSON(JSON.parse(value));
     const compressionRatio = (1 - compressed.length / originalSize) * 100;
     
-    console.log(`Compression: ${originalSize} → ${compressed.length} chars (${compressionRatio.toFixed(1)}% reduction)`);
-    
     const maxChunkSize = 3400; // Conservative limit for reliability
     
     if (compressed.length <= maxChunkSize) {
       // Single compressed cookie
       this.setCookie(name, compressed);
-      console.log(`Stored ${name} as single compressed cookie`);
       return;
     }
     
@@ -184,8 +181,6 @@ class CookieStorageAPI {
     for (let i = 0; i < compressed.length; i += maxChunkSize) {
       chunks.push(compressed.slice(i, i + maxChunkSize));
     }
-    
-    console.log(`Chunking ${name}: ${compressed.length} chars → ${chunks.length} chunks`);
     
     // Clear any existing chunks first
     this.deleteCookieChunked(name);
@@ -202,7 +197,7 @@ class CookieStorageAPI {
       this.setCookie(`${name}_${index}`, chunk);
     });
     
-    console.log(`Successfully stored ${chunks.length} chunks for ${name}`);
+    // Chunks stored successfully
   }
 
   private getCookieChunked(name: string): string | null {
@@ -213,7 +208,6 @@ class CookieStorageAPI {
         // Check if it's compressed JSON by looking for shortened property names
         if (single.includes('"p1n"') || single.includes('"bsc"') || single.includes('"ts"')) {
           const decompressed = this.decompressJSON(single);
-          console.log(`Retrieved single compressed cookie for ${name}`);
           return JSON.stringify(decompressed);
         }
         // Return as-is if not compressed
@@ -239,8 +233,6 @@ class CookieStorageAPI {
       const meta = JSON.parse(metaStr);
       const { count, totalSize, compressed } = meta;
       
-      console.log(`Reassembling ${name}: ${count} chunks, ${totalSize} chars total`);
-      
       let reassembled = '';
       for (let i = 0; i < count; i++) {
         const chunk = this.getCookie(`${name}_${i}`);
@@ -257,7 +249,6 @@ class CookieStorageAPI {
       
       if (compressed) {
         const decompressed = this.decompressJSON(reassembled);
-        console.log(`Successfully reassembled and decompressed ${name}`);
         return JSON.stringify(decompressed);
       } else {
         return reassembled;
@@ -272,8 +263,6 @@ class CookieStorageAPI {
   // Legacy support for old-style chunked cookies
   private getCookieChunkedLegacy(name: string, count: number): string | null {
     if (isNaN(count)) return null;
-    
-    console.log(`Legacy reassembly: ${name} from ${count} chunks`);
     
     let reassembled = '';
     for (let i = 0; i < count; i++) {
@@ -304,7 +293,7 @@ class CookieStorageAPI {
         const meta = JSON.parse(metaStr);
         const count = meta.count || 0;
         
-        console.log(`Deleting chunked cookie ${name}: ${count} chunks + metadata`);
+        // Deleting chunked cookie with metadata
         
         // Delete metadata
         this.deleteCookie(`${name}_meta`);
@@ -365,15 +354,33 @@ class CookieStorageAPI {
       return false;
     }).slice(-50); // Keep maximum 50 events total
   }
+
+  private checkAndCleanupIfNeeded(): void {
+    try {
+      const totalCookieSize = document.cookie.length;
+      
+      // Only log and cleanup if approaching limits (75% of max)
+      const warningThreshold = CookieStorageAPI.MAX_TOTAL_COOKIE_SIZE * 0.75;
+      
+      if (totalCookieSize > warningThreshold) {
+        console.log(`Cookie size check: ${totalCookieSize} chars (${(totalCookieSize/CookieStorageAPI.MAX_TOTAL_COOKIE_SIZE*100).toFixed(1)}% of limit)`);
+        
+        if (totalCookieSize > CookieStorageAPI.MAX_TOTAL_COOKIE_SIZE) {
+          this.performEmergencyCleanup();
+        }
+      }
+    } catch (error) {
+      console.warn('Cookie size check failed:', error);
+    }
+  }
   
   private performEmergencyCleanup(): void {
     try {
       // Calculate total cookie size
       const totalCookieSize = document.cookie.length;
-      console.log(`Total cookie size: ${totalCookieSize} characters`);
       
       if (totalCookieSize > CookieStorageAPI.MAX_TOTAL_COOKIE_SIZE) {
-        console.warn('Cookie size exceeds safe limit, performing emergency cleanup');
+        console.warn(`Emergency cleanup: ${totalCookieSize} chars exceeds ${CookieStorageAPI.MAX_TOTAL_COOKIE_SIZE} limit`);
         
         // Clear old match history cookies first
         const cookies = document.cookie.split(';');
@@ -415,8 +422,8 @@ class CookieStorageAPI {
   }
 
   constructor() {
-    // Perform emergency cleanup on initialization to prevent 431 errors
-    this.performEmergencyCleanup();
+    // Only perform cleanup if cookies are actually approaching limits
+    this.checkAndCleanupIfNeeded();
   }
 
   private setCookie(name: string, value: string, options = COOKIE_OPTIONS): void {
@@ -425,7 +432,6 @@ class CookieStorageAPI {
     const estimatedNewSize = currentCookieSize + name.length + encodeURIComponent(value).length + 100; // +100 for cookie overhead
     
     if (estimatedNewSize > CookieStorageAPI.MAX_TOTAL_COOKIE_SIZE) {
-      console.warn(`Cookie operation would exceed safe limit (${estimatedNewSize}), performing cleanup first`);
       this.performEmergencyCleanup();
     }
     
