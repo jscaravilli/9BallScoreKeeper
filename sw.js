@@ -82,7 +82,18 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return response;
-      }).catch(() => {
+      }).catch(error => {
+        // Handle 431 Request Header Fields Too Large
+        if (error.message && error.message.includes('431')) {
+          console.warn('SW: 431 error detected, clearing cookies to reduce header size');
+          // Post message to main thread to clear large cookies
+          self.clients.matchAll().then(clients => {
+            clients.forEach(client => {
+              client.postMessage({ type: 'CLEAR_LARGE_COOKIES' });
+            });
+          });
+        }
+        
         return caches.match(request).then(response => {
           if (response) {
             return response;

@@ -56,6 +56,37 @@ if ('serviceWorker' in navigator) {
         console.log('SW registration failed: ', registrationError);
       });
   });
+
+  // Listen for messages from service worker
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'CLEAR_LARGE_COOKIES') {
+      console.log('Received request to clear large cookies due to 431 error');
+      
+      // Clear all cookies except essential ones
+      const essentialCookies = ['poolscorer_current_match', 'poolscorer_match_counter'];
+      const cookies = document.cookie.split(';');
+      
+      cookies.forEach(cookie => {
+        const [name] = cookie.split('=');
+        const cookieName = name.trim();
+        
+        if (!essentialCookies.includes(cookieName)) {
+          // Delete non-essential cookies
+          document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+          console.log(`Cleared cookie: ${cookieName}`);
+        }
+      });
+      
+      // Also clear match history from localStorage if it exists
+      try {
+        localStorage.removeItem('poolscorer_match_history');
+        localStorage.removeItem('poolscorer_current_match_events');
+        console.log('Cleared large localStorage items');
+      } catch (error) {
+        console.warn('Error clearing localStorage:', error);
+      }
+    }
+  });
 }
 
 createRoot(document.getElementById("root")!).render(<App />);

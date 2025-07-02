@@ -16,12 +16,30 @@ const COOKIE_OPTIONS = {
 };
 
 class CookieStorageAPI {
+  private static readonly MAX_COOKIE_SIZE = 3800; // Stay well under 4KB browser limit
+  private static readonly MAX_TOTAL_COOKIE_SIZE = 15000; // Prevent total header size issues
+
   private setCookie(name: string, value: string, options = COOKIE_OPTIONS): void {
+    // Check cookie size before setting
+    const encodedValue = encodeURIComponent(value);
+    if (encodedValue.length > CookieStorageAPI.MAX_COOKIE_SIZE) {
+      console.warn(`Cookie ${name} is too large (${encodedValue.length} chars), using localStorage fallback`);
+      this.useLocalStorageFallback(name, value);
+      return;
+    }
+
+    // Check total cookie size to prevent 431 errors
+    const totalSize = this.getTotalCookieSize() + encodedValue.length;
+    if (totalSize > CookieStorageAPI.MAX_TOTAL_COOKIE_SIZE) {
+      console.warn(`Total cookie size would exceed limit, cleaning up old cookies`);
+      this.cleanupOldCookies();
+    }
+
     const expires = new Date();
     expires.setTime(expires.getTime() + (options.expires * 24 * 60 * 60 * 1000));
     
     const cookieString = [
-      `${name}=${encodeURIComponent(value)}`,
+      `${name}=${encodedValue}`,
       `expires=${expires.toUTCString()}`,
       `path=${options.path}`,
       `SameSite=${options.sameSite}`,
@@ -29,6 +47,45 @@ class CookieStorageAPI {
     ].filter(Boolean).join('; ');
     
     document.cookie = cookieString;
+  }
+
+  private useLocalStorageFallback(name: string, value: string): void {
+    try {
+      localStorage.setItem(name, value);
+      console.log(`Successfully stored ${name} in localStorage fallback`);
+    } catch (error) {
+      console.error(`Failed to store ${name} in localStorage:`, error);
+    }
+  }
+
+  private getTotalCookieSize(): number {
+    return document.cookie.length;
+  }
+
+  private cleanupOldCookies(): void {
+    // Remove old match history cookies
+    const cookies = document.cookie.split(';');
+    const historyIndex = this.getCookie('match_history_index');
+    
+    if (historyIndex) {
+      try {
+        const matchIds = JSON.parse(historyIndex);
+        // Keep only last 5 matches to reduce cookie load
+        const toKeep = matchIds.slice(0, 5);
+        const toDelete = matchIds.slice(5);
+        
+        toDelete.forEach((matchId: string) => {
+          this.deleteCookie(`match_history_${matchId}`);
+        });
+        
+        if (toDelete.length > 0) {
+          this.setCookie('match_history_index', JSON.stringify(toKeep));
+          console.log(`Cleaned up ${toDelete.length} old match history cookies`);
+        }
+      } catch (error) {
+        console.error('Error cleaning up old cookies:', error);
+      }
+    }
   }
 
   private getCookie(name: string): string | null {
