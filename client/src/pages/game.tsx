@@ -1165,7 +1165,7 @@ export default function Game() {
       previousBallStates: turnHistory.length > 0 ? turnHistory[turnHistory.length - 1].ballStates : currentBallStates
     };
 
-    // Add rerack state to turn history
+    // Add rerack state to turn history for undo functionality
     setTurnHistory(prev => {
       const newHistory = [...prev, stateBeforeRerack];
       return newHistory.slice(-maxTurnHistory); // Keep only last 10 states
@@ -1176,7 +1176,7 @@ export default function Game() {
       state: 'active' as const,
     }));
 
-    // Update match with incremented game number, reset balls, and reset timeout counters in single operation
+    // Start new game: increment game number, reset balls to rack, reset timeouts
     const updatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, {
       currentGame: currentMatch.currentGame + 1,
       ballStates: initialBallStates,
@@ -1193,7 +1193,7 @@ export default function Game() {
       timestamp: new Date().toISOString(),
       player: gameWinner as 1 | 2,
       playerName: gameWinner === 1 ? currentMatch.player1Name : currentMatch.player2Name,
-      details: 'Rerack - New game started after 9-ball win'
+      details: `Game ${currentMatch.currentGame} won - Reracking for Game ${currentMatch.currentGame + 1}`
     };
     cookieStorageAPI.addMatchEvent(rerackEvent);
 
