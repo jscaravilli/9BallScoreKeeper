@@ -1,7 +1,7 @@
+import React from "react";
 import { Match, MatchEvent } from "@shared/schema";
 import { getPointsToWin } from "@/lib/apa-handicaps";
-import { generateScoresheetPDF } from "@/lib/pdfGenerator";
-import { Button } from "@/components/ui/button";
+import { printScoresheetImage } from "@/lib/pdfGenerator";
 import scoresheetPng from "@assets/9B Blank-0_1751450594313.png";
 
 interface ScoresheetPrintProps {
@@ -149,23 +149,75 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     return marks;
   }
 
-  const handlePDFExport = async () => {
-    await generateScoresheetPDF('scoresheet-container');
+  // Helper function to calculate running totals
+  function calculateRunningTotals(events: MatchEvent[], playerId: 1 | 2): number[] {
+    const totals: number[] = [];
+    let runningTotal = 0;
+    
+    events.forEach(event => {
+      if (event.type === 'ball_scored' && event.player === playerId) {
+        if (event.ballNumber === 9) {
+          runningTotal += 2; // 9-ball is worth 2 points
+        } else {
+          runningTotal += 1; // All other balls worth 1 point
+        }
+        totals.push(runningTotal);
+      }
+    });
+    
+    return totals;
+  }
+
+  // Handle print functionality with canvas rendering
+  const handlePrint = async () => {
+    // Extract data for canvas rendering
+    const tallies: Array<{ x: number; y: number; symbol: string; game: number }> = [];
+    const circles: Array<{ x: number; y: number }> = [];
+    const verticalLines: Array<{ x: number; y: number }> = [];
+
+    // Process match events to build markup data
+    const player1Totals = calculateRunningTotals(match.events, 1);
+    let gameNumber = 1;
+    let markIndex = 0;
+
+    match.events.forEach(event => {
+      if (event.type === 'ball_scored' && event.player === 1) {
+        const coord = PLAYER1_COORDINATES[markIndex];
+        if (coord) {
+          const [x, y] = coord;
+          if (event.ballNumber === 9) {
+            // 9-ball gets 2 tally marks
+            tallies.push({ x: x + 3, y: y, symbol: '/', game: gameNumber });
+            tallies.push({ x: x + 3, y: y, symbol: '/', game: gameNumber });
+          } else {
+            // Regular balls get 1 tally mark
+            tallies.push({ x: x + 3, y: y, symbol: '/', game: gameNumber });
+          }
+          markIndex++;
+        }
+      }
+    });
+
+    // Call canvas-based print function
+    await printScoresheetImage(tallies, circles, verticalLines);
   };
 
+  // Add print event listener
+  React.useEffect(() => {
+    const handlePrintEvent = (e: Event) => {
+      e.preventDefault();
+      handlePrint();
+    };
+
+    window.addEventListener('beforeprint', handlePrintEvent);
+    return () => window.removeEventListener('beforeprint', handlePrintEvent);
+  }, [match.events]);
+
   return (
-    <div className="space-y-4">
-      {/* PDF Export Button */}
-      <div className="flex justify-center">
-        <Button onClick={handlePDFExport} variant="outline">
-          Export as PDF (Letter Size)
-        </Button>
-      </div>
-      
-      <div id="scoresheet-container" className="scoresheet-container w-full max-w-4xl mx-auto bg-white" style={{ 
-        printColorAdjust: 'exact',
-        WebkitPrintColorAdjust: 'exact'
-      }}>
+    <div className="scoresheet-container w-full max-w-4xl mx-auto bg-white" style={{ 
+      printColorAdjust: 'exact',
+      WebkitPrintColorAdjust: 'exact'
+    }}>
       <div className="scoresheet-content relative" style={{ 
         width: '3300px', 
         height: '2550px',
@@ -193,23 +245,4 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       </div>
     </div>
   );
-}
-
-// Helper function to calculate running totals
-function calculateRunningTotals(events: MatchEvent[], playerId: 1 | 2): number[] {
-  const totals: number[] = [];
-  let runningTotal = 0;
-  
-  events.forEach(event => {
-    if (event.type === 'ball_scored' && event.player === playerId) {
-      if (event.ballNumber === 9) {
-        runningTotal += 2; // 9-ball is worth 2 points
-      } else {
-        runningTotal += 1; // All other balls worth 1 point
-      }
-      totals.push(runningTotal);
-    }
-  });
-  
-  return totals;
 }
