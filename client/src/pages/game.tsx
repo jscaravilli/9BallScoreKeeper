@@ -77,7 +77,6 @@ function HistoryDisplay({
                     🏆 {winnerName} Wins!
                   </div>
                   <div className="flex items-center gap-2">
-                    {/* Print button disabled - scoresheet images hidden
                     {match.events && match.completedAt && (
                       <Button
                         size="sm"
@@ -92,7 +91,6 @@ function HistoryDisplay({
                         Print
                       </Button>
                     )}
-                    */}
                     <div className="text-xs text-gray-500">
                       {completedDate.toLocaleDateString()} {completedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </div>
@@ -152,19 +150,20 @@ function HistoryDisplay({
         })}
       </div>
       
-      {/* Hidden scoresheet print components - DISABLED
-      {history.map((match, index) => {
-        // Only render if match has required data
-        if (!match.events || !match.completedAt) {
-          return null;
-        }
-        return (
-          <div key={`print-${match.historyId || index}`} id={`scoresheet-${index}`}>
-            <ScoresheetPrint match={match} />
-          </div>
-        );
-      })}
-      */}
+      {/* Hidden scoresheet print components - invisible but available for printing */}
+      <div className="hidden">
+        {history.map((match, index) => {
+          // Only render if match has required data
+          if (!match.events || !match.completedAt) {
+            return null;
+          }
+          return (
+            <div key={`print-${match.historyId || index}`} id={`scoresheet-${index}`}>
+              <ScoresheetPrint match={match} />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
   } catch (error) {
