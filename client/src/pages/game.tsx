@@ -1190,19 +1190,13 @@ export default function Game() {
 
     if (!updatedMatch) {
       console.error('ERROR: updateMatch returned null during rerack!');
-      // Fallback: keep current match and manually update
-      const fallbackMatch = {
-        ...currentMatch,
-        currentGame: currentMatch.currentGame + 1,
-        ballStates: initialBallStates,
-        player1TimeoutsUsed: 0,
-        player2TimeoutsUsed: 0
-      };
-      queryClient.setQueryData(["/api/match/current"], fallbackMatch);
-    } else {
-      // Invalidate cache to trigger re-render
-      queryClient.setQueryData(["/api/match/current"], updatedMatch);
+      return; // Don't proceed if update failed
     }
+
+    // Update the query cache with the new match data - NO invalidation to prevent server refetch
+    queryClient.setQueryData(["/api/match/current"], updatedMatch);
+    
+    console.log('Rerack - Cache updated with:', updatedMatch);
 
     // Create rerack event
     const rerackEvent: MatchEvent = {
