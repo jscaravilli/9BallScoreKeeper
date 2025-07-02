@@ -240,11 +240,11 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
 - January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
 - January 2, 2025: RESOLVED "431 Request Header Fields Too Large" service worker error:
-  - Added cookie size validation with 3.8KB limit per cookie and 15KB total limit
-  - Implemented automatic fallback to localStorage for oversized cookies
-  - Added service worker error handling for 431 responses with automatic cookie cleanup
-  - Enhanced cookie storage with automatic cleanup of old match history (keeps only 5 recent matches)
-  - Added message passing between service worker and main thread for coordinated cleanup
+  - Implemented hybrid cookie/localStorage strategy: essential data in cookies, large data in localStorage with tracking flags
+  - Added emergency cookie cleanup system that automatically removes oversized cookies on app startup
+  - Smart size detection prevents large match history and events from being stored in cookies
+  - Maintained persistence while eliminating header size issues that were crashing the entire app
+  - App now loads reliably without cookie-related 431 errors
 - January 2, 2025: Implemented automated canvas-based PDF generation system:
   - Replaced HTML-based printing with direct PNG+markup rendering using HTML5 Canvas
   - Added jsPDF library for automatic single-page PDF creation and download
