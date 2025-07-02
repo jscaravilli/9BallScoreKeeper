@@ -280,22 +280,32 @@ export async function printMatchScoresheet(match: any): Promise<void> {
 
     console.log('Processing match events for PDF:', events.length, 'events');
 
-    // Filter out dead balls - only process balls that were scored AND NOT later marked as dead
-    const validScoredEvents = events.filter((event: any, index: number) => {
-      if (event.type !== 'ball_scored') return true; // Keep non-scoring events
+    // Fix tally marks: Only process events where balls remain scored (not dead)
+    // Group events by ball and player to track final state
+    const ballStates = new Map();
+    
+    events.forEach((event: any) => {
+      if (event.type === 'ball_scored' || event.type === 'ball_dead') {
+        const key = `${event.ballNumber}-${event.player}`;
+        if (!ballStates.has(key)) {
+          ballStates.set(key, []);
+        }
+        ballStates.get(key).push(event);
+      }
+    });
+    
+    // Only include ball_scored events where the ball's final state is scored (not dead)
+    const validScoredEvents = events.filter((event: any) => {
+      if (event.type !== 'ball_scored') return false; // Only process scoring events for tallies
       
-      // Check if this ball was later marked as dead by looking at subsequent events
-      const ballNumber = event.ballNumber;
-      const player = event.player;
+      const key = `${event.ballNumber}-${event.player}`;
+      const ballEvents = ballStates.get(key) || [];
       
-      const laterDeadEvent = events.slice(index + 1).find((laterEvent: any) => 
-        laterEvent.type === 'ball_dead' && 
-        laterEvent.ballNumber === ballNumber && 
-        laterEvent.player === player
-      );
+      // Get the most recent event for this ball/player combination
+      const lastEvent = ballEvents[ballEvents.length - 1];
+      const isValidScore = lastEvent && lastEvent.type === 'ball_scored';
       
-      const isValidScore = !laterDeadEvent;
-      console.log(`Ball ${ballNumber} by player ${player}: ${isValidScore ? 'VALID' : 'DEAD - FILTERED OUT'}`);
+      console.log(`Ball ${event.ballNumber} by player ${event.player}: ${isValidScore ? 'VALID TALLY' : 'DEAD - NO TALLY'}`);
       return isValidScore;
     });
 
