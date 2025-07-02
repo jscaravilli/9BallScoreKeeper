@@ -324,7 +324,7 @@ export default function Game() {
   const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Load current match from storage on component mount and periodically
+  // Load current match from storage on component mount and when needed
   useEffect(() => {
     const loadCurrentMatch = () => {
       const match = cookieStorageAPI.getCurrentMatch();
@@ -334,11 +334,14 @@ export default function Game() {
     };
     
     loadCurrentMatch();
-    
-    // Set up periodic refresh to ensure React state stays in sync with storage
-    const interval = setInterval(loadCurrentMatch, 1000);
-    return () => clearInterval(interval);
   }, []);
+
+  // Manual refresh function for when storage changes
+  const refreshMatchFromStorage = () => {
+    const match = cookieStorageAPI.getCurrentMatch();
+    console.log('Manual refresh - Loading current match from storage:', match?.id);
+    setCurrentMatch(match);
+  };
 
 
 
@@ -408,19 +411,16 @@ export default function Game() {
       state: 'active' as const,
     }));
 
-    createMatchMutation.mutate({
+    const newMatch = cookieStorageAPI.createMatch({
       player1Name,
       player1SkillLevel,
-      player1Score: 0,
       player2Name,
       player2SkillLevel,
-      player2Score: 0,
-      currentPlayer: 1,
-      currentGame: 1,
-      ballStates: initialBallStates,
-      isComplete: false,
-      winnerId: null,
+      ballStates: initialBallStates
     });
+    
+    // Update local state immediately
+    setCurrentMatch(newMatch);
     setShowPlayerSetup(false);
     // Reset inning count for new match
     setCurrentInning(1);
@@ -692,9 +692,9 @@ export default function Game() {
 
       console.log('Direct storage update result:', directUpdatedMatch?.id);
       
-      // Update React Query cache with the direct result
+      // Update local state immediately
       if (directUpdatedMatch) {
-        queryClient.setQueryData(["/api/match/current"], directUpdatedMatch);
+        setCurrentMatch(directUpdatedMatch);
       }
 
       // Check for special 9-ball win (only when ball 9 is freshly scored)
@@ -845,8 +845,9 @@ export default function Game() {
 
     console.log('End turn direct storage update result:', directUpdatedMatch?.id);
     
+    // Update local state immediately
     if (directUpdatedMatch) {
-      queryClient.setQueryData(["/api/match/current"], directUpdatedMatch);
+      setCurrentMatch(directUpdatedMatch);
     }
   };
 
