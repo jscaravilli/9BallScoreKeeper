@@ -238,7 +238,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - January 2, 2025: Implemented pixel-perfect scoresheet system using exact coordinate arrays for precise mark placement
 - January 2, 2025: Added game-based slash direction system (forward slashes for odd games, backslashes for even games)
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
-- January 2, 2025: Changed development server port from 5000 to 3000 to resolve port conflicts
+- January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
 
 ## User Preferences
 
