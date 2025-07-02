@@ -1254,12 +1254,14 @@ export default function Game() {
       return;
     }
 
-    // Start new game: increment game number, reset balls to rack, reset timeouts
+    // Start new game: increment game number, reset balls to rack, reset timeouts and safeties
     const updatedMatch = cookieStorageAPI.updateMatch(actualCurrentMatch.id, {
       currentGame: actualCurrentMatch.currentGame + 1,
       ballStates: initialBallStates,
       player1TimeoutsUsed: 0, // Reset timeouts for new game
-      player2TimeoutsUsed: 0  // Reset timeouts for new game
+      player2TimeoutsUsed: 0, // Reset timeouts for new game
+      player1SafetiesUsed: 0, // Reset safeties for new game
+      player2SafetiesUsed: 0  // Reset safeties for new game
     });
 
     console.log('Rerack - BEFORE UPDATE:');
@@ -1283,7 +1285,10 @@ export default function Game() {
     // Update the query cache with the new match data - NO invalidation to prevent server refetch
     queryClient.setQueryData(["/api/match/current"], updatedMatch);
     
-    console.log('Rerack - Cache updated with:', updatedMatch);
+    // Update local state immediately to ensure UI reflects changes
+    setCurrentMatch(updatedMatch);
+    
+    console.log('Rerack - Cache and local state updated with:', updatedMatch);
 
     // Create rerack event
     const rerackEvent: MatchEvent = {
