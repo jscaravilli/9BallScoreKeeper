@@ -252,11 +252,14 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Implemented data compression that keeps only essential match info and key events
   - Added manual recovery button in match history modal to restore from localStorage backup
   - All match data now stored exclusively in cookies with automatic size management
-- January 2, 2025: FIXED tally mark spacing issue during match transitions:
+- January 2, 2025: FIXED multiple scoresheet issues:
   - Corrected scorePosition tracking to use consecutive coordinates without skipping
   - Vertical bars now indicate game transitions but don't affect tally placement continuity
   - Enhanced both Player 1 and Player 2 coordinate mapping for accurate dual-player scoresheets
   - Updated canvas-based PDF generation to match corrected spacing logic
+  - FIXED 9-ball double tally issue - 9-ball now correctly places 2 tally marks in consecutive positions
+  - FIXED skill level target circles - corrected to use actual APA handicap values (SL5=38, not 35)
+  - Implemented centralized game tracking to synchronize slash directions between players
 - January 2, 2025: Implemented automated canvas-based PDF generation system:
   - Replaced HTML-based printing with direct PNG+markup rendering using HTML5 Canvas
   - Added jsPDF library for automatic single-page PDF creation and download
