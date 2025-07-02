@@ -412,6 +412,15 @@ export default function Game() {
   };
 
   const handleBallTap = (ballNumber: number) => {
+    console.log('=== BALL TAP DEBUG ===');
+    console.log('Ball clicked:', ballNumber);
+    console.log('currentMatch.player1Name:', currentMatch?.player1Name);
+    console.log('currentMatch.player2Name:', currentMatch?.player2Name);
+    console.log('currentMatch.player1SkillLevel:', currentMatch?.player1SkillLevel);
+    console.log('currentMatch.player2SkillLevel:', currentMatch?.player2SkillLevel);
+    console.log('currentMatch.id:', currentMatch?.id);
+    console.log('=== END BALL TAP DEBUG ===');
+    
     if (!currentMatch || isProcessing || currentMatch.isComplete || matchWinner) return;
     
     // Special handling for 9-ball undo - ONLY when 9-ball is already scored
@@ -1184,9 +1193,17 @@ export default function Game() {
       player2TimeoutsUsed: 0  // Reset timeouts for new game
     });
 
+    console.log('Rerack - BEFORE UPDATE:');
+    console.log('  currentMatch.player1Name:', currentMatch.player1Name);
+    console.log('  currentMatch.player2Name:', currentMatch.player2Name);
+    console.log('  currentMatch.player1SkillLevel:', currentMatch.player1SkillLevel);
+    console.log('  currentMatch.player2SkillLevel:', currentMatch.player2SkillLevel);
     console.log('Rerack - updatedMatch:', updatedMatch);
-    console.log('Rerack - currentMatch.id:', currentMatch.id);
-    console.log('Rerack - new game number:', currentMatch.currentGame + 1);
+    console.log('Rerack - AFTER UPDATE:');
+    console.log('  updatedMatch.player1Name:', updatedMatch.player1Name);
+    console.log('  updatedMatch.player2Name:', updatedMatch.player2Name);
+    console.log('  updatedMatch.player1SkillLevel:', updatedMatch.player1SkillLevel);
+    console.log('  updatedMatch.player2SkillLevel:', updatedMatch.player2SkillLevel);
 
     if (!updatedMatch) {
       console.error('ERROR: updateMatch returned null during rerack!');
