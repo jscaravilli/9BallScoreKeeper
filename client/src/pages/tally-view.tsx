@@ -16,13 +16,13 @@ export default function TallyView() {
 
   const copyTableData = (validTallies: any[], currentMatch: any, scores: any) => {
     // Create tab-separated table data for copying
-    const headers = "Player\tGame\tBall\tPoints\tTime";
+    const headers = "Player\tGame\tBall\tTally\tTime";
     const rows = validTallies
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
       .map(tally => {
         const ballDisplay = tally.ballNumber === 9 ? "9-ball" : tally.ballNumber.toString();
         const timeDisplay = new Date(tally.timestamp).toLocaleTimeString();
-        return `${tally.playerName}\t${tally.gameNumber}\t${ballDisplay}\t${tally.pointsAwarded}\t${timeDisplay}`;
+        return `${tally.playerName}\t${tally.gameNumber}\t${ballDisplay}\t1\t${timeDisplay}`;
       });
     
     const tableData = [headers, ...rows].join('\n');
@@ -131,17 +131,45 @@ export default function TallyView() {
       const pointsAwarded = event.ballNumber === 9 ? 2 : 1;
       const playerName = event.player === 1 ? currentMatch.player1Name : currentMatch.player2Name;
       
-      tallyData.push({
-        playerName,
-        player: event.player,
-        gameNumber: currentGame,
-        ballNumber: event.ballNumber,
-        pointsAwarded,
-        timestamp: event.timestamp,
-        isValid: true
-      });
-      
-      console.log(`Valid tally: ${playerName} (Player ${event.player}), Ball ${event.ballNumber}, Game ${currentGame}`);
+      // For 9-ball, add 2 separate tally marks
+      if (event.ballNumber === 9) {
+        // First tally mark for 9-ball
+        tallyData.push({
+          playerName,
+          player: event.player,
+          gameNumber: currentGame,
+          ballNumber: event.ballNumber,
+          pointsAwarded: 1, // Each tally is worth 1, but we'll have 2 of them
+          timestamp: event.timestamp,
+          isValid: true
+        });
+        
+        // Second tally mark for 9-ball
+        tallyData.push({
+          playerName,
+          player: event.player,
+          gameNumber: currentGame,
+          ballNumber: event.ballNumber,
+          pointsAwarded: 1, // Each tally is worth 1, but we'll have 2 of them
+          timestamp: event.timestamp,
+          isValid: true
+        });
+        
+        console.log(`Valid 9-ball tallies (2 marks): ${playerName} (Player ${event.player}), Ball ${event.ballNumber}, Game ${currentGame}`);
+      } else {
+        // Regular balls get 1 tally mark
+        tallyData.push({
+          playerName,
+          player: event.player,
+          gameNumber: currentGame,
+          ballNumber: event.ballNumber,
+          pointsAwarded: 1,
+          timestamp: event.timestamp,
+          isValid: true
+        });
+        
+        console.log(`Valid tally: ${playerName} (Player ${event.player}), Ball ${event.ballNumber}, Game ${currentGame}`);
+      }
     }
   });
 
@@ -221,7 +249,7 @@ export default function TallyView() {
                     <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left', userSelect: 'text' }}>Player</th>
                     <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left', userSelect: 'text' }}>Game</th>
                     <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left', userSelect: 'text' }}>Ball</th>
-                    <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left', userSelect: 'text' }}>Points</th>
+                    <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left', userSelect: 'text' }}>Tally</th>
                     <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left', userSelect: 'text' }}>Time</th>
                   </tr>
                 </thead>
