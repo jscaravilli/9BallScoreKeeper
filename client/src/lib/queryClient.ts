@@ -18,11 +18,11 @@ export const clientQueryFunctions = {
     return cookieStorageAPI.createMatch(matchData);
   },
   
-  updateMatch: (matchId: number, updates: Partial<Match>): Match | null => {
+  updateMatch: (matchId: string, updates: Partial<Match>): Match | null => {
     return cookieStorageAPI.updateMatch(matchId, updates);
   },
   
-  updateBallStates: (matchId: number, ballStates: BallInfo[]): Match | null => {
+  updateBallStates: (matchId: string, ballStates: BallInfo[]): Match | null => {
     return cookieStorageAPI.updateBallStates(matchId, ballStates);
   }
 };

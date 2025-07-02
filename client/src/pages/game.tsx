@@ -749,17 +749,22 @@ export default function Game() {
         };
         cookieStorageAPI.addMatchEvent(ballDeadEvent);
 
+        // Update ball state first
+        ball.state = 'dead';
+        ball.inning = currentInning;
+        
         // Direct storage update to avoid cache issues
         const directUpdatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, {
           [ball.scoredBy === 1 ? 'player1Score' : 'player2Score']: newScore,
-          ballStates: ballStates.map(b => b.number === ballNumber ? 
-            { ...b, state: 'dead' as const, inning: currentInning } : b)
+          ballStates,
         });
 
         console.log('Dead ball direct update result:', directUpdatedMatch?.id);
         
         if (directUpdatedMatch) {
           queryClient.setQueryData(["/api/match/current"], directUpdatedMatch);
+          // Also update local state to ensure UI reflects changes immediately
+          setCurrentMatch(directUpdatedMatch);
         }
       } else {
         ball.state = 'dead';
@@ -774,6 +779,8 @@ export default function Game() {
         
         if (directUpdatedMatch) {
           queryClient.setQueryData(["/api/match/current"], directUpdatedMatch);
+          // Also update local state to ensure UI reflects changes immediately
+          setCurrentMatch(directUpdatedMatch);
         }
       }
     } else {
@@ -790,6 +797,8 @@ export default function Game() {
       
       if (directUpdatedMatch) {
         queryClient.setQueryData(["/api/match/current"], directUpdatedMatch);
+        // Also update local state to ensure UI reflects changes immediately
+        setCurrentMatch(directUpdatedMatch);
       }
     }
   };

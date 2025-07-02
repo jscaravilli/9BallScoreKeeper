@@ -54,7 +54,7 @@ export class LocalStorageAPI {
     ballStates?: BallInfo[];
   }): Match {
     const match: Match = {
-      id: this.getMatchCounter(),
+      id: `match_${this.getMatchCounter()}_${Date.now()}`,
       player1Name: matchData.player1Name,
       player1SkillLevel: matchData.player1SkillLevel,
       player2Name: matchData.player2Name,
@@ -66,6 +66,10 @@ export class LocalStorageAPI {
       ballStates: matchData.ballStates || [],
       isComplete: false,
       winnerId: null,
+      player1TimeoutsUsed: 0,
+      player2TimeoutsUsed: 0,
+      player1SafetiesUsed: 0,
+      player2SafetiesUsed: 0,
       createdAt: new Date()
     };
 
@@ -74,7 +78,7 @@ export class LocalStorageAPI {
     return match;
   }
 
-  updateMatch(matchId: number, updates: Partial<Match>): Match | null {
+  updateMatch(matchId: string, updates: Partial<Match>): Match | null {
     const currentMatch = this.getCurrentMatch();
     if (!currentMatch || currentMatch.id !== matchId) {
       return null;
@@ -85,7 +89,7 @@ export class LocalStorageAPI {
     return updatedMatch;
   }
 
-  updateBallStates(matchId: number, ballStates: BallInfo[]): Match | null {
+  updateBallStates(matchId: string, ballStates: BallInfo[]): Match | null {
     return this.updateMatch(matchId, { ballStates });
   }
 
