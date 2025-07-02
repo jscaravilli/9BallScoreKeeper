@@ -29,8 +29,8 @@ export default function PDFTest() {
     ];
     
     const verticalLines: Array<{ x: number; y: number }> = [
-      { x: 439, y: 149 }, // Game separator for Player 1 after 9-ball
-      { x: 436, y: 511 }, // Game separator for Player 2 after their scoring
+      { x: 425, y: 149 }, // Game separator for Player 1 between positions (not covering tallies)
+      { x: 367, y: 511 }, // Game separator for Player 2 between positions (not covering tallies)
     ];
 
     await printScoresheetImage(tallies, circles, verticalLines);

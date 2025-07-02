@@ -255,6 +255,9 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Enhanced to render tallies for both Player 1 (lag winner) and Player 2 with separate coordinate arrays
   - Added target circles for both players based on their individual skill levels
   - PDF opens in new window with manual print instruction, no automatic printing
+  - Fixed vertical bar placement to appear between games without covering tallies
+  - Corrected tally tracking so inactive players don't get spaces added when games end
+  - Enhanced game separator positioning to halfway point between tally positions
 
 ## User Preferences
 
