@@ -280,6 +280,12 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Added confirmation dialog when starting new match that warns about clearing previous match history
   - System now maintains only 1 match history at a time with automatic cleanup of old data
   - New match creation automatically clears all previous match cookies to prevent 431 errors
+  - ENHANCED cookie optimization with advanced compression and chunking system:
+    * JSON compression with shortened property names (player1Name → p1n, etc.)
+    * Cookie chunking system splits large data across multiple 3.5KB cookies
+    * Smart event filtering prioritizes scoresheet-essential data
+    * Multi-tier fallback: chunked compression → localStorage backup → ultra-filtered cookies
+    * Automatic decompression and reassembly on data retrieval
 - January 2, 2025: Implemented automated canvas-based PDF generation system:
   - Replaced HTML-based printing with direct PNG+markup rendering using HTML5 Canvas
   - Added jsPDF library for automatic single-page PDF creation and download

@@ -18,6 +18,152 @@ const COOKIE_OPTIONS = {
 class CookieStorageAPI {
   private static readonly MAX_COOKIE_SIZE = 3800; // Stay well under 4KB browser limit
   private static readonly MAX_TOTAL_COOKIE_SIZE = 8000; // Reduced to prevent 431 errors
+
+  // Advanced compression utilities
+  private compressJSON(obj: any): string {
+    // Remove whitespace and use shorter property names
+    return JSON.stringify(obj)
+      .replace(/\s+/g, '') // Remove all whitespace
+      .replace(/"player1Name"/g, '"p1n"')
+      .replace(/"player2Name"/g, '"p2n"')
+      .replace(/"player1Score"/g, '"p1s"')
+      .replace(/"player2Score"/g, '"p2s"')
+      .replace(/"player1SkillLevel"/g, '"p1sl"')
+      .replace(/"player2SkillLevel"/g, '"p2sl"')
+      .replace(/"ballNumber"/g, '"bn"')
+      .replace(/"timestamp"/g, '"ts"')
+      .replace(/"playerName"/g, '"pn"')
+      .replace(/"ball_scored"/g, '"bs"')
+      .replace(/"match_completed"/g, '"mc"')
+      .replace(/"turn_ended"/g, '"te"');
+  }
+
+  private decompressJSON(compressed: string): any {
+    // Restore full property names
+    const restored = compressed
+      .replace(/"p1n"/g, '"player1Name"')
+      .replace(/"p2n"/g, '"player2Name"')
+      .replace(/"p1s"/g, '"player1Score"')
+      .replace(/"p2s"/g, '"player2Score"')
+      .replace(/"p1sl"/g, '"player1SkillLevel"')
+      .replace(/"p2sl"/g, '"player2SkillLevel"')
+      .replace(/"bn"/g, '"ballNumber"')
+      .replace(/"ts"/g, '"timestamp"')
+      .replace(/"pn"/g, '"playerName"')
+      .replace(/"bs"/g, '"ball_scored"')
+      .replace(/"mc"/g, '"match_completed"')
+      .replace(/"te"/g, '"turn_ended"');
+    
+    return JSON.parse(restored);
+  }
+
+  // Cookie chunking for very large data
+  private setCookieChunked(name: string, value: string): void {
+    const compressed = this.compressJSON(JSON.parse(value));
+    const maxChunkSize = 3500; // Leave room for metadata
+    
+    if (compressed.length <= maxChunkSize) {
+      // Single cookie
+      this.setCookie(name, compressed);
+      return;
+    }
+    
+    // Split into chunks
+    const chunks = [];
+    for (let i = 0; i < compressed.length; i += maxChunkSize) {
+      chunks.push(compressed.slice(i, i + maxChunkSize));
+    }
+    
+    console.log(`Splitting ${name} into ${chunks.length} chunks`);
+    
+    // Store chunk count and each chunk
+    this.setCookie(`${name}_count`, chunks.length.toString());
+    chunks.forEach((chunk, index) => {
+      this.setCookie(`${name}_${index}`, chunk);
+    });
+  }
+
+  private getCookieChunked(name: string): string | null {
+    // Try single cookie first
+    const single = this.getCookie(name);
+    if (single) {
+      try {
+        // Check if it's compressed JSON
+        if (single.includes('"p1n"') || single.includes('"bs"')) {
+          return JSON.stringify(this.decompressJSON(single));
+        }
+        return single;
+      } catch {
+        return single;
+      }
+    }
+    
+    // Try chunked cookies
+    const countStr = this.getCookie(`${name}_count`);
+    if (!countStr) return null;
+    
+    const count = parseInt(countStr);
+    if (isNaN(count)) return null;
+    
+    console.log(`Reassembling ${name} from ${count} chunks`);
+    
+    let reassembled = '';
+    for (let i = 0; i < count; i++) {
+      const chunk = this.getCookie(`${name}_${i}`);
+      if (!chunk) {
+        console.error(`Missing chunk ${i} for ${name}`);
+        return null;
+      }
+      reassembled += chunk;
+    }
+    
+    try {
+      return JSON.stringify(this.decompressJSON(reassembled));
+    } catch (error) {
+      console.error('Error decompressing chunked cookie:', error);
+      return null;
+    }
+  }
+
+  private deleteCookieChunked(name: string): void {
+    // Delete single cookie
+    this.deleteCookie(name);
+    
+    // Delete chunked cookies
+    const countStr = this.getCookie(`${name}_count`);
+    if (countStr) {
+      const count = parseInt(countStr);
+      if (!isNaN(count)) {
+        this.deleteCookie(`${name}_count`);
+        for (let i = 0; i < count; i++) {
+          this.deleteCookie(`${name}_${i}`);
+        }
+      }
+    }
+  }
+
+  // Smart event filtering to prioritize scoresheet-essential data
+  private filterEssentialEvents(events: MatchEvent[]): MatchEvent[] {
+    const now = Date.now();
+    const oneHourAgo = now - (60 * 60 * 1000);
+    
+    // Always keep these event types for scoresheets
+    const essentialTypes = ['ball_scored', 'match_completed', 'game_won', 'timeout_used'];
+    
+    return events.filter((event, index) => {
+      // Always keep essential event types
+      if (essentialTypes.includes(event.type)) return true;
+      
+      // Keep recent events (last hour)
+      const eventTime = new Date(event.timestamp).getTime();
+      if (eventTime > oneHourAgo) return true;
+      
+      // For older events, keep only every 5th non-essential event to preserve some history
+      if (index % 5 === 0) return true;
+      
+      return false;
+    }).slice(-50); // Keep maximum 50 events total
+  }
   
   private performEmergencyCleanup(): void {
     try {
@@ -340,25 +486,31 @@ class CookieStorageAPI {
   // Match event tracking
   getCurrentMatchEvents(): MatchEvent[] {
     try {
-      const events = this.getCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS);
-      const cookieEvents = events ? JSON.parse(events) : [];
-      
-      // Check if localStorage backup has more complete data
-      try {
-        const backupEvents = localStorage.getItem('poolscorer_current_match_events_backup');
-        if (backupEvents) {
-          const parsedBackup = JSON.parse(backupEvents);
-          // Use backup if it has more events than cookie
-          if (parsedBackup.length > cookieEvents.length) {
-            console.log(`Using localStorage backup: ${parsedBackup.length} events vs ${cookieEvents.length} in cookie`);
-            return parsedBackup;
+      // Try chunked compressed retrieval first
+      const eventsJson = this.getCookieChunked(COOKIE_KEYS.CURRENT_MATCH_EVENTS);
+      if (eventsJson) {
+        const cookieEvents = JSON.parse(eventsJson);
+        console.log(`Retrieved ${cookieEvents.length} events from chunked storage`);
+        
+        // Check for localStorage backup with more complete data
+        try {
+          const backupEvents = localStorage.getItem('poolscorer_current_match_events_backup');
+          if (backupEvents) {
+            const parsedBackup = JSON.parse(backupEvents);
+            // Use backup if it has more events than cookie
+            if (parsedBackup.length > cookieEvents.length) {
+              console.log(`Using localStorage backup: ${parsedBackup.length} events vs ${cookieEvents.length} in chunked cookie`);
+              return parsedBackup;
+            }
           }
+        } catch (backupError) {
+          console.warn('Error reading localStorage backup:', backupError);
         }
-      } catch (backupError) {
-        console.warn('Error reading localStorage backup:', backupError);
+        
+        return cookieEvents;
       }
       
-      return cookieEvents;
+      return [];
     } catch (error) {
       console.error('Error getting match events from cookies:', error);
       return [];
@@ -369,32 +521,42 @@ class CookieStorageAPI {
     try {
       const events = this.getCurrentMatchEvents();
       events.push(event);
-      const eventsJson = JSON.stringify(events);
+      
+      // Smart event filtering to keep only essential data
+      const filteredEvents = this.filterEssentialEvents(events);
+      const eventsJson = JSON.stringify(filteredEvents);
       
       console.log(`Adding event: ${event.type} by player ${event.player}, ball ${event.ballNumber}`);
-      console.log(`Total events: ${events.length}, JSON size: ${eventsJson.length} chars`);
+      console.log(`Total events: ${events.length}, Filtered: ${filteredEvents.length}, JSON size: ${eventsJson.length} chars`);
       
-      // Use localStorage as backup when cookie gets too large
+      // Use chunked storage with compression for large data
       if (eventsJson.length > 3000) {
-        console.warn(`Events cookie too large (${eventsJson.length} chars), using localStorage backup`);
+        console.warn(`Events cookie too large (${eventsJson.length} chars), using chunked storage with compression`);
         
-        // Store in localStorage as backup
+        // Try chunked compressed storage
         try {
-          localStorage.setItem('poolscorer_current_match_events_backup', eventsJson);
-          console.log('Events stored in localStorage backup');
-        } catch (lsError) {
-          console.error('localStorage backup also failed:', lsError);
-        }
-        
-        // Keep only essential ball_scored events in cookies for scoresheet
-        const essentialEvents = events.filter(e => e.type === 'ball_scored');
-        const essentialJson = JSON.stringify(essentialEvents);
-        
-        if (essentialJson.length <= 3000) {
-          this.setCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS, essentialJson);
-          console.log(`Stored ${essentialEvents.length} essential events in cookie (${essentialJson.length} chars)`);
-        } else {
-          console.error('Even essential events too large for cookie storage');
+          this.setCookieChunked(COOKIE_KEYS.CURRENT_MATCH_EVENTS, eventsJson);
+          console.log('Events stored using chunked compression');
+        } catch (chunkError) {
+          console.error('Chunked storage failed:', chunkError);
+          
+          // Final fallback: localStorage backup with ultra-filtered events
+          try {
+            localStorage.setItem('poolscorer_current_match_events_backup', eventsJson);
+            
+            // Store only the most essential events in a single cookie
+            const ultraEssential = filteredEvents
+              .filter(e => e.type === 'ball_scored')
+              .slice(-15); // Last 15 ball scoring events only
+            
+            const ultraJson = JSON.stringify(ultraEssential);
+            if (ultraJson.length <= 3000) {
+              this.setCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS, ultraJson);
+              console.log(`Ultra-compressed: ${ultraEssential.length} events in cookie (${ultraJson.length} chars)`);
+            }
+          } catch (fallbackError) {
+            console.error('All storage methods failed:', fallbackError);
+          }
         }
       } else {
         this.setCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS, eventsJson);
@@ -411,7 +573,9 @@ class CookieStorageAPI {
   }
 
   clearCurrentMatchEvents(): void {
-    this.deleteCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS);
+    // Clear both chunked and regular cookies
+    this.deleteCookieChunked(COOKIE_KEYS.CURRENT_MATCH_EVENTS);
+    
     // Also clear localStorage backup
     try {
       localStorage.removeItem('poolscorer_current_match_events_backup');
