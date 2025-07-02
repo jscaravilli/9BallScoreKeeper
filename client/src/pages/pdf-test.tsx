@@ -36,7 +36,7 @@ export default function PDFTest() {
           <li>Render the scoresheet PNG to canvas</li>
           <li>Add 7 sample tally marks (5 single + 1 double for 9-ball)</li>
           <li>Convert to single-page letter-size PDF</li>
-          <li>Automatically download the PDF file</li>
+          <li>Open PDF in new window ready for manual printing (Ctrl+P)</li>
         </ul>
       </div>
     </div>

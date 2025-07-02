@@ -163,11 +163,11 @@ export async function printScoresheetImage(
     const timestamp = new Date().toISOString().slice(0, 16).replace(/[:-]/g, '');
     const filename = `APA-Scoresheet-${timestamp}.pdf`;
     
-    // Print the PDF instead of downloading
+    // Open PDF in new window ready for manual printing
     const pdfBlob = pdf.output('blob');
     const pdfUrl = URL.createObjectURL(pdfBlob);
     
-    // Open in new window for printing
+    // Open in new window ready for printing
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
@@ -183,22 +183,25 @@ export async function printScoresheetImage(
           </head>
           <body>
             <embed src="${pdfUrl}" type="application/pdf" />
+            <p style="position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 8px; border-radius: 4px; font-size: 12px;">
+              Press Ctrl+P to print this scoresheet
+            </p>
           </body>
         </html>
       `);
       printWindow.document.close();
       
+      // Wait for PDF to load, then focus window for user to print manually
       setTimeout(() => {
-        printWindow.print();
-        // Clean up URL after printing
+        printWindow.focus();
+        // Clean up URL after some time
         setTimeout(() => {
           URL.revokeObjectURL(pdfUrl);
-          printWindow.close();
-        }, 1000);
+        }, 60000); // Keep URL for 1 minute
       }, 1000);
     }
     
-    console.log(`PDF generated: ${filename}`);
+    console.log(`PDF ready for printing: ${filename}`);
     
   } catch (error) {
     console.error('PDF generation failed:', error);
@@ -348,11 +351,11 @@ async function printScoresheetImageWithFilename(
     // Add the image to PDF
     pdf.addImage(dataURL, 'PNG', xPos, yPos, imgWidth, imgHeight);
     
-    // Print the PDF instead of downloading
+    // Open PDF in new window ready for manual printing
     const pdfBlob = pdf.output('blob');
     const pdfUrl = URL.createObjectURL(pdfBlob);
     
-    // Open in new window for printing
+    // Open in new window ready for printing
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
@@ -368,22 +371,25 @@ async function printScoresheetImageWithFilename(
           </head>
           <body>
             <embed src="${pdfUrl}" type="application/pdf" />
+            <p style="position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 8px; border-radius: 4px; font-size: 12px;">
+              Press Ctrl+P to print this scoresheet
+            </p>
           </body>
         </html>
       `);
       printWindow.document.close();
       
+      // Wait for PDF to load, then focus window for user to print manually
       setTimeout(() => {
-        printWindow.print();
-        // Clean up URL after printing
+        printWindow.focus();
+        // Clean up URL after some time
         setTimeout(() => {
           URL.revokeObjectURL(pdfUrl);
-          printWindow.close();
-        }, 1000);
+        }, 60000); // Keep URL for 1 minute
       }, 1000);
     }
     
-    console.log(`PDF generated for printing: ${filename}`);
+    console.log(`PDF ready for printing: ${filename}`);
     
   } catch (error) {
     console.error('PDF generation failed:', error);
