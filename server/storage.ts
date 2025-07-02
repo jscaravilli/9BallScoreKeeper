@@ -49,6 +49,10 @@ export class MemStorage implements IStorage {
       player2SkillLevel: insertMatch.player2SkillLevel,
       player1Score: insertMatch.player1Score ?? 0,
       player2Score: insertMatch.player2Score ?? 0,
+      player1TimeoutsUsed: insertMatch.player1TimeoutsUsed ?? 0,
+      player2TimeoutsUsed: insertMatch.player2TimeoutsUsed ?? 0,
+      player1SafetiesUsed: insertMatch.player1SafetiesUsed ?? 0,
+      player2SafetiesUsed: insertMatch.player2SafetiesUsed ?? 0,
       currentPlayer: insertMatch.currentPlayer ?? 1,
       currentGame: insertMatch.currentGame ?? 1,
       ballStates: insertMatch.ballStates ?? [],
@@ -204,13 +208,15 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Use database storage if DATABASE_URL is available, otherwise use memory storage
-export const storage = process.env.DATABASE_URL ? new DatabaseStorage() : new MemStorage();
+// Use memory storage for development, database storage for production
+export const storage = process.env.NODE_ENV === 'development' ? new MemStorage() : new DatabaseStorage();
 
 // Log which storage is being used
-console.log(`Using ${process.env.DATABASE_URL ? 'Database' : 'Memory'} storage`);
-if (process.env.DATABASE_URL) {
-  console.log('DATABASE_URL is set, using PostgreSQL');
+console.log(`Using ${process.env.NODE_ENV === 'development' ? 'Memory' : 'Database'} storage`);
+if (process.env.NODE_ENV === 'development') {
+  console.log('Development mode: using in-memory storage');
+} else if (process.env.DATABASE_URL) {
+  console.log('Production mode: DATABASE_URL is set, using PostgreSQL');
   // Test database connection
   try {
     if (storage instanceof DatabaseStorage) {
@@ -220,5 +226,5 @@ if (process.env.DATABASE_URL) {
     console.error('Database connection test failed:', error);
   }
 } else {
-  console.log('No DATABASE_URL, using in-memory storage');
+  console.log('Production mode: No DATABASE_URL, falling back to in-memory storage');
 }

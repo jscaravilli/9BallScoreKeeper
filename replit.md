@@ -234,6 +234,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - January 1, 2025: Fixed match history white screen issue with proper error handling for missing event data
 - January 1, 2025: Undo Action button repositioned between Safety and New Match buttons with consistent sizing
 - January 1, 2025: Enhanced safety button with undo functionality - added minus button to decrement safety count matching timeout system design
+- January 1, 2025: Updated development environment to use memory storage while keeping production database unchanged
 
 ## User Preferences
 
