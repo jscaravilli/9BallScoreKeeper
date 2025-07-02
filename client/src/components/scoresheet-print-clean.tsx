@@ -48,33 +48,45 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
   // Render player 1 score marks using your exact coordinates
   function renderPlayer1Marks() {
     const marks: JSX.Element[] = [];
-    const totalScore = player1RunningTotals[player1RunningTotals.length - 1] || 0;
-    const slashDirection = getSlashDirection(currentGameNumber);
+    
+    // Track which game each scored ball belongs to
+    let currentGame = 1;
+    let ballsInCurrentGame = 0;
     
     // Draw slash marks for each scored point using your provided coordinates
-    for (let score = 1; score <= Math.min(totalScore, 75); score++) {
-      const coordIndex = score - 1; // Array is 0-indexed, scores are 1-indexed
-      if (coordIndex < PLAYER1_COORDINATES.length) {
-        const [x, y] = PLAYER1_COORDINATES[coordIndex];
+    match.events.forEach((event, eventIndex) => {
+      if (event.type === 'ball_scored' && event.player === 1) {
+        ballsInCurrentGame++;
+        const slashDirection = getSlashDirection(currentGame);
+        const coordIndex = ballsInCurrentGame - 1;
         
-        marks.push(
-          <div
-            key={`p1-mark-${score}`}
-            className="absolute text-center font-bold"
-            style={{
-              left: `${x}px`,
-              top: `${y}px`,
-              fontSize: '42px',
-              color: 'black',
-              transform: 'translate(-50%, -50%)',
-              pointerEvents: 'none'
-            }}
-          >
-            {slashDirection}
-          </div>
-        );
+        if (coordIndex < PLAYER1_COORDINATES.length) {
+          const [x, y] = PLAYER1_COORDINATES[coordIndex];
+          
+          marks.push(
+            <div
+              key={`p1-mark-${eventIndex}`}
+              className="absolute text-center font-bold"
+              style={{
+                left: `${x}px`,
+                top: `${y}px`,
+                fontSize: '44.1px',
+                color: 'black',
+                transform: 'translate(-50%, -50%)',
+                pointerEvents: 'none'
+              }}
+            >
+              {slashDirection}
+            </div>
+          );
+        }
       }
-    }
+      
+      // Check if this event signals end of game (new game started)
+      if (event.type === 'match_completed' || (event.details && event.details.includes('Game'))) {
+        currentGame++;
+      }
+    });
     
     // Circle the target score if it's an SL target position
     if (SL_TARGET_POSITIONS.includes(player1Target)) {
@@ -89,8 +101,8 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
             style={{
               left: `${x}px`,
               top: `${y}px`,
-              width: '60px',
-              height: '60px',
+              width: '63px',
+              height: '63px',
               border: '6px solid black',
               borderRadius: '50%',
               backgroundColor: 'transparent',
