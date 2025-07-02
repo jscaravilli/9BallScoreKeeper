@@ -223,6 +223,20 @@ export async function printMatchScoresheet(match: any): Promise<void> {
   }
   
   console.log(`Generating PDF for match with ${events.length} events`);
+  console.log('Raw events data:', events);
+
+  // Debug: Show all ball_scored and ball_dead events
+  const scoredEvents = events.filter((e: any) => e.type === 'ball_scored');
+  const deadEvents = events.filter((e: any) => e.type === 'ball_dead');
+  console.log(`Found ${scoredEvents.length} ball_scored events and ${deadEvents.length} ball_dead events`);
+  
+  scoredEvents.forEach((e: any, i: number) => {
+    console.log(`Scored ${i+1}: Ball ${e.ballNumber} by Player ${e.player} at ${e.timestamp}`);
+  });
+  
+  deadEvents.forEach((e: any, i: number) => {
+    console.log(`Dead ${i+1}: Ball ${e.ballNumber} by Player ${e.player} at ${e.timestamp}`);
+  });
 
   try {
     // Player 1 coordinates array (lag winner)

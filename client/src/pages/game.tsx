@@ -1596,6 +1596,34 @@ export default function Game() {
               <button
                 onClick={() => {
                   setShowMenu(false);
+                  if (confirm('Clear all cached match data? This will fix tally mark issues but remove match history. This cannot be undone.')) {
+                    // Clear all storage
+                    cookieStorageAPI.clearHistory();
+                    
+                    // Clear cookies manually
+                    document.cookie.split(";").forEach(function(c) { 
+                      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                    });
+                    
+                    // Clear localStorage
+                    const keysToRemove = Object.keys(localStorage).filter(key => 
+                      key.includes('match') || key.includes('currentMatch') || key.includes('events')
+                    );
+                    keysToRemove.forEach(key => localStorage.removeItem(key));
+                    
+                    // Force page reload to clear all cached data
+                    window.location.reload();
+                  }
+                }}
+                className="w-full flex items-center gap-3 p-3 text-left hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <Trash2 className="h-5 w-5 text-red-600" />
+                <span className="font-medium text-red-600">Clear Cache</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowMenu(false);
                   setShowAbout(true);
                 }}
                 className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
