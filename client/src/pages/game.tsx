@@ -11,7 +11,7 @@ import MatchWinModal from "@/components/match-win-modal";
 import BallRack from "@/components/ball-rack";
 import PlayerScores from "@/components/player-scores";
 import TimeoutModal from "@/components/timeout-modal";
-import ScoresheetPrint from "@/components/scoresheet-print";
+import ScoresheetPrint from "@/components/scoresheet-print-new";
 import { getPointsToWin } from "@/lib/apa-handicaps";
 import { getRemainingTimeouts } from "@/lib/timeout-utils";
 import { cookieStorageAPI } from "@/lib/cookieStorage";

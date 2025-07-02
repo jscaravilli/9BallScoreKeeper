@@ -1,6 +1,6 @@
 import { Match, MatchEvent } from "@shared/schema";
 import { getPointsToWin } from "@/lib/apa-handicaps";
-import scoresheetPng from "@assets/apa_9ballscoresheet-1_1751404203390.png";
+import scoresheetPng from "@assets/9B Blank-0_1751447644974.png";
 
 interface ScoresheetPrintProps {
   match: Match & { completedAt: string; events: MatchEvent[] };
