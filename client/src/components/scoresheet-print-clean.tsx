@@ -42,6 +42,23 @@ function getSlashDirection(gameNumber: number): string {
   return gameNumber % 2 === 1 ? '/' : '\\';
 }
 
+// Create a game tracking function that maps each event to its game number
+function buildGameMap(events: MatchEvent[]): Map<number, number> {
+  const gameMap = new Map<number, number>();
+  let currentGame = 1;
+  
+  events.forEach((event, index) => {
+    gameMap.set(index, currentGame);
+    
+    // Advance game when 9-ball is scored by either player
+    if (event.type === 'ball_scored' && event.ballNumber === 9) {
+      currentGame++;
+    }
+  });
+  
+  return gameMap;
+}
+
 export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
   if (!match || !match.events || !match.completedAt) {
     return null;
@@ -53,6 +70,12 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
 
   // Calculate running totals for player 1
   const player1RunningTotals = calculateRunningTotals(match.events, 1);
+  
+  // Debug: Log the total points for Player 1
+  const player1FinalScore = player1RunningTotals.length > 0 ? player1RunningTotals[player1RunningTotals.length - 1] : 0;
+  const player1Events = match.events.filter(e => e.type === 'ball_scored' && e.player === 1);
+  console.log(`DEBUG: Player 1 final score: ${player1FinalScore}, Target: ${player1Target}`);
+  console.log(`DEBUG: Player 1 scored ${player1Events.length} balls:`, player1Events.map(e => e.ballNumber));
 
   // Get match date and times
   const matchDate = new Date(match.completedAt);
@@ -64,14 +87,13 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
   // Render player 1 score marks using your exact coordinates
   function renderPlayer1Marks() {
     const marks: JSX.Element[] = [];
-    
-    // Track game numbers by counting 9-ball scoring events
-    let currentGame = 1;
+    const gameMap = buildGameMap(match.events);
     let scorePosition = 0;
     
     // Draw slash marks for each scored point using your provided coordinates
     match.events.forEach((event, eventIndex) => {
       if (event.type === 'ball_scored' && event.player === 1) {
+        const currentGame = gameMap.get(eventIndex) || 1;
         const slashDirection = getSlashDirection(currentGame);
         
         // 9-ball is worth 2 points, so it gets 2 tally marks
@@ -127,7 +149,6 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
               </div>
             );
           }
-          currentGame++;
         }
       }
     });
@@ -164,14 +185,13 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
   // Render player 2 score marks using exact coordinates
   function renderPlayer2Marks() {
     const marks: JSX.Element[] = [];
-    
-    // Track game numbers by counting 9-ball scoring events
-    let currentGame = 1;
+    const gameMap = buildGameMap(match.events);
     let scorePosition = 0;
     
     // Draw slash marks for each scored point using Player 2 coordinates
     match.events.forEach((event, eventIndex) => {
       if (event.type === 'ball_scored' && event.player === 2) {
+        const currentGame = gameMap.get(eventIndex) || 1;
         const slashDirection = getSlashDirection(currentGame);
         
         // 9-ball is worth 2 points, so it gets 2 tally marks
@@ -203,7 +223,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
           }
         }
         
-        // If this was a 9-ball, add vertical line after this game ends
+        // If this was a 9-ball scored by player 2, add vertical line after this game ends
         if (event.ballNumber === 9) {
           // Place vertical bar after the last tally mark of this game
           const lastCoordIndex = scorePosition - 1;
@@ -227,7 +247,6 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
               </div>
             );
           }
-          currentGame++;
         }
       }
     });
@@ -287,18 +306,20 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     const circles: Array<{ x: number; y: number }> = [];
     const verticalLines: Array<{ x: number; y: number }> = [];
 
-    // Process Player 1 events
-    let currentGame = 1;
-    let scorePosition = 0;
+    const gameMap = buildGameMap(match.events);
 
-    match.events.forEach(event => {
+    // Process Player 1 events
+    let player1ScorePosition = 0;
+
+    match.events.forEach((event, eventIndex) => {
       if (event.type === 'ball_scored' && event.player === 1) {
+        const currentGame = gameMap.get(eventIndex) || 1;
         const slashDirection = getSlashDirection(currentGame);
         const pointsWorth = event.ballNumber === 9 ? 2 : 1;
         
         for (let i = 0; i < pointsWorth; i++) {
-          const coordIndex = scorePosition;
-          scorePosition++;
+          const coordIndex = player1ScorePosition;
+          player1ScorePosition++;
           
           if (coordIndex < PLAYER1_COORDINATES.length) {
             const [x, y] = PLAYER1_COORDINATES[coordIndex];
@@ -308,28 +329,27 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
         
         // Add vertical separator after 9-ball
         if (event.ballNumber === 9) {
-          const lastCoordIndex = scorePosition - 1;
+          const lastCoordIndex = player1ScorePosition - 1;
           if (lastCoordIndex < PLAYER1_COORDINATES.length) {
             const [x, y] = PLAYER1_COORDINATES[lastCoordIndex];
             verticalLines.push({ x: x + 25 + 3, y: y });
           }
-          currentGame++;
         }
       }
     });
 
     // Process Player 2 events
-    currentGame = 1;
-    scorePosition = 0;
+    let player2ScorePosition = 0;
 
-    match.events.forEach(event => {
+    match.events.forEach((event, eventIndex) => {
       if (event.type === 'ball_scored' && event.player === 2) {
+        const currentGame = gameMap.get(eventIndex) || 1;
         const slashDirection = getSlashDirection(currentGame);
         const pointsWorth = event.ballNumber === 9 ? 2 : 1;
         
         for (let i = 0; i < pointsWorth; i++) {
-          const coordIndex = scorePosition;
-          scorePosition++;
+          const coordIndex = player2ScorePosition;
+          player2ScorePosition++;
           
           if (coordIndex < PLAYER2_COORDINATES.length) {
             const [x, y] = PLAYER2_COORDINATES[coordIndex];
@@ -339,12 +359,11 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
         
         // Add vertical separator after 9-ball
         if (event.ballNumber === 9) {
-          const lastCoordIndex = scorePosition - 1;
+          const lastCoordIndex = player2ScorePosition - 1;
           if (lastCoordIndex < PLAYER2_COORDINATES.length) {
             const [x, y] = PLAYER2_COORDINATES[lastCoordIndex];
             verticalLines.push({ x: x + 25 + 3, y: y });
           }
-          currentGame++;
         }
       }
     });
