@@ -243,6 +243,15 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Applied fixes to all ball transitions: scored → dead → active
   - Fixed dead ball visual indicators (red X) and point deductions working properly
   - NOTE: TypeScript type conflicts between string IDs (new storage) and legacy number ID references causing server instability
+- July 2, 2025: FIXED re-rack functionality after dropping the nine ball:
+  - Added missing setCurrentMatch() call to sync local state with storage updates immediately
+  - Enhanced re-rack to reset timeouts and safeties for new games
+  - Game number increments correctly and all ball states reset to active
+- July 2, 2025: FIXED scoresheet tally mark issues:
+  - Implemented proper event filtering to exclude dead balls from tally marks
+  - Dead balls no longer generate tally marks on scoresheet
+  - Fixed excessive tally mark counts by filtering out invalid ball_scored events
+  - Added validation to ensure only legitimate scores appear on APA scoresheet
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
 - January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
 - January 2, 2025: RESOLVED "431 Request Header Fields Too Large" service worker error:

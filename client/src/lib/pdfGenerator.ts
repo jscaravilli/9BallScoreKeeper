@@ -266,7 +266,28 @@ export async function printMatchScoresheet(match: any): Promise<void> {
 
     console.log('Processing match events for PDF:', events.length, 'events');
 
-    events.forEach((event: any, eventIndex: number) => {
+    // Filter out dead balls - only process balls that were scored AND NOT later marked as dead
+    const validScoredEvents = events.filter((event: any, index: number) => {
+      if (event.type !== 'ball_scored') return true; // Keep non-scoring events
+      
+      // Check if this ball was later marked as dead by looking at subsequent events
+      const ballNumber = event.ballNumber;
+      const player = event.player;
+      
+      const laterDeadEvent = events.slice(index + 1).find((laterEvent: any) => 
+        laterEvent.type === 'ball_dead' && 
+        laterEvent.ballNumber === ballNumber && 
+        laterEvent.player === player
+      );
+      
+      const isValidScore = !laterDeadEvent;
+      console.log(`Ball ${ballNumber} by player ${player}: ${isValidScore ? 'VALID' : 'DEAD - FILTERED OUT'}`);
+      return isValidScore;
+    });
+
+    console.log(`Filtered events: ${events.length} total -> ${validScoredEvents.length} valid events`);
+
+    validScoredEvents.forEach((event: any, eventIndex: number) => {
       if (event.type === 'ball_scored') {
         const player = event.player;
         const isPlayer1 = player === 1;
