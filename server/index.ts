@@ -83,9 +83,10 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Serve the app on port 8080 to avoid conflicts
+  // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
-  const port = Number(process.env.PORT) || 8080;
+  // It is the only port that is not firewalled and works with Replit preview.
+  const port = Number(process.env.PORT) || 5000;
   server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
     console.log(`Server accessible at http://0.0.0.0:${port}`);
