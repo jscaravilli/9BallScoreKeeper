@@ -122,112 +122,74 @@ export default function TallyView() {
           </CardContent>
         </Card>
 
-        {/* Tally Tables */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Player 1 Tallies */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-blue-700">{currentMatch.player1Name} - Tallies</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2">Game</th>
-                      <th className="text-left p-2">Ball</th>
-                      <th className="text-left p-2">Points</th>
-                      <th className="text-left p-2">Time</th>
+        {/* Combined Tally Table for Easy Copy/Paste */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-white">Match Tally Data - Copy & Paste Ready</CardTitle>
+          </CardHeader>
+          <CardContent className="bg-white">
+            <div className="overflow-x-auto">
+              <table style={{ 
+                borderCollapse: 'collapse', 
+                width: '100%', 
+                fontSize: '14px',
+                fontFamily: 'monospace'
+              }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f3f4f6' }}>
+                    <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left' }}>Player</th>
+                    <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left' }}>Game</th>
+                    <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left' }}>Ball</th>
+                    <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left' }}>Points</th>
+                    <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left' }}>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {validTallies.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'center', color: '#6b7280' }}>
+                        No valid tallies
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {player1Tallies.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="text-center p-4 text-gray-500">No valid tallies</td>
-                      </tr>
-                    ) : (
-                      player1Tallies.map((tally, index) => (
-                        <tr key={index} className="border-b">
-                          <td className="p-2">{tally.gameNumber}</td>
-                          <td className="p-2">
-                            {tally.ballNumber === 9 ? (
-                              <span className="font-bold text-yellow-600">9-ball</span>
-                            ) : (
-                              tally.ballNumber
-                            )}
+                  ) : (
+                    validTallies
+                      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+                      .map((tally, index) => (
+                        <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
+                          <td style={{ border: '1px solid #d1d5db', padding: '8px' }}>{tally.playerName}</td>
+                          <td style={{ border: '1px solid #d1d5db', padding: '8px' }}>{tally.gameNumber}</td>
+                          <td style={{ border: '1px solid #d1d5db', padding: '8px' }}>
+                            {tally.ballNumber === 9 ? '9-ball' : tally.ballNumber.toString()}
                           </td>
-                          <td className="p-2">
-                            {tally.pointsAwarded === 2 ? (
-                              <span className="font-bold">2</span>
-                            ) : (
-                              1
-                            )}
+                          <td style={{ border: '1px solid #d1d5db', padding: '8px' }}>{tally.pointsAwarded}</td>
+                          <td style={{ border: '1px solid #d1d5db', padding: '8px' }}>
+                            {new Date(tally.timestamp).toLocaleTimeString()}
                           </td>
-                          <td className="p-2">{new Date(tally.timestamp).toLocaleTimeString()}</td>
                         </tr>
                       ))
-                    )}
-                  </tbody>
-                </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Summary */}
+            <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#f3f4f6', borderRadius: '6px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', fontFamily: 'monospace' }}>
+                <div>
+                  <strong>{currentMatch.player1Name} Total:</strong> {totalPlayer1Points} points ({player1Tallies.length} tallies)
+                </div>
+                <div>
+                  <strong>{currentMatch.player2Name} Total:</strong> {totalPlayer2Points} points ({player2Tallies.length} tallies)
+                </div>
               </div>
-              <div className="mt-4 pt-2 border-t font-bold">
-                Total: {player1Tallies.length} tallies, {totalPlayer1Points} points
-              </div>
-            </CardContent>
-          </Card>
+            </div>
 
-          {/* Player 2 Tallies */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-red-700">{currentMatch.player2Name} - Tallies</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2">Game</th>
-                      <th className="text-left p-2">Ball</th>
-                      <th className="text-left p-2">Points</th>
-                      <th className="text-left p-2">Time</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {player2Tallies.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="text-center p-4 text-gray-500">No valid tallies</td>
-                      </tr>
-                    ) : (
-                      player2Tallies.map((tally, index) => (
-                        <tr key={index} className="border-b">
-                          <td className="p-2">{tally.gameNumber}</td>
-                          <td className="p-2">
-                            {tally.ballNumber === 9 ? (
-                              <span className="font-bold text-yellow-600">9-ball</span>
-                            ) : (
-                              tally.ballNumber
-                            )}
-                          </td>
-                          <td className="p-2">
-                            {tally.pointsAwarded === 2 ? (
-                              <span className="font-bold">2</span>
-                            ) : (
-                              1
-                            )}
-                          </td>
-                          <td className="p-2">{new Date(tally.timestamp).toLocaleTimeString()}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-4 pt-2 border-t font-bold">
-                Total: {player2Tallies.length} tallies, {totalPlayer2Points} points
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            {/* Copy Instructions */}
+            <div style={{ marginTop: '12px', padding: '8px', fontSize: '12px', color: '#6b7280', backgroundColor: '#fef3c7', borderRadius: '4px' }}>
+              💡 <strong>Tip:</strong> Select the table above and copy (Ctrl+C / Cmd+C) to paste into spreadsheets or documents
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Summary */}
         <Card className="mt-6">
