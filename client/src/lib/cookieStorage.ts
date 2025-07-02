@@ -422,6 +422,9 @@ class CookieStorageAPI {
     
     try {
       const events = this.getCurrentMatchEvents();
+      console.log('DEBUG: Events retrieved for history:', events);
+      console.log('DEBUG: Number of events:', events.length);
+      console.log('DEBUG: Ball scored events:', events.filter(e => e.type === 'ball_scored'));
       
       // Create unique history ID (timestamp + match ID + random)
       const uniqueHistoryId = `${Date.now()}_${match.id}_${Math.random().toString(36).substr(2, 9)}`;

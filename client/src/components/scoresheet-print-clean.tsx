@@ -70,6 +70,17 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
   console.log('Scoresheet Debug - Player 1 Events:', match.events.filter(e => e.type === 'ball_scored' && e.player === 1));
   console.log('Scoresheet Debug - Player 2 Events:', match.events.filter(e => e.type === 'ball_scored' && e.player === 2));
   console.log('Scoresheet Debug - 9-ball Events:', match.events.filter(e => e.type === 'ball_scored' && e.ballNumber === 9));
+  
+  // Count expected tallies for each player
+  let p1TallyCount = 0, p2TallyCount = 0;
+  match.events.forEach(event => {
+    if (event.type === 'ball_scored') {
+      const pointsWorth = event.ballNumber === 9 ? 2 : 1;
+      if (event.player === 1) p1TallyCount += pointsWorth;
+      if (event.player === 2) p2TallyCount += pointsWorth;
+    }
+  });
+  console.log(`Expected tallies - Player 1: ${p1TallyCount}, Player 2: ${p2TallyCount}`);
 
   // Calculate target points for both players
   const player1Target = getPointsToWin(match.player1SkillLevel as any);
