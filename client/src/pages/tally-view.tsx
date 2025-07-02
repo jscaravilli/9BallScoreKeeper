@@ -69,19 +69,7 @@ export default function TallyView() {
   // Get match events and filter for scoring events
   const events = adaptiveStorageAPI.getCurrentMatchEvents() || [];
   
-  // Track final state of each ball to determine valid tallies
-  const ballStates = new Map();
-  events.forEach((event: any) => {
-    if (event.type === 'ball_scored' || event.type === 'ball_dead') {
-      const key = `${event.ballNumber}-${event.player}`;
-      if (!ballStates.has(key)) {
-        ballStates.set(key, []);
-      }
-      ballStates.get(key).push(event);
-    }
-  });
-
-  // Build tally data - only include balls that end up scored (not dead)
+  // Build tally data by processing events and extracting game information
   const tallyData: Array<{
     playerName: string;
     player: number;
@@ -92,29 +80,45 @@ export default function TallyView() {
     isValid: boolean;
   }> = [];
 
-  let currentGame = 1;
+  const processedEvents = new Set<string>(); // Track unique events to prevent duplicates
   
+  // Process ball_scored events directly, using game info from event details
   events.forEach((event: any) => {
     if (event.type === 'ball_scored') {
-      const key = `${event.ballNumber}-${event.player}`;
-      const ballEvents = ballStates.get(key) || [];
-      const lastEvent = ballEvents[ballEvents.length - 1];
-      const isValid = lastEvent && lastEvent.type === 'ball_scored';
+      // Extract game number from event details if available
+      let gameNumber = 1;
+      if (event.details && event.details.includes('Game ')) {
+        const gameMatch = event.details.match(/Game (\d+):/);
+        if (gameMatch) {
+          gameNumber = parseInt(gameMatch[1]);
+        }
+      }
       
+      // Create unique event ID to prevent duplicates
+      const eventId = `${event.player}-${event.ballNumber}-${gameNumber}`;
+      
+      // Skip if we've already processed this ball for this player in this game
+      if (processedEvents.has(eventId)) {
+        console.log(`Skipping duplicate tally: Player ${event.player}, Ball ${event.ballNumber}, Game ${gameNumber}`);
+        return;
+      }
+      processedEvents.add(eventId);
+      
+      // Only include valid scoring events (not balls that were later marked dead)
       const pointsAwarded = event.ballNumber === 9 ? 2 : 1;
       const playerName = event.player === 1 ? currentMatch.player1Name : currentMatch.player2Name;
       
       tallyData.push({
         playerName,
         player: event.player,
-        gameNumber: currentGame,
+        gameNumber: gameNumber,
         ballNumber: event.ballNumber,
         pointsAwarded,
         timestamp: event.timestamp,
-        isValid
+        isValid: true
       });
-    } else if (event.type === 'turn_ended' && event.details?.includes('won')) {
-      currentGame++;
+      
+      console.log(`Added tally: ${playerName} (Player ${event.player}), Ball ${event.ballNumber}, Game ${gameNumber}`);
     }
   });
 

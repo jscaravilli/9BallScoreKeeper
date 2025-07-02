@@ -588,18 +588,34 @@ export default function Game() {
         ? currentMatch.player1Score + points
         : currentMatch.player2Score + points;
 
-      // Track ball scoring event
-      const ballScoredEvent: MatchEvent = {
-        type: 'ball_scored',
-        timestamp: new Date().toISOString(),
-        player: currentMatch.currentPlayer as 1 | 2,
-        playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
-        ballNumber: ballNumber,
-        pointsAwarded: points,
-        newScore: newScore,
-        details: `${ballNumber}-Ball scored for ${points} point${points > 1 ? 's' : ''}`
-      };
-      cookieStorageAPI.addMatchEvent(ballScoredEvent);
+      // Track ball scoring event - but only if this ball hasn't already been logged for this game
+      const currentEvents = cookieStorageAPI.getCurrentMatchEvents();
+      const currentGame = currentMatch.currentGame;
+      
+      // Check if this exact ball has already been scored in this game
+      const alreadyLogged = currentEvents.some(event => 
+        event.type === 'ball_scored' && 
+        event.ballNumber === ballNumber && 
+        event.player === currentMatch.currentPlayer &&
+        event.details?.includes(`Game ${currentGame}`) // We'll add game info to prevent cross-game duplicates
+      );
+      
+      if (!alreadyLogged) {
+        const ballScoredEvent: MatchEvent = {
+          type: 'ball_scored',
+          timestamp: new Date().toISOString(),
+          player: currentMatch.currentPlayer as 1 | 2,
+          playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+          ballNumber: ballNumber,
+          pointsAwarded: points,
+          newScore: newScore,
+          details: `Game ${currentGame}: ${ballNumber}-Ball scored for ${points} point${points > 1 ? 's' : ''}`
+        };
+        cookieStorageAPI.addMatchEvent(ballScoredEvent);
+        console.log(`Logged ball_scored event: Player ${currentMatch.currentPlayer}, Ball ${ballNumber}, Game ${currentGame}`);
+      } else {
+        console.log(`Skipped duplicate ball_scored event: Player ${currentMatch.currentPlayer}, Ball ${ballNumber}, Game ${currentGame}`);
+      }
 
       // Check if this scoring wins the match (reaches or exceeds handicap)
       const targetForCurrentPlayer = currentMatch.currentPlayer === 1 ? player1Target : player2Target;
