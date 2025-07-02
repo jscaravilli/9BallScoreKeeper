@@ -264,13 +264,15 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Corrected target circle positioning with proper 0-indexed coordinate conversion for both players
   - FIXED vertical bar placement for mixed game winners - both players now get vertical bars when ANY player wins a game
   - Implemented centralized game ending detection to ensure consistent bar placement regardless of who wins each game
-- January 2, 2025: RESOLVED scoresheet tally rendering issues:
+- January 2, 2025: RESOLVED scoresheet tally rendering and print functionality issues:
   - Fixed incorrect APA handicap values in PDF generator (SL5 was using 35 instead of 38)
   - IDENTIFIED root cause: Cookie storage system hitting browser size limits, truncating match events
   - Cookie analysis revealed events arrays cut off after ~15-20 events, losing later game data
   - IMPLEMENTED hybrid storage solution: Essential ball_scored events in cookies, complete backup in localStorage
   - Added automatic fallback system that uses localStorage when cookie data is incomplete
   - Enhanced event storage with size monitoring and verification checks
+  - FIXED print button functionality by updating PDF generator to handle hybrid storage data
+  - Corrected target circle positioning arrays in PDF generator to match scoresheet display
 - January 2, 2025: Implemented automated canvas-based PDF generation system:
   - Replaced HTML-based printing with direct PNG+markup rendering using HTML5 Canvas
   - Added jsPDF library for automatic single-page PDF creation and download

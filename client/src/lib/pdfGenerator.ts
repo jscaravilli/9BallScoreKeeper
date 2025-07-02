@@ -210,10 +210,19 @@ export async function printScoresheetImage(
 
 // Generate PDF directly from match data (for match history printing)
 export async function printMatchScoresheet(match: any): Promise<void> {
-  if (!match || !match.events || !match.completedAt) {
+  if (!match || !match.completedAt) {
     console.error('Invalid match data for PDF generation');
     return;
   }
+  
+  // Ensure we have complete event data - check both sources
+  let events = match.events || [];
+  if (events.length === 0) {
+    console.error('No events found in match data for PDF generation');
+    return;
+  }
+  
+  console.log(`Generating PDF for match with ${events.length} events`);
 
   try {
     // Player 1 coordinates array (lag winner)
@@ -255,9 +264,9 @@ export async function printMatchScoresheet(match: any): Promise<void> {
       return gameNum % 2 === 1 ? '/' : '\\';
     };
 
-    console.log('Processing match events for PDF:', match.events.length, 'events');
+    console.log('Processing match events for PDF:', events.length, 'events');
 
-    match.events.forEach((event: any, eventIndex: number) => {
+    events.forEach((event: any, eventIndex: number) => {
       if (event.type === 'ball_scored') {
         const player = event.player;
         const isPlayer1 = player === 1;
@@ -347,7 +356,7 @@ export async function printMatchScoresheet(match: any): Promise<void> {
     console.log(`Final tally count: ${tallies.length}, vertical lines: ${verticalLines.length}, circles: ${circles.length}`);
 
     // Add target circles for both players (skill level positions)
-    const SL_TARGET_POSITIONS = [1, 5, 10, 14, 19, 25, 31, 35, 38, 46, 50, 55, 60, 65, 70, 75];
+    const SL_TARGET_POSITIONS = [14, 19, 25, 31, 38, 46, 55, 65, 75];
     
     // Player 1 target circle
     const player1Target = getPointsToWin(match.player1SkillLevel);
