@@ -102,8 +102,9 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
                 style={{
                   left: `${x + 25}px`,
                   top: `${y}px`,
-                  fontSize: '48.5px',
+                  fontSize: '53.4px',
                   color: 'black',
+                  fontWeight: '900',
                   transform: 'translate(-50%, -50%)',
                   pointerEvents: 'none'
                 }}
