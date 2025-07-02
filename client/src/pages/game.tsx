@@ -46,13 +46,57 @@ function HistoryDisplay({
       forceRender(Date.now());
     }, []);
   
+  const handleRecoveryAttempt = () => {
+    console.log('Manual recovery attempt triggered');
+    const localHistory = localStorage.getItem('poolscorer_match_history');
+    
+    if (localHistory) {
+      try {
+        const parsed = JSON.parse(localHistory);
+        console.log(`Found ${parsed.length} matches in localStorage, attempting recovery...`);
+        
+        // Trigger migration
+        cookieStorageAPI.migrateFromLocalStorage();
+        
+        // Force re-render
+        forceRender(Date.now());
+        
+        setTimeout(() => {
+          forceRender(Date.now() + 1);
+        }, 500);
+        
+      } catch (error) {
+        console.error('Recovery attempt failed:', error);
+      }
+    } else {
+      console.log('No localStorage history found for recovery');
+    }
+  };
+
   if (history.length === 0) {
+    const localHistory = localStorage.getItem('poolscorer_match_history');
+    const hasLocalHistory = localHistory && JSON.parse(localHistory).length > 0;
+    
     return (
       <div className="overflow-y-auto max-h-96">
         <div className="text-center py-8 text-gray-500">
           <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
           <p>No completed matches yet.</p>
           <p className="text-sm">Win your first match to see it here!</p>
+          
+          {hasLocalHistory && (
+            <div className="mt-4">
+              <Button 
+                onClick={handleRecoveryAttempt}
+                variant="outline"
+                size="sm"
+                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
+                Recover Lost History
+              </Button>
+              <p className="text-xs text-gray-400 mt-1">Found backup data in storage</p>
+            </div>
+          )}
         </div>
       </div>
     );

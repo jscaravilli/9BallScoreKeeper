@@ -85,6 +85,39 @@ const emergencyCleanup = () => {
 // Emergency cleanup before anything else
 emergencyCleanup();
 
+// Force match history recovery check
+console.log('=== MATCH HISTORY RECOVERY CHECK ===');
+const checkHistory = () => {
+  const indexCookie = document.cookie.split(';').find(c => c.trim().startsWith('match_history_index='));
+  const localHistory = localStorage.getItem('poolscorer_match_history');
+  
+  console.log('Index cookie exists:', !!indexCookie);
+  console.log('localStorage history exists:', !!localHistory);
+  
+  if (localHistory) {
+    try {
+      const parsed = JSON.parse(localHistory);
+      console.log(`localStorage has ${parsed.length} matches`);
+      
+      // If no index cookie but localStorage has data, trigger recovery
+      if (!indexCookie && parsed.length > 0) {
+        console.log('TRIGGERING EMERGENCY RECOVERY...');
+        // Force re-import
+        import('./lib/cookieStorage').then(module => {
+          module.cookieStorageAPI.migrateFromLocalStorage();
+          console.log('Recovery migration triggered');
+        });
+      }
+    } catch (e) {
+      console.error('Error parsing localStorage history:', e);
+    }
+  }
+};
+
+// Check immediately and after a short delay
+checkHistory();
+setTimeout(checkHistory, 1000);
+
 // Check for updates before rendering
 checkForUpdates();
 
