@@ -478,8 +478,8 @@ async function printScoresheetImageWithFilename(
   }
 }
 
-// Helper function to calculate points needed to win (needs to be imported or defined)
+// Helper function to calculate points needed to win - using correct APA handicap values
 function getPointsToWin(skillLevel: number): number {
-  const targets = [14, 19, 25, 31, 35, 38, 46, 50, 55];
-  return targets[skillLevel - 1] || 55;
+  const targets = [14, 19, 25, 31, 38, 46, 55, 65, 75];
+  return targets[skillLevel - 1] || 75;
 }
