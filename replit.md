@@ -276,6 +276,10 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Real-time truncation using .slice(0, 20) in onChange handlers prevents typing beyond limit
   - State initialization and save function also apply 20-character truncation for data consistency
   - Multi-layer validation ensures names never exceed 20 characters in UI or storage
+- July 2, 2025: ADDED "LAG" tag to Player 1 score display:
+  - Small green tag (light green background, darker green text) appears next to Player 1's name
+  - Indicates Player 1 won the lag (break) in pool terminology
+  - Uses flexbox layout to maintain centered alignment without disrupting existing score card design
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
 - January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
 - January 2, 2025: RESOLVED "431 Request Header Fields Too Large" service worker error:

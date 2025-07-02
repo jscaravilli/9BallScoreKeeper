@@ -28,7 +28,12 @@ export default function PlayerScores({ match, overrideScores }: PlayerScoresProp
             : 'border-2 border-transparent bg-white'
         }`}>
           <div className="text-center">
-            <h3 className="font-semibold text-gray-800">{match.player1Name}</h3>
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <h3 className="font-semibold text-gray-800">{match.player1Name}</h3>
+              <span className="px-1.5 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded">
+                LAG
+              </span>
+            </div>
             <div className="text-xs text-gray-600 mb-2">
               Skill Level {match.player1SkillLevel}
             </div>
