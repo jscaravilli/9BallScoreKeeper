@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Game from "@/pages/game";
 import ScoresheetTest from "@/components/scoresheet-test";
 import PDFTest from "@/pages/pdf-test";
+import ClearStorage from "@/pages/clear-storage";
 
 function Router() {
   return (
@@ -14,6 +15,7 @@ function Router() {
       <Route path="/" component={Game} />
       <Route path="/test" component={ScoresheetTest} />
       <Route path="/pdf-test" component={PDFTest} />
+      <Route path="/clear" component={ClearStorage} />
       <Route component={NotFound} />
     </Switch>
   );
