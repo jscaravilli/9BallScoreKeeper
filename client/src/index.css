@@ -282,21 +282,28 @@ button {
 /* Print optimization for scoresheet */
 @media print {
   .scoresheet-container {
-    width: 100vw !important;
-    height: 100vh !important;
+    width: 8.5in !important;
+    height: 11in !important;
     max-width: none !important;
     margin: 0 !important;
     padding: 0 !important;
     page-break-inside: avoid;
+    page-break-after: avoid;
+    overflow: hidden;
   }
   
   .scoresheet-content {
-    transform: scale(0.41) !important;
+    transform: scale(0.35) !important;
     transform-origin: top left !important;
   }
   
   @page {
-    margin: 0;
+    margin: 0.25in;
     size: letter;
+  }
+  
+  /* Hide everything else when printing */
+  body > *:not(.scoresheet-container) {
+    display: none !important;
   }
 }

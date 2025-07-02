@@ -77,7 +77,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
                 style={{
                   left: `${x}px`,
                   top: `${y}px`,
-                  fontSize: '44.1px',
+                  fontSize: '48.5px',
                   color: 'blue',
                   transform: 'translate(-50%, -50%)',
                   pointerEvents: 'none'
@@ -92,8 +92,9 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
         // If this was a 9-ball, next ball scored will be in the next game
         if (event.ballNumber === 9) {
           // Add vertical line after this game ends
-          if (coordIndex < PLAYER1_COORDINATES.length) {
-            const [x, y] = PLAYER1_COORDINATES[coordIndex];
+          const lastCoordIndex = scorePosition - 1;
+          if (lastCoordIndex < PLAYER1_COORDINATES.length) {
+            const [x, y] = PLAYER1_COORDINATES[lastCoordIndex];
             marks.push(
               <div
                 key={`game-separator-${currentGame}`}
@@ -101,7 +102,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
                 style={{
                   left: `${x + 25}px`,
                   top: `${y}px`,
-                  fontSize: '44.1px',
+                  fontSize: '48.5px',
                   color: 'black',
                   transform: 'translate(-50%, -50%)',
                   pointerEvents: 'none'
@@ -129,9 +130,9 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
             style={{
               left: `${x}px`,
               top: `${y}px`,
-              width: '63px',
-              height: '63px',
-              border: '6px solid blue',
+              width: '69px',
+              height: '69px',
+              border: '7px solid blue',
               borderRadius: '50%',
               backgroundColor: 'transparent',
               transform: 'translate(-50%, -50%)',
