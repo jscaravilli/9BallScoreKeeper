@@ -14,7 +14,7 @@ import TimeoutModal from "@/components/timeout-modal";
 import ScoresheetPrint from "@/components/scoresheet-print-clean";
 import { getPointsToWin } from "@/lib/apa-handicaps";
 import { getRemainingTimeouts } from "@/lib/timeout-utils";
-import { cookieStorageAPI } from "@/lib/cookieStorage";
+import { adaptiveStorageAPI as cookieStorageAPI } from "@/lib/adaptiveStorage";
 import { localStorageAPI } from "@/lib/localStorage";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { usePrint } from "@/hooks/usePrint";
