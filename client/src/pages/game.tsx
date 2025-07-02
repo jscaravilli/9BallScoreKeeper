@@ -886,7 +886,11 @@ export default function Game() {
         ? { player1TimeoutsUsed: currentPlayerTimeoutsUsed - 1 }
         : { player2TimeoutsUsed: currentPlayerTimeoutsUsed - 1 };
       
-      updateMatchMutation.mutate({ id: currentMatch.id, updates });
+      // Update storage directly instead of using mutations
+      const updatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, updates);
+      if (updatedMatch) {
+        setCurrentMatch(updatedMatch);
+      }
     }
   };
 
@@ -902,7 +906,11 @@ export default function Game() {
         ? { player1SafetiesUsed: currentPlayerSafetiesUsed - 1 }
         : { player2SafetiesUsed: currentPlayerSafetiesUsed - 1 };
       
-      updateMatchMutation.mutate({ id: currentMatch.id, updates });
+      // Update storage directly instead of using mutations
+      const updatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, updates);
+      if (updatedMatch) {
+        setCurrentMatch(updatedMatch);
+      }
     }
   };
 
@@ -918,7 +926,11 @@ export default function Game() {
       ? { player1TimeoutsUsed: currentPlayerTimeoutsUsed + 1 }
       : { player2TimeoutsUsed: currentPlayerTimeoutsUsed + 1 };
     
-    updateMatchMutation.mutate({ id: currentMatch.id, updates });
+    // Update storage directly instead of using mutations
+    const updatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, updates);
+    if (updatedMatch) {
+      setCurrentMatch(updatedMatch);
+    }
     
     // Add to history
     const timeoutEvent: MatchEvent = {
@@ -946,7 +958,11 @@ export default function Game() {
       ? { player1SafetiesUsed: currentPlayerSafetiesUsed + 1 }
       : { player2SafetiesUsed: currentPlayerSafetiesUsed + 1 };
     
-    updateMatchMutation.mutate({ id: currentMatch.id, updates });
+    // Update storage directly instead of using mutations
+    const updatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, updates);
+    if (updatedMatch) {
+      setCurrentMatch(updatedMatch);
+    }
     
     // Add to match history
     const safetyEvent: MatchEvent = {
@@ -1126,23 +1142,23 @@ export default function Game() {
     
     setUndoInProgress(true);
 
-    updateMatchMutation.mutate({
-      id: currentMatch.id,
-      updates: {
-        currentPlayer: previousState.currentPlayer,
-        player1Score: previousState.player1Score,
-        player2Score: previousState.player2Score,
-        isComplete: false,
-        winnerId: null,
-      }
+    // Update match data directly in storage instead of using API mutations
+    const updatedMatch = cookieStorageAPI.updateMatch(currentMatch.id, {
+      currentPlayer: previousState.currentPlayer,
+      player1Score: previousState.player1Score,
+      player2Score: previousState.player2Score,
+      isComplete: false,
+      winnerId: null,
     });
 
     // Ensure completely clean ball state restoration - deep clone to avoid any references
     const cleanBallStates = JSON.parse(JSON.stringify(previousState.ballStates));
-    updateBallsMutation.mutate({
-      id: currentMatch.id,
-      ballStates: cleanBallStates,
-    });
+    const finalMatch = cookieStorageAPI.updateBallStates(currentMatch.id, cleanBallStates);
+    
+    // Update local state immediately with the final result
+    if (finalMatch) {
+      setCurrentMatch(finalMatch);
+    }
 
     // Remove the last state from history
     setTurnHistory(prev => prev.slice(0, -1));
