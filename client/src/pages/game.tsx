@@ -412,16 +412,19 @@ export default function Game() {
   };
 
   const handleBallTap = (ballNumber: number) => {
+    // Get current match directly from storage to avoid cache issues
+    const storageMatch = cookieStorageAPI.getCurrentMatch();
+    
     console.log('=== BALL TAP DEBUG ===');
     console.log('Ball clicked:', ballNumber);
-    console.log('currentMatch.player1Name:', currentMatch?.player1Name);
-    console.log('currentMatch.player2Name:', currentMatch?.player2Name);
-    console.log('currentMatch.player1SkillLevel:', currentMatch?.player1SkillLevel);
-    console.log('currentMatch.player2SkillLevel:', currentMatch?.player2SkillLevel);
-    console.log('currentMatch.id:', currentMatch?.id);
+    console.log('React Query currentMatch.id:', currentMatch?.id);
+    console.log('Storage currentMatch.id:', storageMatch?.id);
     console.log('=== END BALL TAP DEBUG ===');
     
-    if (!currentMatch || isProcessing || currentMatch.isComplete || matchWinner) return;
+    if (!storageMatch || isProcessing || storageMatch.isComplete || matchWinner) return;
+    
+    // Use storage match instead of React Query match
+    const currentMatch = storageMatch;
     
     // Special handling for 9-ball undo - ONLY when 9-ball is already scored
     if (ballNumber === 9 && turnHistory.length > 0) {
