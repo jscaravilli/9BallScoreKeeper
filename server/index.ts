@@ -9,6 +9,9 @@ if (process.env.NODE_ENV === 'production') {
   }
 }
 
+// Set Vite host configuration for Replit preview compatibility
+process.env.VITE_HOST = '0.0.0.0';
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
