@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Copy } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { EventDeduplicator } from "@/lib/eventDeduplication";
 
 export default function TallyView() {
   const { toast } = useToast();
@@ -13,7 +14,7 @@ export default function TallyView() {
     queryFn: () => adaptiveStorageAPI.getCurrentMatch(),
   });
 
-  const copyTableData = (validTallies: any[], currentMatch: any) => {
+  const copyTableData = (validTallies: any[], currentMatch: any, scores: any) => {
     // Create tab-separated table data for copying
     const headers = "Player\tGame\tBall\tPoints\tTime";
     const rows = validTallies
@@ -26,13 +27,11 @@ export default function TallyView() {
     
     const tableData = [headers, ...rows].join('\n');
     
-    // Add summary data
-    const player1Points = validTallies.filter(t => t.player === 1).reduce((sum, t) => sum + t.pointsAwarded, 0);
-    const player2Points = validTallies.filter(t => t.player === 2).reduce((sum, t) => sum + t.pointsAwarded, 0);
+    // Use the accurate scores from EventDeduplicator
     const player1Tallies = validTallies.filter(t => t.player === 1).length;
     const player2Tallies = validTallies.filter(t => t.player === 2).length;
     
-    const summary = `\n\nSUMMARY:\n${currentMatch.player1Name}: ${player1Points} points (${player1Tallies} tallies)\n${currentMatch.player2Name}: ${player2Points} points (${player2Tallies} tallies)`;
+    const summary = `\n\nSUMMARY:\n${currentMatch.player1Name}: ${scores.player1Score} points (${player1Tallies} tallies)\n${currentMatch.player2Name}: ${scores.player2Score} points (${player2Tallies} tallies)`;
     
     const fullData = tableData + summary;
     
@@ -66,10 +65,20 @@ export default function TallyView() {
     );
   }
 
-  // Get match events and filter for scoring events
-  const events = adaptiveStorageAPI.getCurrentMatchEvents() || [];
+  // Get match events and deduplicate them
+  const rawEvents = adaptiveStorageAPI.getCurrentMatchEvents() || [];
+  const events = EventDeduplicator.deduplicateEvents(rawEvents);
   
-  // Build tally data by processing events and extracting game information
+  console.log(`Raw events: ${rawEvents.length}, Deduplicated: ${events.length}`);
+  
+  // Calculate accurate scores from events
+  const scores = EventDeduplicator.calculateScoresFromEvents(
+    events,
+    currentMatch.player1Name,
+    currentMatch.player2Name
+  );
+  
+  // Build tally data from deduplicated events
   const tallyData: Array<{
     playerName: string;
     player: number;
@@ -80,55 +89,72 @@ export default function TallyView() {
     isValid: boolean;
   }> = [];
 
-  const processedEvents = new Set<string>(); // Track unique events to prevent duplicates
+  // Track dead balls to filter them out of tallies
+  const deadBalls = new Map<string, boolean>();
+  let currentGame = 1;
   
-  // Process ball_scored events directly, using game info from event details
+  // First pass: identify dead balls
   events.forEach((event: any) => {
-    if (event.type === 'ball_scored') {
-      // Extract game number from event details if available
-      let gameNumber = 1;
-      if (event.details && event.details.includes('Game ')) {
-        const gameMatch = event.details.match(/Game (\d+):/);
-        if (gameMatch) {
-          gameNumber = parseInt(gameMatch[1]);
-        }
+    if (event.details && event.details.includes('Game ')) {
+      const gameMatch = event.details.match(/Game (\d+):/);
+      if (gameMatch) {
+        currentGame = parseInt(gameMatch[1]);
       }
+    }
+    
+    if (event.type === 'ball_dead' && event.ballNumber && event.player) {
+      const key = `${currentGame}-${event.player}-${event.ballNumber}`;
+      deadBalls.set(key, true);
+      console.log(`Marked dead: Game ${currentGame}, Player ${event.player}, Ball ${event.ballNumber}`);
+    }
+  });
+  
+  // Second pass: build tally data, excluding dead balls
+  currentGame = 1;
+  events.forEach((event: any) => {
+    if (event.details && event.details.includes('Game ')) {
+      const gameMatch = event.details.match(/Game (\d+):/);
+      if (gameMatch) {
+        currentGame = parseInt(gameMatch[1]);
+      }
+    }
+    
+    if (event.type === 'ball_scored' && event.ballNumber && event.player) {
+      const key = `${currentGame}-${event.player}-${event.ballNumber}`;
       
-      // Create unique event ID to prevent duplicates
-      const eventId = `${event.player}-${event.ballNumber}-${gameNumber}`;
-      
-      // Skip if we've already processed this ball for this player in this game
-      if (processedEvents.has(eventId)) {
-        console.log(`Skipping duplicate tally: Player ${event.player}, Ball ${event.ballNumber}, Game ${gameNumber}`);
+      // Skip if this ball was later marked dead
+      if (deadBalls.has(key)) {
+        console.log(`Skipping dead ball: Game ${currentGame}, Player ${event.player}, Ball ${event.ballNumber}`);
         return;
       }
-      processedEvents.add(eventId);
       
-      // Only include valid scoring events (not balls that were later marked dead)
       const pointsAwarded = event.ballNumber === 9 ? 2 : 1;
       const playerName = event.player === 1 ? currentMatch.player1Name : currentMatch.player2Name;
       
       tallyData.push({
         playerName,
         player: event.player,
-        gameNumber: gameNumber,
+        gameNumber: currentGame,
         ballNumber: event.ballNumber,
         pointsAwarded,
         timestamp: event.timestamp,
         isValid: true
       });
       
-      console.log(`Added tally: ${playerName} (Player ${event.player}), Ball ${event.ballNumber}, Game ${gameNumber}`);
+      console.log(`Valid tally: ${playerName} (Player ${event.player}), Ball ${event.ballNumber}, Game ${currentGame}`);
     }
   });
 
-  // Filter to only valid tallies and group by player
-  const validTallies = tallyData.filter(t => t.isValid);
+  // Use the scores calculated by the deduplicator for accuracy
+  const validTallies = tallyData;
   const player1Tallies = validTallies.filter(t => t.player === 1);
   const player2Tallies = validTallies.filter(t => t.player === 2);
-
-  const totalPlayer1Points = player1Tallies.reduce((sum, t) => sum + t.pointsAwarded, 0);
-  const totalPlayer2Points = player2Tallies.reduce((sum, t) => sum + t.pointsAwarded, 0);
+  
+  // Use calculated scores instead of summing from tallies
+  const totalPlayer1Points = scores.player1Score;
+  const totalPlayer2Points = scores.player2Score;
+  
+  console.log(`Final scores - P1: ${totalPlayer1Points} (${player1Tallies.length} tallies), P2: ${totalPlayer2Points} (${player2Tallies.length} tallies)`);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 p-4">
@@ -170,7 +196,7 @@ export default function TallyView() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-white">Match Tally Data - Copy & Paste Ready</CardTitle>
             <Button 
-              onClick={() => copyTableData(validTallies, currentMatch)}
+              onClick={() => copyTableData(validTallies, currentMatch, scores)}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Copy className="h-4 w-4 mr-2" />

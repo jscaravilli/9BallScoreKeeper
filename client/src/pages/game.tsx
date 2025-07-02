@@ -20,6 +20,7 @@ import { localStorageAPI } from "@/lib/localStorage";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { usePrint } from "@/hooks/usePrint";
 import { printMatchScoresheet } from "@/lib/pdfGenerator";
+import { EventDeduplicator } from "@/lib/eventDeduplication";
 import type { Match, BallInfo, MatchEvent } from "@shared/schema";
 
 // History Display Component
@@ -412,6 +413,10 @@ export default function Game() {
       state: 'active' as const,
     }));
 
+    // Clear previous match events and deduplication cache
+    cookieStorageAPI.clearCurrentMatchEvents();
+    EventDeduplicator.clearProcessedEvents();
+
     const newMatch = cookieStorageAPI.createMatch({
       player1Name,
       player1SkillLevel,
@@ -588,30 +593,23 @@ export default function Game() {
         ? currentMatch.player1Score + points
         : currentMatch.player2Score + points;
 
-      // Track ball scoring event - but only if this ball hasn't already been logged for this game
-      const currentEvents = cookieStorageAPI.getCurrentMatchEvents();
+      // Track ball scoring event using deduplication
       const currentGame = currentMatch.currentGame;
+      const ballScoredEvent: MatchEvent = {
+        type: 'ball_scored',
+        timestamp: new Date().toISOString(),
+        player: currentMatch.currentPlayer as 1 | 2,
+        playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
+        ballNumber: ballNumber,
+        pointsAwarded: points,
+        newScore: newScore,
+        details: `Game ${currentGame}: ${ballNumber}-Ball scored for ${points} point${points > 1 ? 's' : ''}`
+      };
       
-      // Check if this exact ball has already been scored in this game
-      const alreadyLogged = currentEvents.some(event => 
-        event.type === 'ball_scored' && 
-        event.ballNumber === ballNumber && 
-        event.player === currentMatch.currentPlayer &&
-        event.details?.includes(`Game ${currentGame}`) // We'll add game info to prevent cross-game duplicates
-      );
-      
-      if (!alreadyLogged) {
-        const ballScoredEvent: MatchEvent = {
-          type: 'ball_scored',
-          timestamp: new Date().toISOString(),
-          player: currentMatch.currentPlayer as 1 | 2,
-          playerName: currentMatch.currentPlayer === 1 ? currentMatch.player1Name : currentMatch.player2Name,
-          ballNumber: ballNumber,
-          pointsAwarded: points,
-          newScore: newScore,
-          details: `Game ${currentGame}: ${ballNumber}-Ball scored for ${points} point${points > 1 ? 's' : ''}`
-        };
+      // Only log if not already processed
+      if (!EventDeduplicator.isEventProcessed(ballScoredEvent, currentGame)) {
         cookieStorageAPI.addMatchEvent(ballScoredEvent);
+        EventDeduplicator.markEventAsProcessed(ballScoredEvent, currentGame);
         console.log(`Logged ball_scored event: Player ${currentMatch.currentPlayer}, Ball ${ballNumber}, Game ${currentGame}`);
       } else {
         console.log(`Skipped duplicate ball_scored event: Player ${currentMatch.currentPlayer}, Ball ${ballNumber}, Game ${currentGame}`);
