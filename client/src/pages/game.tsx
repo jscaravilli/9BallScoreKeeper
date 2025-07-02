@@ -13,6 +13,7 @@ import PlayerScores from "@/components/player-scores";
 import TimeoutModal from "@/components/timeout-modal";
 import ScoresheetPrint from "@/components/scoresheet-print-clean";
 import { getPointsToWin } from "@/lib/apa-handicaps";
+import scoresheetPng from "@assets/9B Blank-0_1751450594313.png";
 import { getRemainingTimeouts } from "@/lib/timeout-utils";
 import { cookieStorageAPI } from "@/lib/cookieStorage";
 import { localStorageAPI } from "@/lib/localStorage";
@@ -104,8 +105,30 @@ function printMatchScoresheet(match: any, filename: string) {
     }
   };
   
-  // Load the scoresheet image from the asset
-  img.src = '/src/assets/9B Blank-0_1751450594313.png';
+  // Load the scoresheet image from the asset - try multiple paths
+  img.onerror = function() {
+    // Fallback paths if first doesn't work
+    const fallbackPaths = [
+      '/attached_assets/9B Blank-0_1751450594313.png',
+      './attached_assets/9B Blank-0_1751450594313.png',
+      'attached_assets/9B Blank-0_1751450594313.png'
+    ];
+    
+    let pathIndex = 0;
+    const tryNextPath = () => {
+      if (pathIndex < fallbackPaths.length) {
+        img.src = fallbackPaths[pathIndex++];
+      } else {
+        console.error('Could not load scoresheet image');
+        alert('Could not load scoresheet image for printing');
+      }
+    };
+    
+    img.onerror = tryNextPath;
+    tryNextPath();
+  };
+  
+  img.src = scoresheetPng;
 }
 
 // History Display Component
