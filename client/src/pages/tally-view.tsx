@@ -270,7 +270,7 @@ export default function TallyView() {
                           <td style={{ border: '1px solid #d1d5db', padding: '8px', userSelect: 'text' }}>
                             {tally.ballNumber === 9 ? '9-ball' : tally.ballNumber.toString()}
                           </td>
-                          <td style={{ border: '1px solid #d1d5db', padding: '8px', userSelect: 'text', fontStyle: 'italic', fontSize: '16px' }}>/</td>
+                          <td style={{ border: '1px solid #d1d5db', padding: '8px', userSelect: 'text', fontStyle: 'italic', fontSize: '18px' }}>╱</td>
                           <td style={{ border: '1px solid #d1d5db', padding: '8px', userSelect: 'text' }}>
                             {new Date(tally.timestamp).toLocaleTimeString()}
                           </td>

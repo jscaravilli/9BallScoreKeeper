@@ -275,7 +275,7 @@ export async function printMatchScoresheet(match: any): Promise<void> {
 
     // Helper function to get slash direction
     const getSlashDirection = (gameNum: number): string => {
-      return gameNum % 2 === 1 ? '/' : '\\';
+      return gameNum % 2 === 1 ? '╱' : '╲';
     };
 
     console.log('Processing match events for PDF:', events.length, 'events');

@@ -40,7 +40,7 @@ const SL_TARGET_POSITIONS = [14, 19, 25, 31, 38, 46, 55, 65, 75];
 
 // Get slash direction based on game number
 function getSlashDirection(gameNumber: number): string {
-  return gameNumber % 2 === 1 ? '/' : '\\';
+  return gameNumber % 2 === 1 ? '╱' : '╲';
 }
 
 // Create a game tracking function that maps each event to its game number
