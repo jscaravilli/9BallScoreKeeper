@@ -218,12 +218,21 @@ class IndexedDBStorageAPI {
 
   updateMatch(matchId: number, updates: Partial<Match>): Match | null {
     const currentMatch = this.getCurrentMatch();
+    console.log('=== STORAGE UPDATE MATCH DEBUG ===');
+    console.log('Requested matchId:', matchId);
+    console.log('Current stored match:', currentMatch);
+    console.log('Current match ID:', currentMatch?.id);
+    console.log('IDs match?:', currentMatch?.id === matchId);
+    console.log('=== END STORAGE DEBUG ===');
+    
     if (!currentMatch || currentMatch.id !== matchId) {
+      console.error('STORAGE ERROR: Match ID mismatch or no current match!');
       return null;
     }
 
     const updatedMatch = { ...currentMatch, ...updates };
     this.setItem('poolscorer_current_match', JSON.stringify(updatedMatch));
+    console.log('Updated match saved:', updatedMatch);
     return updatedMatch;
   }
 
