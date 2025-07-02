@@ -280,12 +280,16 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Added confirmation dialog when starting new match that warns about clearing previous match history
   - System now maintains only 1 match history at a time with automatic cleanup of old data
   - New match creation automatically clears all previous match cookies to prevent 431 errors
-  - ENHANCED cookie optimization with advanced compression and chunking system:
-    * JSON compression with shortened property names (player1Name → p1n, etc.)
-    * Cookie chunking system splits large data across multiple 3.5KB cookies
-    * Smart event filtering prioritizes scoresheet-essential data
-    * Multi-tier fallback: chunked compression → localStorage backup → ultra-filtered cookies
-    * Automatic decompression and reassembly on data retrieval
+  - ENHANCED cookie optimization with advanced compression, chunking, and timestamp optimization:
+    * Comprehensive JSON compression with 50+ shortened property names (player1Name → p1n, ball_scored → bsc, etc.)
+    * Timestamp optimization: ISO strings → Unix timestamps (saves ~15 chars per timestamp: "2025-01-02T23:03:19.123Z" → "t1735862599123")
+    * Advanced chunking system with metadata tracking (chunk count, total size, compression status)
+    * Intelligent compression ratio analysis and logging for optimization monitoring
+    * Smart event filtering prioritizes scoresheet-essential data with time-based retention
+    * Multi-tier storage: compressed single cookie → chunked compression → localStorage backup → ultra-filtered cookies
+    * Automatic decompression, timestamp restoration, and chunk reassembly with integrity verification
+    * Legacy compatibility support for old-style chunked cookies during migration
+    * Comprehensive cleanup system prevents orphaned chunks and metadata corruption
 - January 2, 2025: Implemented automated canvas-based PDF generation system:
   - Replaced HTML-based printing with direct PNG+markup rendering using HTML5 Canvas
   - Added jsPDF library for automatic single-page PDF creation and download

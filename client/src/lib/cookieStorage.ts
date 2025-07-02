@@ -19,10 +19,13 @@ class CookieStorageAPI {
   private static readonly MAX_COOKIE_SIZE = 3800; // Stay well under 4KB browser limit
   private static readonly MAX_TOTAL_COOKIE_SIZE = 8000; // Reduced to prevent 431 errors
 
-  // Advanced compression utilities
+  // Advanced compression utilities with timestamp optimization
   private compressJSON(obj: any): string {
+    // Deep clone and optimize timestamps
+    const optimized = this.optimizeTimestamps(JSON.parse(JSON.stringify(obj)));
+    
     // Remove whitespace and use shorter property names
-    return JSON.stringify(obj)
+    return JSON.stringify(optimized)
       .replace(/\s+/g, '') // Remove all whitespace
       .replace(/"player1Name"/g, '"p1n"')
       .replace(/"player2Name"/g, '"p2n"')
@@ -30,12 +33,34 @@ class CookieStorageAPI {
       .replace(/"player2Score"/g, '"p2s"')
       .replace(/"player1SkillLevel"/g, '"p1sl"')
       .replace(/"player2SkillLevel"/g, '"p2sl"')
+      .replace(/"player1TimeoutsUsed"/g, '"p1tu"')
+      .replace(/"player2TimeoutsUsed"/g, '"p2tu"')
+      .replace(/"player1SafetiesUsed"/g, '"p1su"')
+      .replace(/"player2SafetiesUsed"/g, '"p2su"')
+      .replace(/"currentPlayer"/g, '"cp"')
+      .replace(/"currentGame"/g, '"cg"')
+      .replace(/"ballStates"/g, '"bs"')
       .replace(/"ballNumber"/g, '"bn"')
       .replace(/"timestamp"/g, '"ts"')
       .replace(/"playerName"/g, '"pn"')
-      .replace(/"ball_scored"/g, '"bs"')
+      .replace(/"completedAt"/g, '"ca"')
+      .replace(/"historyId"/g, '"hid"')
+      .replace(/"isComplete"/g, '"ic"')
+      .replace(/"winnerId"/g, '"wid"')
+      .replace(/"scoredBy"/g, '"sb"')
+      .replace(/"ball_scored"/g, '"bsc"')
       .replace(/"match_completed"/g, '"mc"')
-      .replace(/"turn_ended"/g, '"te"');
+      .replace(/"turn_ended"/g, '"te"')
+      .replace(/"timeout_used"/g, '"tu"')
+      .replace(/"safety_used"/g, '"su"')
+      .replace(/"game_won"/g, '"gw"')
+      .replace(/"details"/g, '"d"')
+      .replace(/"events"/g, '"e"')
+      .replace(/"number"/g, '"n"')
+      .replace(/"state"/g, '"st"')
+      .replace(/"active"/g, '"a"')
+      .replace(/"scored"/g, '"sc"')
+      .replace(/"dead"/g, '"dd"');
   }
 
   private decompressJSON(compressed: string): any {
@@ -47,71 +72,214 @@ class CookieStorageAPI {
       .replace(/"p2s"/g, '"player2Score"')
       .replace(/"p1sl"/g, '"player1SkillLevel"')
       .replace(/"p2sl"/g, '"player2SkillLevel"')
+      .replace(/"p1tu"/g, '"player1TimeoutsUsed"')
+      .replace(/"p2tu"/g, '"player2TimeoutsUsed"')
+      .replace(/"p1su"/g, '"player1SafetiesUsed"')
+      .replace(/"p2su"/g, '"player2SafetiesUsed"')
+      .replace(/"cp"/g, '"currentPlayer"')
+      .replace(/"cg"/g, '"currentGame"')
+      .replace(/"bs"/g, '"ballStates"')
       .replace(/"bn"/g, '"ballNumber"')
       .replace(/"ts"/g, '"timestamp"')
       .replace(/"pn"/g, '"playerName"')
-      .replace(/"bs"/g, '"ball_scored"')
+      .replace(/"ca"/g, '"completedAt"')
+      .replace(/"hid"/g, '"historyId"')
+      .replace(/"ic"/g, '"isComplete"')
+      .replace(/"wid"/g, '"winnerId"')
+      .replace(/"sb"/g, '"scoredBy"')
+      .replace(/"bsc"/g, '"ball_scored"')
       .replace(/"mc"/g, '"match_completed"')
-      .replace(/"te"/g, '"turn_ended"');
+      .replace(/"te"/g, '"turn_ended"')
+      .replace(/"tu"/g, '"timeout_used"')
+      .replace(/"su"/g, '"safety_used"')
+      .replace(/"gw"/g, '"game_won"')
+      .replace(/"d"/g, '"details"')
+      .replace(/"e"/g, '"events"')
+      .replace(/"n"/g, '"number"')
+      .replace(/"st"/g, '"state"')
+      .replace(/"a"/g, '"active"')
+      .replace(/"sc"/g, '"scored"')
+      .replace(/"dd"/g, '"dead"');
     
-    return JSON.parse(restored);
+    const parsed = JSON.parse(restored);
+    
+    // Restore optimized timestamps
+    return this.restoreTimestamps(parsed);
   }
 
-  // Cookie chunking for very large data
+  // Timestamp optimization: Convert ISO strings to Unix timestamps (saves ~15 chars per timestamp)
+  private optimizeTimestamps(obj: any): any {
+    if (obj === null || obj === undefined) return obj;
+    
+    if (typeof obj === 'string') {
+      // Check if it's an ISO timestamp (2025-01-02T23:03:19.123Z format)
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/.test(obj)) {
+        const timestamp = new Date(obj).getTime();
+        return `t${timestamp}`; // Prefix with 't' to identify as timestamp
+      }
+      return obj;
+    }
+    
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.optimizeTimestamps(item));
+    }
+    
+    if (typeof obj === 'object') {
+      const optimized: any = {};
+      for (const [key, value] of Object.entries(obj)) {
+        optimized[key] = this.optimizeTimestamps(value);
+      }
+      return optimized;
+    }
+    
+    return obj;
+  }
+
+  private restoreTimestamps(obj: any): any {
+    if (obj === null || obj === undefined) return obj;
+    
+    if (typeof obj === 'string') {
+      // Check if it's an optimized timestamp (starts with 't' followed by numbers)
+      if (/^t\d+$/.test(obj)) {
+        const timestamp = parseInt(obj.slice(1)); // Remove 't' prefix
+        return new Date(timestamp).toISOString();
+      }
+      return obj;
+    }
+    
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.restoreTimestamps(item));
+    }
+    
+    if (typeof obj === 'object') {
+      const restored: any = {};
+      for (const [key, value] of Object.entries(obj)) {
+        restored[key] = this.restoreTimestamps(value);
+      }
+      return restored;
+    }
+    
+    return obj;
+  }
+
+  // Advanced cookie chunking with compression optimization
   private setCookieChunked(name: string, value: string): void {
+    const originalSize = value.length;
     const compressed = this.compressJSON(JSON.parse(value));
-    const maxChunkSize = 3500; // Leave room for metadata
+    const compressionRatio = (1 - compressed.length / originalSize) * 100;
+    
+    console.log(`Compression: ${originalSize} → ${compressed.length} chars (${compressionRatio.toFixed(1)}% reduction)`);
+    
+    const maxChunkSize = 3400; // Conservative limit for reliability
     
     if (compressed.length <= maxChunkSize) {
-      // Single cookie
+      // Single compressed cookie
       this.setCookie(name, compressed);
+      console.log(`Stored ${name} as single compressed cookie`);
       return;
     }
     
-    // Split into chunks
+    // Split into optimized chunks
     const chunks = [];
     for (let i = 0; i < compressed.length; i += maxChunkSize) {
       chunks.push(compressed.slice(i, i + maxChunkSize));
     }
     
-    console.log(`Splitting ${name} into ${chunks.length} chunks`);
+    console.log(`Chunking ${name}: ${compressed.length} chars → ${chunks.length} chunks`);
     
-    // Store chunk count and each chunk
-    this.setCookie(`${name}_count`, chunks.length.toString());
+    // Clear any existing chunks first
+    this.deleteCookieChunked(name);
+    
+    // Store chunk metadata and each chunk
+    this.setCookie(`${name}_meta`, JSON.stringify({
+      count: chunks.length,
+      totalSize: compressed.length,
+      compressed: true,
+      timestamp: Date.now()
+    }));
+    
     chunks.forEach((chunk, index) => {
       this.setCookie(`${name}_${index}`, chunk);
     });
+    
+    console.log(`Successfully stored ${chunks.length} chunks for ${name}`);
   }
 
   private getCookieChunked(name: string): string | null {
-    // Try single cookie first
+    // Try single compressed cookie first
     const single = this.getCookie(name);
     if (single) {
       try {
-        // Check if it's compressed JSON
-        if (single.includes('"p1n"') || single.includes('"bs"')) {
-          return JSON.stringify(this.decompressJSON(single));
+        // Check if it's compressed JSON by looking for shortened property names
+        if (single.includes('"p1n"') || single.includes('"bsc"') || single.includes('"ts"')) {
+          const decompressed = this.decompressJSON(single);
+          console.log(`Retrieved single compressed cookie for ${name}`);
+          return JSON.stringify(decompressed);
         }
+        // Return as-is if not compressed
         return single;
-      } catch {
+      } catch (error) {
+        console.warn(`Error decompressing single cookie ${name}:`, error);
         return single;
       }
     }
     
-    // Try chunked cookies
-    const countStr = this.getCookie(`${name}_count`);
-    if (!countStr) return null;
+    // Try chunked cookies with metadata
+    const metaStr = this.getCookie(`${name}_meta`);
+    if (!metaStr) {
+      // Fallback to old-style count-based chunks
+      const countStr = this.getCookie(`${name}_count`);
+      if (countStr) {
+        return this.getCookieChunkedLegacy(name, parseInt(countStr));
+      }
+      return null;
+    }
     
-    const count = parseInt(countStr);
+    try {
+      const meta = JSON.parse(metaStr);
+      const { count, totalSize, compressed } = meta;
+      
+      console.log(`Reassembling ${name}: ${count} chunks, ${totalSize} chars total`);
+      
+      let reassembled = '';
+      for (let i = 0; i < count; i++) {
+        const chunk = this.getCookie(`${name}_${i}`);
+        if (!chunk) {
+          console.error(`Missing chunk ${i}/${count} for ${name}`);
+          return null;
+        }
+        reassembled += chunk;
+      }
+      
+      if (reassembled.length !== totalSize) {
+        console.warn(`Size mismatch: expected ${totalSize}, got ${reassembled.length}`);
+      }
+      
+      if (compressed) {
+        const decompressed = this.decompressJSON(reassembled);
+        console.log(`Successfully reassembled and decompressed ${name}`);
+        return JSON.stringify(decompressed);
+      } else {
+        return reassembled;
+      }
+      
+    } catch (error) {
+      console.error(`Error reassembling chunked cookie ${name}:`, error);
+      return null;
+    }
+  }
+
+  // Legacy support for old-style chunked cookies
+  private getCookieChunkedLegacy(name: string, count: number): string | null {
     if (isNaN(count)) return null;
     
-    console.log(`Reassembling ${name} from ${count} chunks`);
+    console.log(`Legacy reassembly: ${name} from ${count} chunks`);
     
     let reassembled = '';
     for (let i = 0; i < count; i++) {
       const chunk = this.getCookie(`${name}_${i}`);
       if (!chunk) {
-        console.error(`Missing chunk ${i} for ${name}`);
+        console.error(`Missing legacy chunk ${i} for ${name}`);
         return null;
       }
       reassembled += chunk;
@@ -120,8 +288,8 @@ class CookieStorageAPI {
     try {
       return JSON.stringify(this.decompressJSON(reassembled));
     } catch (error) {
-      console.error('Error decompressing chunked cookie:', error);
-      return null;
+      console.error('Error decompressing legacy chunked cookie:', error);
+      return reassembled;
     }
   }
 
@@ -129,15 +297,48 @@ class CookieStorageAPI {
     // Delete single cookie
     this.deleteCookie(name);
     
-    // Delete chunked cookies
+    // Delete new-style chunked cookies with metadata
+    const metaStr = this.getCookie(`${name}_meta`);
+    if (metaStr) {
+      try {
+        const meta = JSON.parse(metaStr);
+        const count = meta.count || 0;
+        
+        console.log(`Deleting chunked cookie ${name}: ${count} chunks + metadata`);
+        
+        // Delete metadata
+        this.deleteCookie(`${name}_meta`);
+        
+        // Delete all chunks
+        for (let i = 0; i < count; i++) {
+          this.deleteCookie(`${name}_${i}`);
+        }
+        
+        return;
+      } catch (error) {
+        console.warn(`Error parsing metadata for ${name}, attempting cleanup:`, error);
+      }
+    }
+    
+    // Fallback: Delete legacy-style chunked cookies
     const countStr = this.getCookie(`${name}_count`);
     if (countStr) {
       const count = parseInt(countStr);
       if (!isNaN(count)) {
+        console.log(`Deleting legacy chunked cookie ${name}: ${count} chunks`);
         this.deleteCookie(`${name}_count`);
         for (let i = 0; i < count; i++) {
           this.deleteCookie(`${name}_${i}`);
         }
+      }
+    }
+    
+    // Brute force cleanup: Delete any remaining chunks (safety net)
+    for (let i = 0; i < 20; i++) { // Check up to 20 chunks
+      const chunkExists = this.getCookie(`${name}_${i}`);
+      if (chunkExists) {
+        this.deleteCookie(`${name}_${i}`);
+        console.log(`Cleaned up orphaned chunk ${name}_${i}`);
       }
     }
   }
