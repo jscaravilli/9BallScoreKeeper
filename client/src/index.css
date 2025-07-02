@@ -278,3 +278,25 @@ button {
     min-width: 44px;
   }
 }
+
+/* Print optimization for scoresheet */
+@media print {
+  .scoresheet-container {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    page-break-inside: avoid;
+  }
+  
+  .scoresheet-content {
+    transform: scale(0.41) !important;
+    transform-origin: top left !important;
+  }
+  
+  @page {
+    margin: 0;
+    size: letter;
+  }
+}

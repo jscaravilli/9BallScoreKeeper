@@ -140,11 +140,11 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white" style={{ 
+    <div className="scoresheet-container w-full max-w-4xl mx-auto bg-white" style={{ 
       printColorAdjust: 'exact',
       WebkitPrintColorAdjust: 'exact'
     }}>
-      <div className="relative" style={{ 
+      <div className="scoresheet-content relative" style={{ 
         width: '3300px', 
         height: '2550px',
         transform: 'scale(0.62)',
