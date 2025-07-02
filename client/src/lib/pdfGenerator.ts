@@ -94,15 +94,14 @@ export async function renderScoresheetToCanvas(
       ctx.fillText(text, x, y);
     };
     
-    // Player names - using points 0 and 1 as bottom-left anchors with width constraints
+    // Player names - starting from specified points
     // LAG tag is added for display only, not part of the actual name data
     const player1Text = `${matchData.player1Name} (LAG)`;
     const player2Text = matchData.player2Name;
-    const player1MaxWidth = 810; // Right edge at [810,322]
-    const player2MaxWidth = 810; // Right edge at [810,465]
     
-    drawTextWithSizing(player1Text, 0, 322, player1MaxWidth); // Point 0 with y=322
-    drawTextWithSizing(player2Text, 1, 465, player2MaxWidth); // Point 1 with y=465
+    // Use points as starting positions without width constraints
+    ctx.fillText(player1Text, 0, 322); // Player 1: Point 0 (x=0, y=322)
+    ctx.fillText(player2Text, 1, 465); // Player 2: Point 1 (x=1, y=465)
     
     // Reset to standard font for other elements
     ctx.font = 'bold 36px Arial';
