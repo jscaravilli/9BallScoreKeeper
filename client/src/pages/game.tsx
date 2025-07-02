@@ -357,7 +357,7 @@ export default function Game() {
 
   // Update match mutation
   const updateMatchMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: number; updates: any }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
       return clientMutation(() => clientQueryFunctions.updateMatch(id, updates));
     },
     onSuccess: (data) => {
@@ -367,7 +367,7 @@ export default function Game() {
 
   // Update ball states mutation
   const updateBallsMutation = useMutation({
-    mutationFn: async ({ id, ballStates }: { id: number; ballStates: BallInfo[] }) => {
+    mutationFn: async ({ id, ballStates }: { id: string; ballStates: BallInfo[] }) => {
       return clientMutation(() => clientQueryFunctions.updateBallStates(id, ballStates));
     },
     onSuccess: () => {

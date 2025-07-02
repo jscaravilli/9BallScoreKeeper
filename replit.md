@@ -237,6 +237,12 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - January 1, 2025: Updated development environment to use memory storage while keeping production database unchanged
 - January 2, 2025: Implemented pixel-perfect scoresheet system using exact coordinate arrays for precise mark placement
 - January 2, 2025: Added game-based slash direction system (forward slashes for odd games, backslashes for even games)
+- July 2, 2025: FIXED dead ball functionality after IndexedDB changes - issue was ball state updates not syncing with React Query cache:
+  - Enhanced ball state updates to trigger immediate local state changes alongside storage updates
+  - Added setCurrentMatch calls after direct storage updates to ensure UI reflects changes immediately
+  - Applied fixes to all ball transitions: scored → dead → active
+  - Fixed dead ball visual indicators (red X) and point deductions working properly
+  - NOTE: TypeScript type conflicts between string IDs (new storage) and legacy number ID references causing server instability
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
 - January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
 - January 2, 2025: RESOLVED "431 Request Header Fields Too Large" service worker error:
