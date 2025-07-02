@@ -1199,16 +1199,17 @@ export default function Game() {
     console.log('  currentMatch.player1SkillLevel:', currentMatch.player1SkillLevel);
     console.log('  currentMatch.player2SkillLevel:', currentMatch.player2SkillLevel);
     console.log('Rerack - updatedMatch:', updatedMatch);
-    console.log('Rerack - AFTER UPDATE:');
-    console.log('  updatedMatch.player1Name:', updatedMatch.player1Name);
-    console.log('  updatedMatch.player2Name:', updatedMatch.player2Name);
-    console.log('  updatedMatch.player1SkillLevel:', updatedMatch.player1SkillLevel);
-    console.log('  updatedMatch.player2SkillLevel:', updatedMatch.player2SkillLevel);
 
     if (!updatedMatch) {
       console.error('ERROR: updateMatch returned null during rerack!');
       return; // Don't proceed if update failed
     }
+
+    console.log('Rerack - AFTER UPDATE:');
+    console.log('  updatedMatch.player1Name:', updatedMatch.player1Name);
+    console.log('  updatedMatch.player2Name:', updatedMatch.player2Name);
+    console.log('  updatedMatch.player1SkillLevel:', updatedMatch.player1SkillLevel);
+    console.log('  updatedMatch.player2SkillLevel:', updatedMatch.player2SkillLevel);
 
     // Update the query cache with the new match data - NO invalidation to prevent server refetch
     queryClient.setQueryData(["/api/match/current"], updatedMatch);
