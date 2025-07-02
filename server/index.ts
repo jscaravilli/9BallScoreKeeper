@@ -87,6 +87,37 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled and works with Replit preview.
   const port = Number(process.env.PORT) || 5000;
+  
+  // Add error handling for port conflicts
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${port} is already in use. Trying to find available port...`);
+      // Try ports 5001-5010 if 5000 is in use
+      const tryPort = (portToTry: number) => {
+        if (portToTry > 5010) {
+          console.error('Could not find available port between 5000-5010');
+          process.exit(1);
+        }
+        server.listen(portToTry, "0.0.0.0", () => {
+          log(`serving on port ${portToTry}`);
+          console.log(`Server accessible at http://0.0.0.0:${portToTry}`);
+        }).on('error', (err: any) => {
+          if (err.code === 'EADDRINUSE') {
+            console.log(`Port ${portToTry} in use, trying ${portToTry + 1}...`);
+            tryPort(portToTry + 1);
+          } else {
+            console.error('Server error:', err);
+            process.exit(1);
+          }
+        });
+      };
+      tryPort(5001);
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
+  });
+  
   server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
     console.log(`Server accessible at http://0.0.0.0:${port}`);
