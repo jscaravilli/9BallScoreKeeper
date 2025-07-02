@@ -94,12 +94,13 @@ export async function renderScoresheetToCanvas(
       ctx.fillText(text, x, y);
     };
     
-    // Player names - starting from specified points
+    // Player names - limit to 10 characters, non-bold, smaller font
     // LAG tag is added for display only, not part of the actual name data
-    const player1Text = `${matchData.player1Name} (LAG)`;
-    const player2Text = matchData.player2Name;
+    const player1Text = `${matchData.player1Name.slice(0, 10)} (LAG)`;
+    const player2Text = matchData.player2Name.slice(0, 10);
     
-    // Use correct markup coordinates for player names
+    // Set smaller, non-bold font for player names
+    ctx.font = '32px Arial';
     ctx.fillText(player1Text, 492, 315); // Player 1: [492,315]
     ctx.fillText(player2Text, 492, 460); // Player 2: [492,460]
     

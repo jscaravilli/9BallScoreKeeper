@@ -409,17 +409,17 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       return fontSize;
     };
 
-    // Player names with correct markup coordinates
+    // Player names with correct markup coordinates - limit to 10 characters
     // Note: LAG tag is visual-only, not part of underlying name data
-    const player1Text = `${match.player1Name} (LAG)`;
-    const player2Text = match.player2Name;
+    const player1Text = `${match.player1Name.slice(0, 10)} (LAG)`;
+    const player2Text = match.player2Name.slice(0, 10);
 
     // Coordinate definitions for precise positioning
     // Note: coordinates represent bottom-left anchor point of text
     const coordinates = {
-      // Player names - using correct markup coordinates
-      player1Name: { x: 492, y: 315, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
-      player2Name: { x: 492, y: 460, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      // Player names - using correct markup coordinates, non-bold, smaller font
+      player1Name: { x: 492, y: 315, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
+      player2Name: { x: 492, y: 460, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
       
       // Skill levels  
       player1SkillLevel: { x: 1200, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
