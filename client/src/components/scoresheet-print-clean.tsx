@@ -106,14 +106,28 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white">
-      <div className="relative w-full" style={{ aspectRatio: '11/8.5' }}>
-        {/* Background scoresheet image */}
+    <div className="w-full max-w-4xl mx-auto bg-white" style={{ 
+      printColorAdjust: 'exact',
+      WebkitPrintColorAdjust: 'exact'
+    }}>
+      <div className="relative w-full" style={{ 
+        aspectRatio: '11/8.5', 
+        width: '1056px', 
+        height: '816px',
+        transform: 'scale(1)',
+        transformOrigin: 'top left'
+      }}>
+        {/* Background scoresheet image - fixed dimensions to match coordinate system */}
         <img 
           src={scoresheetPng} 
           alt="APA Scoresheet"
-          className="absolute inset-0 w-full h-full"
-          style={{ objectFit: 'contain' }}
+          className="absolute inset-0"
+          style={{ 
+            width: '1056px', 
+            height: '816px',
+            objectFit: 'fill',
+            imageRendering: 'crisp-edges'
+          }}
         />
         
         {/* Overlay data using only your provided coordinates */}
