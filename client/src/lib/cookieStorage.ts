@@ -17,9 +17,71 @@ const COOKIE_OPTIONS = {
 
 class CookieStorageAPI {
   private static readonly MAX_COOKIE_SIZE = 3800; // Stay well under 4KB browser limit
-  private static readonly MAX_TOTAL_COOKIE_SIZE = 15000; // Prevent total header size issues
+  private static readonly MAX_TOTAL_COOKIE_SIZE = 8000; // Reduced to prevent 431 errors
+  
+  private performEmergencyCleanup(): void {
+    try {
+      // Calculate total cookie size
+      const totalCookieSize = document.cookie.length;
+      console.log(`Total cookie size: ${totalCookieSize} characters`);
+      
+      if (totalCookieSize > CookieStorageAPI.MAX_TOTAL_COOKIE_SIZE) {
+        console.warn('Cookie size exceeds safe limit, performing emergency cleanup');
+        
+        // Clear old match history cookies first
+        const cookies = document.cookie.split(';');
+        const matchHistoryCookies = cookies
+          .map(c => c.trim().split('=')[0])
+          .filter(name => name.startsWith('match_history_') && name !== 'match_history_index');
+        
+        // Keep only the 3 most recent matches
+        const indexCookie = this.getCookie('match_history_index');
+        if (indexCookie) {
+          try {
+            const matchIds = JSON.parse(indexCookie);
+            const keepIds = matchIds.slice(0, 3);
+            const removeIds = matchIds.slice(3);
+            
+            // Delete old match cookies
+            removeIds.forEach((id: string) => {
+              this.deleteCookie(`match_history_${id}`);
+            });
+            
+            // Update index
+            this.setCookie('match_history_index', JSON.stringify(keepIds));
+            console.log(`Emergency cleanup: Kept ${keepIds.length} matches, removed ${removeIds.length}`);
+          } catch (error) {
+            console.error('Error parsing match history index during cleanup:', error);
+          }
+        }
+        
+        // If still too large, clear current match events (keeping essential data only)
+        const newTotalSize = document.cookie.length;
+        if (newTotalSize > CookieStorageAPI.MAX_TOTAL_COOKIE_SIZE) {
+          console.warn('Still too large after history cleanup, clearing current match events');
+          this.deleteCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS);
+        }
+      }
+    } catch (error) {
+      console.error('Emergency cleanup failed:', error);
+    }
+  }
+
+  constructor() {
+    // Perform emergency cleanup on initialization to prevent 431 errors
+    this.performEmergencyCleanup();
+  }
 
   private setCookie(name: string, value: string, options = COOKIE_OPTIONS): void {
+    // Pre-check: Prevent 431 errors by checking total cookie size
+    const currentCookieSize = document.cookie.length;
+    const estimatedNewSize = currentCookieSize + name.length + encodeURIComponent(value).length + 100; // +100 for cookie overhead
+    
+    if (estimatedNewSize > CookieStorageAPI.MAX_TOTAL_COOKIE_SIZE) {
+      console.warn(`Cookie operation would exceed safe limit (${estimatedNewSize}), performing cleanup first`);
+      this.performEmergencyCleanup();
+    }
+    
     // Smart cookie management to prevent 431 errors
     let processedValue = value;
     let encodedValue = encodeURIComponent(value);

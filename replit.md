@@ -273,6 +273,9 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Enhanced event storage with size monitoring and verification checks
   - FIXED print button functionality by updating PDF generator to handle hybrid storage data
   - Corrected target circle positioning arrays in PDF generator to match scoresheet display
+  - RESOLVED HTTP 431 "Request Header Fields Too Large" errors with emergency cookie cleanup system
+  - Implemented automatic cookie size monitoring and cleanup to prevent browser header limit issues
+  - Added proactive cookie management with reduced total size limits (8KB) and emergency cleanup on app startup
 - January 2, 2025: Implemented automated canvas-based PDF generation system:
   - Replaced HTML-based printing with direct PNG+markup rendering using HTML5 Canvas
   - Added jsPDF library for automatic single-page PDF creation and download
