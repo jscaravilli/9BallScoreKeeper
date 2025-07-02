@@ -84,8 +84,8 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled and works with Replit preview.
   const port = Number(process.env.PORT) || 5000;
-  server.listen(port, "localhost", () => {
+  server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
-    console.log(`Server accessible at http://localhost:${port}`);
+    console.log(`Server accessible at http://0.0.0.0:${port}`);
   });
 })();
