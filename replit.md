@@ -245,6 +245,9 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Smart size detection prevents large match history and events from being stored in cookies
   - Maintained persistence while eliminating header size issues that were crashing the entire app
   - App now loads reliably without cookie-related 431 errors
+  - Fixed match history disappearing issue by preserving history cookies in emergency cleanup
+  - Added automatic recovery system that restores match history from localStorage if cookies are accidentally cleared
+  - Enhanced migration system to detect and restore lost match history data
 - January 2, 2025: Implemented automated canvas-based PDF generation system:
   - Replaced HTML-based printing with direct PNG+markup rendering using HTML5 Canvas
   - Added jsPDF library for automatic single-page PDF creation and download

@@ -300,7 +300,24 @@ class CookieStorageAPI {
       console.log(`Raw index cookie value: ${indexCookie}`);
       
       if (!indexCookie) {
-        console.log('DEBUG: No match history index found. Checking for orphaned match cookies...');
+        console.log('DEBUG: No match history index found. Checking localStorage fallback...');
+        
+        // Check localStorage for match history (from hybrid storage approach)
+        try {
+          const localHistory = localStorage.getItem('poolscorer_match_history');
+          if (localHistory) {
+            console.log('Found match history in localStorage, returning it');
+            const parsedHistory = JSON.parse(localHistory);
+            // Ensure historyId exists for all entries
+            return parsedHistory.map((match: any, index: number) => ({
+              ...match,
+              historyId: match.historyId || `local_${index}_${Date.now()}`
+            }));
+          }
+        } catch (error) {
+          console.warn('Error reading localStorage history:', error);
+        }
+        
         // Check if there are any match history cookies without an index
         const allCookies = document.cookie.split(';');
         const matchCookies = allCookies.filter(cookie => cookie.trim().startsWith('match_history_') && !cookie.trim().startsWith('match_history_index'));
@@ -313,13 +330,31 @@ class CookieStorageAPI {
           this.setMatchHistoryCookie('match_history_index', JSON.stringify(orphanedIds));
           console.log(`Rebuilt index with ${orphanedIds.length} matches: ${JSON.stringify(orphanedIds)}`);
           
-          // Now try to load them
+          // Continue with rebuilt index instead of returning empty
           const matchIds = orphanedIds;
           console.log(`Using rebuilt match IDs: ${JSON.stringify(matchIds)}`);
+          
+          // Process the rebuilt matches
+          for (const matchId of matchIds) {
+            const matchCookie = this.getCookie(`match_history_${matchId}`);
+            if (matchCookie) {
+              try {
+                const match = JSON.parse(matchCookie);
+                if (!match.historyId) {
+                  match.historyId = matchId;
+                }
+                history.push(match);
+                console.log(`Successfully loaded rebuilt match: ${match.player1Name} vs ${match.player2Name}`);
+              } catch (parseError) {
+                console.warn(`Error parsing rebuilt match ${matchId}`);
+              }
+            }
+          }
+          
+          return history.sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime());
         } else {
           return [];
         }
-        return [];
       }
       
       const matchIds = indexCookie ? JSON.parse(indexCookie) : [];
@@ -503,30 +538,60 @@ class CookieStorageAPI {
   // Migration helper: copy data from localStorage to cookies
   migrateFromLocalStorage(): void {
     try {
-      // Only migrate if cookies are empty and localStorage has data
-      if (this.getCurrentMatch()) return; // Already have cookie data
+      // Check if match history was lost and recover from localStorage
+      const indexCookie = this.getCookie('match_history_index');
+      const localHistory = localStorage.getItem('poolscorer_match_history');
       
-      const localMatch = localStorage.getItem('poolscorer_current_match');
-      if (localMatch) {
-        const match = JSON.parse(localMatch);
-        this.setCookie(COOKIE_KEYS.CURRENT_MATCH, localMatch);
-        console.log('Migrated current match from localStorage to cookies');
+      if (!indexCookie && localHistory) {
+        console.log('RECOVERY: Match history index missing but localStorage has data - recovering...');
+        try {
+          const parsedHistory = JSON.parse(localHistory);
+          if (Array.isArray(parsedHistory) && parsedHistory.length > 0) {
+            console.log(`RECOVERY: Restoring ${parsedHistory.length} matches from localStorage`);
+            // Create index from localStorage data
+            const matchIds = parsedHistory.map((match: any, index: number) => 
+              match.historyId || `recovered_${Date.now()}_${index}`
+            );
+            
+            // Store recovered matches
+            parsedHistory.forEach((match: any, index: number) => {
+              const historyId = matchIds[index];
+              const historyData = JSON.stringify({
+                ...match,
+                historyId: historyId
+              });
+              
+              // Use localStorage for large data with cookie flag
+              localStorage.setItem(`match_history_${historyId}`, historyData);
+              this.setCookie(`match_history_${historyId}_flag`, `ls_${Date.now()}`);
+            });
+            
+            // Create index cookie
+            this.setCookie('match_history_index', JSON.stringify(matchIds));
+            console.log(`RECOVERY: Successfully restored match history index with ${matchIds.length} matches`);
+          }
+        } catch (parseError) {
+          console.error('RECOVERY: Error parsing localStorage history:', parseError);
+        }
+      }
+      
+      // Standard migration for other data
+      if (!this.getCurrentMatch()) {
+        const localMatch = localStorage.getItem('poolscorer_current_match');
+        if (localMatch) {
+          this.setCookie(COOKIE_KEYS.CURRENT_MATCH, localMatch);
+          console.log('Migrated current match from localStorage to cookies');
+        }
       }
 
       const localCounter = localStorage.getItem('poolscorer_match_counter');
-      if (localCounter) {
+      if (localCounter && !this.getCookie(COOKIE_KEYS.MATCH_COUNTER)) {
         this.setCookie(COOKIE_KEYS.MATCH_COUNTER, localCounter);
         console.log('Migrated match counter from localStorage to cookies');
       }
 
-      const localHistory = localStorage.getItem('poolscorer_match_history');
-      if (localHistory) {
-        this.setCookie(COOKIE_KEYS.MATCH_HISTORY, localHistory);
-        console.log('Migrated match history from localStorage to cookies');
-      }
-
       const localEvents = localStorage.getItem('poolscorer_current_match_events');
-      if (localEvents) {
+      if (localEvents && !this.getCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS)) {
         this.setCookie(COOKIE_KEYS.CURRENT_MATCH_EVENTS, localEvents);
         console.log('Migrated match events from localStorage to cookies');
       }

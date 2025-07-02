@@ -57,15 +57,26 @@ const emergencyCleanup = () => {
     console.log('Cookies too large, performing emergency cleanup');
     
     // Clear all cookies except essential ones
-    const essentialCookies = ['poolscorer_current_match', 'poolscorer_match_counter'];
+    const essentialCookies = [
+      'poolscorer_current_match', 
+      'poolscorer_match_counter',
+      'match_history_index'  // Preserve match history index
+    ];
     
     cookies.forEach(cookie => {
       const [name] = cookie.split('=');
       const cookieName = name.trim();
       
-      if (!essentialCookies.includes(cookieName)) {
+      // Keep essential cookies and match history cookies
+      const isEssential = essentialCookies.includes(cookieName);
+      const isMatchHistory = cookieName.startsWith('match_history_');
+      const isMatchHistoryFlag = cookieName.endsWith('_flag');
+      
+      if (!isEssential && !isMatchHistory && !isMatchHistoryFlag) {
         document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
         console.log(`Emergency cleared cookie: ${cookieName}`);
+      } else if (isMatchHistory || isEssential || isMatchHistoryFlag) {
+        console.log(`Preserved essential cookie: ${cookieName}`);
       }
     });
   }
