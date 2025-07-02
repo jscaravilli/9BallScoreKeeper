@@ -42,6 +42,38 @@ const checkForUpdates = () => {
   }
 };
 
+// Emergency cookie cleanup to prevent 431 errors
+const emergencyCleanup = () => {
+  const cookies = document.cookie.split(';');
+  let totalSize = 0;
+  
+  cookies.forEach(cookie => {
+    totalSize += cookie.length;
+  });
+  
+  console.log(`Total cookie size: ${totalSize} characters`);
+  
+  if (totalSize > 10000) { // If cookies are too large
+    console.log('Cookies too large, performing emergency cleanup');
+    
+    // Clear all cookies except essential ones
+    const essentialCookies = ['poolscorer_current_match', 'poolscorer_match_counter'];
+    
+    cookies.forEach(cookie => {
+      const [name] = cookie.split('=');
+      const cookieName = name.trim();
+      
+      if (!essentialCookies.includes(cookieName)) {
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        console.log(`Emergency cleared cookie: ${cookieName}`);
+      }
+    });
+  }
+};
+
+// Emergency cleanup before anything else
+emergencyCleanup();
+
 // Check for updates before rendering
 checkForUpdates();
 

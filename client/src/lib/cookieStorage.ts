@@ -20,20 +20,26 @@ class CookieStorageAPI {
   private static readonly MAX_TOTAL_COOKIE_SIZE = 15000; // Prevent total header size issues
 
   private setCookie(name: string, value: string, options = COOKIE_OPTIONS): void {
-    // EMERGENCY FIX: Always use localStorage to prevent 431 errors
-    console.log(`Using localStorage for ${name} to prevent 431 error`);
-    this.useLocalStorageFallback(name, value);
-    return;
-    
-    // Original cookie code disabled to prevent app crashes
-    /*
+    // Smart cookie management to prevent 431 errors
     const encodedValue = encodeURIComponent(value);
-    if (encodedValue.length > CookieStorageAPI.MAX_COOKIE_SIZE) {
-      console.warn(`Cookie ${name} is too large (${encodedValue.length} chars), using localStorage fallback`);
+    
+    // For large data (match history/events), use localStorage but set a small cookie flag
+    if (encodedValue.length > 2000 || name.includes('history') || name.includes('events')) {
+      // Store actual data in localStorage
       this.useLocalStorageFallback(name, value);
+      
+      // Set small cookie flag to indicate data exists in localStorage
+      const flagName = `${name}_flag`;
+      const flagValue = `ls_${Date.now()}`;
+      const expires = new Date();
+      expires.setTime(expires.getTime() + (options.expires * 24 * 60 * 60 * 1000));
+      
+      const flagCookie = `${flagName}=${flagValue}; expires=${expires.toUTCString()}; path=${options.path}; SameSite=${options.sameSite}`;
+      document.cookie = flagCookie;
       return;
     }
 
+    // For small essential data, use cookies normally
     const expires = new Date();
     expires.setTime(expires.getTime() + (options.expires * 24 * 60 * 60 * 1000));
     
@@ -46,7 +52,6 @@ class CookieStorageAPI {
     ].filter(Boolean).join('; ');
     
     document.cookie = cookieString;
-    */
   }
 
   private useLocalStorageFallback(name: string, value: string): void {
@@ -89,6 +94,24 @@ class CookieStorageAPI {
   }
 
   private getCookie(name: string): string | null {
+    // First check if there's a flag indicating data is in localStorage
+    const flagName = `${name}_flag`;
+    const flagExists = document.cookie.includes(`${flagName}=`);
+    
+    if (flagExists) {
+      // Data is stored in localStorage, retrieve it
+      try {
+        const localStorageValue = localStorage.getItem(name);
+        if (localStorageValue) {
+          console.log(`Retrieved ${name} from localStorage (flagged)`);
+          return localStorageValue;
+        }
+      } catch (error) {
+        console.warn(`localStorage retrieval failed for ${name}:`, error);
+      }
+    }
+    
+    // Check for direct cookie value
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
     
@@ -100,7 +123,7 @@ class CookieStorageAPI {
       }
     }
     
-    // Fallback to localStorage if cookie not found
+    // Final fallback to localStorage (for backwards compatibility)
     try {
       const localStorageValue = localStorage.getItem(name);
       if (localStorageValue) {
