@@ -72,7 +72,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
               style={{
                 left: `${x}px`,
                 top: `${y}px`,
-                fontSize: '44.1px',
+                fontSize: '29.5px',
                 color: 'blue',
                 transform: 'translate(-50%, -50%)',
                 pointerEvents: 'none'
@@ -95,8 +95,8 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
                 style={{
                   left: `${x + 25}px`,
                   top: `${y}px`,
-                  fontSize: '44.1px',
-                  color: 'blue',
+                  fontSize: '29.5px',
+                  color: 'black',
                   transform: 'translate(-50%, -50%)',
                   pointerEvents: 'none'
                 }}
@@ -123,9 +123,9 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
             style={{
               left: `${x}px`,
               top: `${y}px`,
-              width: '63px',
-              height: '63px',
-              border: '6px solid blue',
+              width: '42px',
+              height: '42px',
+              border: '4px solid blue',
               borderRadius: '50%',
               backgroundColor: 'transparent',
               transform: 'translate(-50%, -50%)',
