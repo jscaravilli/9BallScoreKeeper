@@ -248,6 +248,10 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Fixed match history disappearing issue by preserving history cookies in emergency cleanup
   - Added automatic recovery system that restores match history from localStorage if cookies are accidentally cleared
   - Enhanced migration system to detect and restore lost match history data
+  - Reverted to cookie-only storage with intelligent compression for match history
+  - Implemented data compression that keeps only essential match info and key events
+  - Added manual recovery button in match history modal to restore from localStorage backup
+  - All match data now stored exclusively in cookies with automatic size management
 - January 2, 2025: Implemented automated canvas-based PDF generation system:
   - Replaced HTML-based printing with direct PNG+markup rendering using HTML5 Canvas
   - Added jsPDF library for automatic single-page PDF creation and download

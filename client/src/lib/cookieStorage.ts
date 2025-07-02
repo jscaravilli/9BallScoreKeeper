@@ -21,22 +21,60 @@ class CookieStorageAPI {
 
   private setCookie(name: string, value: string, options = COOKIE_OPTIONS): void {
     // Smart cookie management to prevent 431 errors
-    const encodedValue = encodeURIComponent(value);
+    let processedValue = value;
+    let encodedValue = encodeURIComponent(value);
     
-    // For large data (match history/events), use localStorage but set a small cookie flag
-    if (encodedValue.length > 2000 || name.includes('history') || name.includes('events')) {
-      // Store actual data in localStorage
-      this.useLocalStorageFallback(name, value);
+    // For large data, compress and split into multiple cookies if needed
+    if (encodedValue.length > 3000) {
+      console.log(`Large cookie ${name} (${encodedValue.length} chars), implementing compression strategy`);
       
-      // Set small cookie flag to indicate data exists in localStorage
-      const flagName = `${name}_flag`;
-      const flagValue = `ls_${Date.now()}`;
-      const expires = new Date();
-      expires.setTime(expires.getTime() + (options.expires * 24 * 60 * 60 * 1000));
-      
-      const flagCookie = `${flagName}=${flagValue}; expires=${expires.toUTCString()}; path=${options.path}; SameSite=${options.sameSite}`;
-      document.cookie = flagCookie;
-      return;
+      // Try to compress the data by storing only essential match info
+      if (name.includes('history')) {
+        try {
+          const data = JSON.parse(value);
+          // Keep only essential fields for match history
+          const compressed = Array.isArray(data) ? data.map(match => ({
+            id: match.id,
+            player1Name: match.player1Name,
+            player1SkillLevel: match.player1SkillLevel,
+            player2Name: match.player2Name,
+            player2SkillLevel: match.player2SkillLevel,
+            player1Score: match.player1Score,
+            player2Score: match.player2Score,
+            winnerId: match.winnerId,
+            completedAt: match.completedAt,
+            historyId: match.historyId,
+            // Store only key scoring events, not every ball state
+            events: match.events ? match.events.filter((e: any) => 
+              e.type === 'ball_scored' || e.type === 'match_completed'
+            ).slice(-20) : [] // Keep last 20 events only
+          })) : data;
+          
+          let finalData = compressed;
+          let finalValue = JSON.stringify(finalData);
+          let finalEncoded = encodeURIComponent(finalValue);
+          
+          if (finalEncoded.length <= 3000) {
+            console.log(`Compressed ${name} from ${encodedValue.length} to ${finalEncoded.length} chars`);
+            processedValue = finalValue;
+            encodedValue = finalEncoded;
+          } else {
+            // If still too large, keep only last 3 matches
+            const recentMatches = Array.isArray(finalData) ? finalData.slice(0, 3) : finalData;
+            finalValue = JSON.stringify(recentMatches);
+            finalEncoded = encodeURIComponent(finalValue);
+            processedValue = finalValue;
+            encodedValue = finalEncoded;
+            console.log(`Further compressed ${name} to last 3 matches: ${finalEncoded.length} chars`);
+          }
+        } catch (error) {
+          console.error('Error compressing match history:', error);
+          // Fallback: truncate the original data
+          const truncated = value.substring(0, 2000);
+          processedValue = truncated;
+          encodedValue = encodeURIComponent(truncated);
+        }
+      }
     }
 
     // For small essential data, use cookies normally
@@ -94,24 +132,7 @@ class CookieStorageAPI {
   }
 
   private getCookie(name: string): string | null {
-    // First check if there's a flag indicating data is in localStorage
-    const flagName = `${name}_flag`;
-    const flagExists = document.cookie.includes(`${flagName}=`);
-    
-    if (flagExists) {
-      // Data is stored in localStorage, retrieve it
-      try {
-        const localStorageValue = localStorage.getItem(name);
-        if (localStorageValue) {
-          console.log(`Retrieved ${name} from localStorage (flagged)`);
-          return localStorageValue;
-        }
-      } catch (error) {
-        console.warn(`localStorage retrieval failed for ${name}:`, error);
-      }
-    }
-    
-    // Check for direct cookie value
+    // Direct cookie retrieval only
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
     
@@ -121,17 +142,6 @@ class CookieStorageAPI {
       if (c.indexOf(nameEQ) === 0) {
         return decodeURIComponent(c.substring(nameEQ.length, c.length));
       }
-    }
-    
-    // Final fallback to localStorage (for backwards compatibility)
-    try {
-      const localStorageValue = localStorage.getItem(name);
-      if (localStorageValue) {
-        console.log(`Found ${name} in localStorage fallback`);
-        return localStorageValue;
-      }
-    } catch (error) {
-      console.warn(`localStorage fallback failed for ${name}:`, error);
     }
     
     return null;
@@ -300,23 +310,7 @@ class CookieStorageAPI {
       console.log(`Raw index cookie value: ${indexCookie}`);
       
       if (!indexCookie) {
-        console.log('DEBUG: No match history index found. Checking localStorage fallback...');
-        
-        // Check localStorage for match history (from hybrid storage approach)
-        try {
-          const localHistory = localStorage.getItem('poolscorer_match_history');
-          if (localHistory) {
-            console.log('Found match history in localStorage, returning it');
-            const parsedHistory = JSON.parse(localHistory);
-            // Ensure historyId exists for all entries
-            return parsedHistory.map((match: any, index: number) => ({
-              ...match,
-              historyId: match.historyId || `local_${index}_${Date.now()}`
-            }));
-          }
-        } catch (error) {
-          console.warn('Error reading localStorage history:', error);
-        }
+        console.log('DEBUG: No match history index found.');
         
         // Check if there are any match history cookies without an index
         const allCookies = document.cookie.split(';');
@@ -547,28 +541,14 @@ class CookieStorageAPI {
         try {
           const parsedHistory = JSON.parse(localHistory);
           if (Array.isArray(parsedHistory) && parsedHistory.length > 0) {
-            console.log(`RECOVERY: Restoring ${parsedHistory.length} matches from localStorage`);
-            // Create index from localStorage data
-            const matchIds = parsedHistory.map((match: any, index: number) => 
-              match.historyId || `recovered_${Date.now()}_${index}`
-            );
+            console.log(`RECOVERY: Restoring ${parsedHistory.length} matches from localStorage to cookies`);
             
-            // Store recovered matches
-            parsedHistory.forEach((match: any, index: number) => {
-              const historyId = matchIds[index];
-              const historyData = JSON.stringify({
-                ...match,
-                historyId: historyId
-              });
-              
-              // Use localStorage for large data with cookie flag
-              localStorage.setItem(`match_history_${historyId}`, historyData);
-              this.setCookie(`match_history_${historyId}_flag`, `ls_${Date.now()}`);
+            // Store each match in the proper cookie format
+            parsedHistory.forEach((match: any) => {
+              this.addToHistory(match);
             });
             
-            // Create index cookie
-            this.setCookie('match_history_index', JSON.stringify(matchIds));
-            console.log(`RECOVERY: Successfully restored match history index with ${matchIds.length} matches`);
+            console.log(`RECOVERY: Successfully restored match history to cookies`);
           }
         } catch (parseError) {
           console.error('RECOVERY: Error parsing localStorage history:', parseError);

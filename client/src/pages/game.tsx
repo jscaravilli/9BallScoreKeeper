@@ -53,29 +53,61 @@ function HistoryDisplay({
     if (localHistory) {
       try {
         const parsed = JSON.parse(localHistory);
-        console.log(`Found ${parsed.length} matches in localStorage, attempting recovery...`);
+        console.log(`Found ${parsed.length} matches in localStorage, attempting cookie recovery...`);
         
-        // Trigger migration
+        // Clear any existing partial cookie data first
+        cookieStorageAPI.clearHistory();
+        
+        // Trigger migration to cookies
         cookieStorageAPI.migrateFromLocalStorage();
         
-        // Force re-render
+        // Force multiple re-renders to ensure data loads
         forceRender(Date.now());
         
         setTimeout(() => {
           forceRender(Date.now() + 1);
-        }, 500);
+          console.log('Recovery complete, checking if matches are now visible...');
+        }, 1000);
         
       } catch (error) {
         console.error('Recovery attempt failed:', error);
       }
     } else {
       console.log('No localStorage history found for recovery');
+      
+      // Also check if there are any orphaned cookie matches
+      const allCookies = document.cookie.split(';');
+      const matchCookies = allCookies.filter(c => c.trim().startsWith('match_history_') && !c.trim().startsWith('match_history_index'));
+      
+      if (matchCookies.length > 0) {
+        console.log(`Found ${matchCookies.length} orphaned match cookies, rebuilding index...`);
+        // Try to rebuild from orphaned cookies
+        forceRender(Date.now());
+      }
     }
   };
 
   if (history.length === 0) {
     const localHistory = localStorage.getItem('poolscorer_match_history');
-    const hasLocalHistory = localHistory && JSON.parse(localHistory).length > 0;
+    let hasLocalHistory = false;
+    let localHistoryCount = 0;
+    
+    try {
+      if (localHistory) {
+        const parsed = JSON.parse(localHistory);
+        hasLocalHistory = Array.isArray(parsed) && parsed.length > 0;
+        localHistoryCount = parsed.length;
+      }
+    } catch (e) {
+      console.error('Error parsing localStorage history:', e);
+    }
+    
+    console.log('History check:', { 
+      localHistory: !!localHistory, 
+      hasLocalHistory, 
+      localHistoryCount,
+      cookieIndex: document.cookie.includes('match_history_index')
+    });
     
     return (
       <div className="overflow-y-auto max-h-96">
@@ -84,19 +116,23 @@ function HistoryDisplay({
           <p>No completed matches yet.</p>
           <p className="text-sm">Win your first match to see it here!</p>
           
-          {hasLocalHistory && (
-            <div className="mt-4">
-              <Button 
-                onClick={handleRecoveryAttempt}
-                variant="outline"
-                size="sm"
-                className="text-blue-600 border-blue-200 hover:bg-blue-50"
-              >
-                Recover Lost History
-              </Button>
-              <p className="text-xs text-gray-400 mt-1">Found backup data in storage</p>
-            </div>
-          )}
+          {/* Always show recovery button for debugging */}
+          <div className="mt-4 space-y-2">
+            <Button 
+              onClick={handleRecoveryAttempt}
+              variant="outline"
+              size="sm"
+              className="text-blue-600 border-blue-200 hover:bg-blue-50"
+            >
+              Recover Lost History
+            </Button>
+            {hasLocalHistory && (
+              <p className="text-xs text-gray-400">Found {localHistoryCount} matches in backup</p>
+            )}
+            <p className="text-xs text-gray-400">
+              Debug: localStorage={!!localHistory}, parsed={hasLocalHistory}
+            </p>
+          </div>
         </div>
       </div>
     );
