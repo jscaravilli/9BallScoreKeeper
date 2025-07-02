@@ -58,29 +58,35 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     // Draw slash marks for each scored point using your provided coordinates
     match.events.forEach((event, eventIndex) => {
       if (event.type === 'ball_scored' && event.player === 1) {
-        scorePosition++;
         const slashDirection = getSlashDirection(currentGame);
-        const coordIndex = scorePosition - 1;
         
-        if (coordIndex < PLAYER1_COORDINATES.length) {
-          const [x, y] = PLAYER1_COORDINATES[coordIndex];
+        // 9-ball is worth 2 points, so it gets 2 tally marks
+        const pointsWorth = event.ballNumber === 9 ? 2 : 1;
+        
+        for (let i = 0; i < pointsWorth; i++) {
+          scorePosition++;
+          const coordIndex = scorePosition - 1;
           
-          marks.push(
-            <div
-              key={`p1-mark-${eventIndex}`}
-              className="absolute text-center font-bold"
-              style={{
-                left: `${x}px`,
-                top: `${y}px`,
-                fontSize: '44.1px',
-                color: 'blue',
-                transform: 'translate(-50%, -50%)',
-                pointerEvents: 'none'
-              }}
-            >
-              {slashDirection}
-            </div>
-          );
+          if (coordIndex < PLAYER1_COORDINATES.length) {
+            const [x, y] = PLAYER1_COORDINATES[coordIndex];
+            
+            marks.push(
+              <div
+                key={`p1-mark-${eventIndex}-${i}`}
+                className="absolute text-center font-bold"
+                style={{
+                  left: `${x}px`,
+                  top: `${y}px`,
+                  fontSize: '44.1px',
+                  color: 'blue',
+                  transform: 'translate(-50%, -50%)',
+                  pointerEvents: 'none'
+                }}
+              >
+                {slashDirection}
+              </div>
+            );
+          }
         }
         
         // If this was a 9-ball, next ball scored will be in the next game
