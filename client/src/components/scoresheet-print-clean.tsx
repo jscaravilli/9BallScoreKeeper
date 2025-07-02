@@ -153,8 +153,8 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       WebkitPrintColorAdjust: 'exact'
     }}>
       <div className="scoresheet-content relative" style={{ 
-        width: '3300px', 
-        height: '2550px',
+        width: 'fit-content', 
+        height: 'fit-content',
         transform: 'scale(0.62)',
         transformOrigin: 'top left'
       }}>
@@ -162,11 +162,12 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
         <img 
           src={scoresheetPng} 
           alt="APA Scoresheet"
-          className="absolute inset-0"
+          className="block"
           style={{ 
-            width: '3300px', 
-            height: '2550px',
-            objectFit: 'fill'
+            width: 'auto', 
+            height: 'auto',
+            maxWidth: '100%',
+            maxHeight: '100%'
           }}
         />
         
