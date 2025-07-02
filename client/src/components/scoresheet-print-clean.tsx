@@ -93,45 +93,16 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
         const currentGame = gameMap.get(eventIndex) || 1;
         const slashDirection = getSlashDirection(currentGame);
         
-        // 9-ball is worth 2 points, so it gets 2 tally marks
-        if (event.ballNumber === 9) {
-          // For 9-ball, place 2 separate tally marks in consecutive positions
-          for (let i = 0; i < 2; i++) {
-            const coordIndex = scorePosition;
-            scorePosition++;
-            
-            if (coordIndex < PLAYER1_COORDINATES.length) {
-              const [x, y] = PLAYER1_COORDINATES[coordIndex];
-              
-              marks.push(
-                <div
-                  key={`p1-9ball-${eventIndex}-${i}-${coordIndex}`}
-                  className="absolute text-center font-bold"
-                  style={{
-                    left: `${x}px`,
-                    top: `${y}px`,
-                    fontSize: '48.5px',
-                    color: 'blue',
-                    transform: 'translate(-50%, -50%)',
-                    pointerEvents: 'none'
-                  }}
-                >
-                  {slashDirection}
-                </div>
-              );
-            }
-          }
-        } else {
-          // Regular balls get 1 tally mark
-          const coordIndex = scorePosition;
-          scorePosition++;
-          
-          if (coordIndex < PLAYER1_COORDINATES.length) {
-            const [x, y] = PLAYER1_COORDINATES[coordIndex];
+        // Each ball scored gets appropriate number of tally marks
+        const pointsWorth = event.ballNumber === 9 ? 2 : 1;
+        
+        for (let i = 0; i < pointsWorth; i++) {
+          if (scorePosition < PLAYER1_COORDINATES.length) {
+            const [x, y] = PLAYER1_COORDINATES[scorePosition];
             
             marks.push(
               <div
-                key={`p1-mark-${eventIndex}-${coordIndex}`}
+                key={`p1-tally-${scorePosition}`}
                 className="absolute text-center font-bold"
                 style={{
                   left: `${x}px`,
@@ -145,6 +116,8 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
                 {slashDirection}
               </div>
             );
+            
+            scorePosition++;
           }
         }
         
@@ -178,8 +151,8 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     
     // Circle the target score if it's an SL target position
     if (SL_TARGET_POSITIONS.includes(player1Target)) {
-      const coordIndex = player1Target - 1;
-      if (coordIndex < PLAYER1_COORDINATES.length) {
+      const coordIndex = player1Target - 1; // Convert to 0-indexed
+      if (coordIndex >= 0 && coordIndex < PLAYER1_COORDINATES.length) {
         const [x, y] = PLAYER1_COORDINATES[coordIndex];
         
         marks.push(
@@ -217,45 +190,16 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
         const currentGame = gameMap.get(eventIndex) || 1;
         const slashDirection = getSlashDirection(currentGame);
         
-        // 9-ball is worth 2 points, so it gets 2 tally marks
-        if (event.ballNumber === 9) {
-          // For 9-ball, place 2 separate tally marks in consecutive positions
-          for (let i = 0; i < 2; i++) {
-            const coordIndex = scorePosition;
-            scorePosition++;
-            
-            if (coordIndex < PLAYER2_COORDINATES.length) {
-              const [x, y] = PLAYER2_COORDINATES[coordIndex];
-              
-              marks.push(
-                <div
-                  key={`p2-9ball-${eventIndex}-${i}-${coordIndex}`}
-                  className="absolute text-center font-bold"
-                  style={{
-                    left: `${x}px`,
-                    top: `${y}px`,
-                    fontSize: '48.5px',
-                    color: 'blue',
-                    transform: 'translate(-50%, -50%)',
-                    pointerEvents: 'none'
-                  }}
-                >
-                  {slashDirection}
-                </div>
-              );
-            }
-          }
-        } else {
-          // Regular balls get 1 tally mark
-          const coordIndex = scorePosition;
-          scorePosition++;
-          
-          if (coordIndex < PLAYER2_COORDINATES.length) {
-            const [x, y] = PLAYER2_COORDINATES[coordIndex];
+        // Each ball scored gets appropriate number of tally marks
+        const pointsWorth = event.ballNumber === 9 ? 2 : 1;
+        
+        for (let i = 0; i < pointsWorth; i++) {
+          if (scorePosition < PLAYER2_COORDINATES.length) {
+            const [x, y] = PLAYER2_COORDINATES[scorePosition];
             
             marks.push(
               <div
-                key={`p2-mark-${eventIndex}-${coordIndex}`}
+                key={`p2-tally-${scorePosition}`}
                 className="absolute text-center font-bold"
                 style={{
                   left: `${x}px`,
@@ -269,6 +213,8 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
                 {slashDirection}
               </div>
             );
+            
+            scorePosition++;
           }
         }
         
@@ -302,8 +248,8 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     
     // Circle the target score if it's an SL target position
     if (SL_TARGET_POSITIONS.includes(player2Target)) {
-      const coordIndex = player2Target - 1;
-      if (coordIndex < PLAYER2_COORDINATES.length) {
+      const coordIndex = player2Target - 1; // Convert to 0-indexed
+      if (coordIndex >= 0 && coordIndex < PLAYER2_COORDINATES.length) {
         const [x, y] = PLAYER2_COORDINATES[coordIndex];
         
         marks.push(
@@ -364,33 +310,22 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       if (event.type === 'ball_scored' && event.player === 1) {
         const currentGame = gameMap.get(eventIndex) || 1;
         const slashDirection = getSlashDirection(currentGame);
+        const pointsWorth = event.ballNumber === 9 ? 2 : 1;
         
-        if (event.ballNumber === 9) {
-          // For 9-ball, place 2 separate tally marks in consecutive positions
-          for (let i = 0; i < 2; i++) {
-            const coordIndex = player1ScorePosition;
+        for (let i = 0; i < pointsWorth; i++) {
+          if (player1ScorePosition < PLAYER1_COORDINATES.length) {
+            const [x, y] = PLAYER1_COORDINATES[player1ScorePosition];
+            tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: currentGame });
             player1ScorePosition++;
-            
-            if (coordIndex < PLAYER1_COORDINATES.length) {
-              const [x, y] = PLAYER1_COORDINATES[coordIndex];
-              tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: currentGame });
-            }
           }
-          
-          // Add vertical separator after 9-ball
+        }
+        
+        // Add vertical separator after 9-ball
+        if (event.ballNumber === 9) {
           const lastCoordIndex = player1ScorePosition - 1;
-          if (lastCoordIndex < PLAYER1_COORDINATES.length) {
+          if (lastCoordIndex >= 0 && lastCoordIndex < PLAYER1_COORDINATES.length) {
             const [x, y] = PLAYER1_COORDINATES[lastCoordIndex];
             verticalLines.push({ x: x + 25 + 3, y: y });
-          }
-        } else {
-          // Regular balls get 1 tally mark
-          const coordIndex = player1ScorePosition;
-          player1ScorePosition++;
-          
-          if (coordIndex < PLAYER1_COORDINATES.length) {
-            const [x, y] = PLAYER1_COORDINATES[coordIndex];
-            tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: currentGame });
           }
         }
       }
@@ -403,33 +338,22 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       if (event.type === 'ball_scored' && event.player === 2) {
         const currentGame = gameMap.get(eventIndex) || 1;
         const slashDirection = getSlashDirection(currentGame);
+        const pointsWorth = event.ballNumber === 9 ? 2 : 1;
         
-        if (event.ballNumber === 9) {
-          // For 9-ball, place 2 separate tally marks in consecutive positions
-          for (let i = 0; i < 2; i++) {
-            const coordIndex = player2ScorePosition;
+        for (let i = 0; i < pointsWorth; i++) {
+          if (player2ScorePosition < PLAYER2_COORDINATES.length) {
+            const [x, y] = PLAYER2_COORDINATES[player2ScorePosition];
+            tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: currentGame });
             player2ScorePosition++;
-            
-            if (coordIndex < PLAYER2_COORDINATES.length) {
-              const [x, y] = PLAYER2_COORDINATES[coordIndex];
-              tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: currentGame });
-            }
           }
-          
-          // Add vertical separator after 9-ball
+        }
+        
+        // Add vertical separator after 9-ball
+        if (event.ballNumber === 9) {
           const lastCoordIndex = player2ScorePosition - 1;
-          if (lastCoordIndex < PLAYER2_COORDINATES.length) {
+          if (lastCoordIndex >= 0 && lastCoordIndex < PLAYER2_COORDINATES.length) {
             const [x, y] = PLAYER2_COORDINATES[lastCoordIndex];
             verticalLines.push({ x: x + 25 + 3, y: y });
-          }
-        } else {
-          // Regular balls get 1 tally mark
-          const coordIndex = player2ScorePosition;
-          player2ScorePosition++;
-          
-          if (coordIndex < PLAYER2_COORDINATES.length) {
-            const [x, y] = PLAYER2_COORDINATES[coordIndex];
-            tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: currentGame });
           }
         }
       }
@@ -437,16 +361,16 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
 
     // Add target circles for both players
     if (SL_TARGET_POSITIONS.includes(player1Target)) {
-      const coordIndex = player1Target - 1;
-      if (coordIndex < PLAYER1_COORDINATES.length) {
+      const coordIndex = player1Target - 1; // Convert to 0-indexed
+      if (coordIndex >= 0 && coordIndex < PLAYER1_COORDINATES.length) {
         const [x, y] = PLAYER1_COORDINATES[coordIndex];
         circles.push({ x: x + 3, y: y });
       }
     }
 
     if (SL_TARGET_POSITIONS.includes(player2Target)) {
-      const coordIndex = player2Target - 1;
-      if (coordIndex < PLAYER2_COORDINATES.length) {
+      const coordIndex = player2Target - 1; // Convert to 0-indexed
+      if (coordIndex >= 0 && coordIndex < PLAYER2_COORDINATES.length) {
         const [x, y] = PLAYER2_COORDINATES[coordIndex];
         circles.push({ x: x + 3, y: y });
       }

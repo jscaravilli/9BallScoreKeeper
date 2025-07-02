@@ -260,6 +260,8 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - FIXED 9-ball double tally issue - 9-ball now correctly places 2 tally marks in consecutive positions
   - FIXED skill level target circles - corrected to use actual APA handicap values (SL5=38, not 35)
   - Implemented centralized game tracking to synchronize slash directions between players
+  - FIXED tally mark overlapping - simplified coordinate indexing to prevent rendering conflicts
+  - Corrected target circle positioning with proper 0-indexed coordinate conversion for both players
 - January 2, 2025: Implemented automated canvas-based PDF generation system:
   - Replaced HTML-based printing with direct PNG+markup rendering using HTML5 Canvas
   - Added jsPDF library for automatic single-page PDF creation and download
