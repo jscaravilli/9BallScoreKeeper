@@ -49,16 +49,16 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
   function renderPlayer1Marks() {
     const marks: JSX.Element[] = [];
     
-    // Track which game each scored ball belongs to
+    // Track game numbers by counting 9-ball scoring events
     let currentGame = 1;
-    let ballsInCurrentGame = 0;
+    let scorePosition = 0;
     
     // Draw slash marks for each scored point using your provided coordinates
     match.events.forEach((event, eventIndex) => {
       if (event.type === 'ball_scored' && event.player === 1) {
-        ballsInCurrentGame++;
+        scorePosition++;
         const slashDirection = getSlashDirection(currentGame);
-        const coordIndex = ballsInCurrentGame - 1;
+        const coordIndex = scorePosition - 1;
         
         if (coordIndex < PLAYER1_COORDINATES.length) {
           const [x, y] = PLAYER1_COORDINATES[coordIndex];
@@ -80,11 +80,11 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
             </div>
           );
         }
-      }
-      
-      // Check if this event signals end of game (new game started)
-      if (event.type === 'match_completed' || (event.details && event.details.includes('Game'))) {
-        currentGame++;
+        
+        // If this was a 9-ball, next ball scored will be in the next game
+        if (event.ballNumber === 9) {
+          currentGame++;
+        }
       }
     });
     
