@@ -246,6 +246,9 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - PDF automatically sized for letter paper (landscape) with proper margins and centering
   - Match history print buttons now generate timestamped PDFs with player names in filename
   - No more browser print dialogs - direct PDF download with canvas-rendered scoresheet image
+  - Enhanced to render tallies for both Player 1 (lag winner) and Player 2 with separate coordinate arrays
+  - Added target circles for both players based on their individual skill levels
+  - PDF opens in new window with manual print instruction, no automatic printing
 
 ## User Preferences
 

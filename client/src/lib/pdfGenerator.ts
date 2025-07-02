@@ -216,7 +216,7 @@ export async function printMatchScoresheet(match: any): Promise<void> {
   }
 
   try {
-    // Player 1 coordinates array (same as in scoresheet component)
+    // Player 1 coordinates array (lag winner)
     const PLAYER1_COORDINATES = [
       [255,149], [283,149], [310,149], [341,149], [373,149], [411,149], [435,149], [466,149], [497,149], [542,149],
       [591,149], [618,149], [649,149], [698,149], [753,149], [781,149], [812,149], [840,149], [885,149], [940,149],
@@ -228,6 +228,18 @@ export async function printMatchScoresheet(match: any): Promise<void> {
       [2787,149], [2818,149], [2846,149], [2877,149], [2925,149]
     ];
 
+    // Player 2 coordinates array
+    const PLAYER2_COORDINATES = [
+      [252,511], [280,511], [307,511], [338,511], [370,511], [408,511], [432,511], [463,511], [494,511], [539,511],
+      [588,511], [615,511], [646,511], [695,511], [750,511], [778,511], [809,511], [837,511], [882,511], [937,511],
+      [965,511], [992,511], [1020,511], [1051,511], [1099,511], [1148,511], [1179,511], [1210,511], [1238,511], [1269,511],
+      [1317,511], [1369,511], [1397,511], [1428,511], [1473,511], [1511,511], [1542,511], [1591,511], [1643,511], [1674,511],
+      [1701,511], [1729,511], [1760,511], [1788,511], [1819,511], [1864,511], [1916,511], [1944,511], [1975,511], [2020,511],
+      [2061,511], [2092,511], [2120,511], [2148,511], [2196,511], [2244,511], [2279,511], [2307,511], [2338,511], [2383,511],
+      [2424,511], [2452,511], [2483,511], [2511,511], [2559,511], [2608,511], [2639,511], [2670,511], [2698,511], [2739,511],
+      [2784,511], [2815,511], [2843,511], [2874,511], [2922,511]
+    ];
+
     // Extract data for canvas rendering
     const tallies: Array<{ x: number; y: number; symbol: string; game: number }> = [];
     const circles: Array<{ x: number; y: number }> = [];
@@ -235,7 +247,8 @@ export async function printMatchScoresheet(match: any): Promise<void> {
 
     // Process match events to build markup data
     let gameNumber = 1;
-    let markIndex = 0;
+    let player1MarkIndex = 0;
+    let player2MarkIndex = 0;
 
     // Helper function to get slash direction
     const getSlashDirection = (gameNum: number): string => {
@@ -245,11 +258,16 @@ export async function printMatchScoresheet(match: any): Promise<void> {
     console.log('Processing match events for PDF:', match.events.length, 'events');
 
     match.events.forEach((event: any, eventIndex: number) => {
-      if (event.type === 'ball_scored' && event.player === 1) {
-        console.log(`Event ${eventIndex}: Ball ${event.ballNumber} scored by player 1, markIndex: ${markIndex}`);
+      if (event.type === 'ball_scored') {
+        const player = event.player;
+        const isPlayer1 = player === 1;
+        const coordinates = isPlayer1 ? PLAYER1_COORDINATES : PLAYER2_COORDINATES;
+        const markIndex = isPlayer1 ? player1MarkIndex : player2MarkIndex;
         
-        const coord = PLAYER1_COORDINATES[markIndex];
-        if (coord && markIndex < PLAYER1_COORDINATES.length) {
+        console.log(`Event ${eventIndex}: Ball ${event.ballNumber} scored by player ${player}, markIndex: ${markIndex}`);
+        
+        const coord = coordinates[markIndex];
+        if (coord && markIndex < coordinates.length) {
           const [x, y] = coord;
           const slashDirection = getSlashDirection(gameNumber);
           
@@ -257,35 +275,60 @@ export async function printMatchScoresheet(match: any): Promise<void> {
             // 9-ball gets 2 tally marks
             tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: gameNumber });
             tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: gameNumber });
-            console.log(`Added 2 tallies for 9-ball at position ${markIndex}, coords: ${x}, ${y}`);
+            console.log(`Added 2 tallies for 9-ball by player ${player} at position ${markIndex}, coords: ${x}, ${y}`);
             
             // Add vertical line after game ends (use last position for reference)
             verticalLines.push({ x: x + 25, y: y });
             gameNumber++;
-            markIndex += 2; // 9-ball takes 2 positions
+            
+            // Update mark index for the scoring player
+            if (isPlayer1) {
+              player1MarkIndex += 2; // 9-ball takes 2 positions
+            } else {
+              player2MarkIndex += 2;
+            }
           } else {
             // Regular balls get 1 tally mark
             tallies.push({ x: x + 3, y: y, symbol: slashDirection, game: gameNumber });
-            console.log(`Added 1 tally for ball ${event.ballNumber} at position ${markIndex}, coords: ${x}, ${y}`);
-            markIndex += 1; // Regular ball takes 1 position
+            console.log(`Added 1 tally for ball ${event.ballNumber} by player ${player} at position ${markIndex}, coords: ${x}, ${y}`);
+            
+            // Update mark index for the scoring player
+            if (isPlayer1) {
+              player1MarkIndex += 1; // Regular ball takes 1 position
+            } else {
+              player2MarkIndex += 1;
+            }
           }
         } else {
-          console.warn(`No coordinate available for markIndex ${markIndex}, max is ${PLAYER1_COORDINATES.length - 1}`);
+          console.warn(`No coordinate available for player ${player} markIndex ${markIndex}, max is ${coordinates.length - 1}`);
         }
       }
     });
 
     console.log(`Final tally count: ${tallies.length}, vertical lines: ${verticalLines.length}, circles: ${circles.length}`);
 
-    // Add target circle if needed (skill level positions)
+    // Add target circles for both players (skill level positions)
     const SL_TARGET_POSITIONS = [1, 5, 10, 14, 19, 25, 31, 35, 38, 46, 50, 55, 60, 65, 70, 75];
-    const player1Target = getPointsToWin(match.player1SkillLevel);
     
+    // Player 1 target circle
+    const player1Target = getPointsToWin(match.player1SkillLevel);
     if (SL_TARGET_POSITIONS.includes(player1Target)) {
       const coordIndex = player1Target - 1;
       if (coordIndex < PLAYER1_COORDINATES.length) {
         const [x, y] = PLAYER1_COORDINATES[coordIndex];
         circles.push({ x: x + 3, y: y });
+        console.log(`Added target circle for Player 1 at position ${player1Target}, coords: ${x}, ${y}`);
+      }
+    }
+    
+    // Player 2 target circle
+    const player2Target = getPointsToWin(match.player2SkillLevel);
+    if (SL_TARGET_POSITIONS.includes(player2Target)) {
+      const coordIndex = player2Target - 1;
+      if (coordIndex < PLAYER2_COORDINATES.length) {
+        const [x, y] = PLAYER2_COORDINATES[coordIndex];
+        circles.push({ x: x + 3, y: y });
+        console.log(`Added target circle for Player 2 at position ${player2Target}, coords: ${x}, ${y}`);
       }
     }
 
