@@ -106,13 +106,13 @@ export async function renderScoresheetToCanvas(
     // Reset to standard font for other elements
     ctx.font = 'bold 36px Arial';
     
-    // Skill levels
-    ctx.fillText(matchData.player1SkillLevel.toString(), 841, 224); // [841,224] Player1 SL
-    ctx.fillText(matchData.player2SkillLevel.toString(), 1073, 446); // [1073,446] Player2 SL - updated coordinate
+    // Skill levels - positioned in Player # fields
+    ctx.fillText(matchData.player1SkillLevel.toString(), 272, 94); // Player1 SL in Player # field
+    ctx.fillText(matchData.player2SkillLevel.toString(), 272, 152); // Player2 SL in Player # field
     
-    // Handicaps (targets)
-    ctx.fillText(matchData.player1Target.toString(), 898, 307); // [898,307] Player1 Handicap
-    ctx.fillText(matchData.player2Target.toString(), 898, 442); // [898,442] Player2 Handicap
+    // Handicaps (targets) - positioned in Score fields  
+    ctx.fillText(matchData.player1Target.toString(), 631, 27); // Player1 Target in Score field
+    ctx.fillText(matchData.player2Target.toString(), 631, 143); // Player2 Target in Score field
     
     // Final scores
     ctx.fillText(matchData.player1FinalScore.toString(), 1073, 230); // [1073,230] Player1 final score

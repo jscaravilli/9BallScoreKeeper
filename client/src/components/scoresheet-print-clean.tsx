@@ -409,30 +409,25 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       return fontSize;
     };
 
-    // Calculate dynamic font sizes for player names
+    // Player names without dynamic sizing constraints
     // Note: LAG tag is visual-only, not part of underlying name data
     const player1Text = `${match.player1Name} (LAG)`;
     const player2Text = match.player2Name;
-    const player1MaxWidth = 810; // Right edge at [810,322]
-    const player2MaxWidth = 810; // Right edge at [810,465]
-    
-    const player1FontSize = calculateFontSize(player1Text, player1MaxWidth);
-    const player2FontSize = calculateFontSize(player2Text, player2MaxWidth);
 
     // Coordinate definitions for precise positioning
     // Note: coordinates represent bottom-left anchor point of text
     const coordinates = {
-      // Player names - bottom-left anchored with dynamic sizing
-      player1Name: { x: 0, y: 322, fontSize: `${player1FontSize}px`, fontWeight: 'bold', color: 'blue' },
-      player2Name: { x: 1, y: 465, fontSize: `${player2FontSize}px`, fontWeight: 'bold', color: 'blue' },
+      // Player names - starting from specified points
+      player1Name: { x: 0, y: 322, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      player2Name: { x: 1, y: 465, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
       
-      // Skill levels  
-      player1SkillLevel: { x: 1200, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
-      player2SkillLevel: { x: 1073, y: 446, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      // Skill levels - positioned in Player # fields
+      player1SkillLevel: { x: 272, y: 94, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      player2SkillLevel: { x: 272, y: 152, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
-      // Handicaps (targets)
-      player1Target: { x: 1400, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
-      player2Target: { x: 1400, y: 100, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      // Target scores (handicaps) - positioned in Score fields
+      player1Target: { x: 631, y: 27, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      player2Target: { x: 631, y: 143, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Final scores
       player1Score: { x: 1600, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
