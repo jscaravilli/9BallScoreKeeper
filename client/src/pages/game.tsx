@@ -22,59 +22,90 @@ import type { Match, BallInfo, MatchEvent } from "@shared/schema";
 
 // Function to print match scoresheet dynamically
 function printMatchScoresheet(match: any, filename: string) {
-  // Create a temporary container with the scoresheet component
-  const tempId = `temp-scoresheet-${Date.now()}`;
-  const tempContainer = document.createElement('div');
-  tempContainer.id = tempId;
-  tempContainer.style.position = 'absolute';
-  tempContainer.style.left = '-9999px';
-  tempContainer.style.top = '-9999px';
-  document.body.appendChild(tempContainer);
-
-  // Create React root and render the scoresheet
-  import('react-dom/client').then((ReactDOMClient) => {
-    import('react').then((React) => {
-      const root = ReactDOMClient.createRoot(tempContainer);
-      const scoresheetElement = React.createElement(ScoresheetPrint, { match });
+  // Load the scoresheet image and convert to base64
+  const img = new Image();
+  img.onload = function() {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx?.drawImage(img, 0, 0);
+    const base64Image = canvas.toDataURL('image/png');
+    
+    // Create print window with the scoresheet
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>${filename}</title>
+            <style>
+              @page { 
+                size: landscape;
+                margin: 0.5in;
+              }
+              body { 
+                margin: 0; 
+                padding: 0; 
+                font-family: Arial, sans-serif;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+              }
+              .scoresheet-container {
+                position: relative;
+                width: 100%;
+                max-width: 1000px;
+                aspect-ratio: 11/8.5;
+              }
+              .scoresheet-bg {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+              }
+              .overlay {
+                position: absolute;
+                inset: 0;
+                font-size: 11px;
+                font-family: Arial;
+              }
+              @media print { 
+                body { padding: 0; margin: 0; }
+                * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="scoresheet-container">
+              <img src="${base64Image}" alt="APA Scoresheet" class="scoresheet-bg" />
+              <div class="overlay">
+                <div style="position: absolute; top: 97px; left: 166px; font-size: 12px; font-weight: bold;">${match.player1Name}</div>
+                <div style="position: absolute; top: 124px; left: 166px; font-size: 12px; font-weight: bold;">${match.player2Name}</div>
+                <div style="position: absolute; top: 97px; left: 277px; width: 20px; font-size: 11px; font-weight: bold; text-align: center;">${match.player1SkillLevel}</div>
+                <div style="position: absolute; top: 124px; left: 277px; width: 20px; font-size: 11px; font-weight: bold; text-align: center;">${match.player2SkillLevel}</div>
+                <div style="position: absolute; top: 97px; right: 245px; width: 30px; font-size: 11px; font-weight: bold; text-align: center;">${match.player1Score}</div>
+                <div style="position: absolute; top: 124px; right: 245px; width: 30px; font-size: 11px; font-weight: bold; text-align: center;">${match.player2Score}</div>
+                <div style="position: absolute; top: 97px; right: 355px; width: 30px; font-size: 11px; font-weight: bold; text-align: center;">${match.player1SafetiesUsed || 0}</div>
+                <div style="position: absolute; top: 124px; right: 355px; width: 30px; font-size: 11px; font-weight: bold; text-align: center;">${match.player2SafetiesUsed || 0}</div>
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
       
-      root.render(scoresheetElement);
-      
-      // Wait for rendering then trigger print
+      // Print after a delay to ensure everything loads
       setTimeout(() => {
-        // Use the existing printElement function from usePrint hook
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
-          const scoresheetHTML = tempContainer.innerHTML;
-          printWindow.document.write(`
-            <html>
-              <head>
-                <title>${filename}</title>
-                <style>
-                  body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
-                  @media print { 
-                    body { padding: 0; margin: 0; } 
-                    * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
-                  }
-                </style>
-              </head>
-              <body>
-                ${scoresheetHTML}
-              </body>
-            </html>
-          `);
-          printWindow.document.close();
-          printWindow.print();
-          printWindow.onafterprint = () => printWindow.close();
-        }
-        
-        // Clean up
-        setTimeout(() => {
-          root.unmount();
-          document.body.removeChild(tempContainer);
-        }, 1000);
+        printWindow.print();
+        printWindow.onafterprint = () => printWindow.close();
       }, 1000);
-    });
-  });
+    }
+  };
+  
+  // Load the scoresheet image from the asset
+  img.src = '/src/assets/9B Blank-0_1751450594313.png';
 }
 
 // History Display Component
