@@ -680,9 +680,9 @@ export default function Game() {
       }
 
       // Check for special 9-ball win (9-ball pocketed during game)
-      if (ballNumber === 9) {
+      if (ballNumber === 9 && ball.state === 'scored' && ball.scoredBy === storageMatch.currentPlayer) {
         console.log('9-ball win triggered, ball states should be:', ballStates);
-        setGameWinner(currentMatch.currentPlayer as 1 | 2);
+        setGameWinner(storageMatch.currentPlayer as 1 | 2);
         setShowGameWin(true);
         // Don't return - let the mutation complete
       }
