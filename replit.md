@@ -309,7 +309,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Skill levels: [841,228] (Player1), [841,370] (Player2)
   - Handicaps/Targets: [885,325] (Player1), [885,460] (Player2)
   - Final scores: [1073,246] (Player1), [1077,466] (Player2) - should equal tallies
-  - Total innings: [1073,308] (primary), [2533,333] (secondary)
+  - Total innings: [1073,308] (primary), [2533,348] (secondary)
   - Total dead balls: [1073,382]
   - Timestamps: [2465,76] (start time), [2941,76] (end time)
   - Updated both PDF generation and scoresheet display components with correct positioning

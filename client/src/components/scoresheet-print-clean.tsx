@@ -435,7 +435,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       
       // Innings - aligned x coordinates
       innings: { x: 1073, y: 308, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
-      innings2: { x: 2533, y: 333, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      innings2: { x: 2533, y: 348, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Dead balls
       deadBalls: { x: 1073, y: 382, fontSize: '36px', fontWeight: 'bold', color: 'blue' },

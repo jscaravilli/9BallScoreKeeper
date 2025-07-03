@@ -120,7 +120,7 @@ export async function renderScoresheetToCanvas(
     
     // Match statistics - aligned x coordinates
     ctx.fillText(matchData.totalInnings.toString(), 1073, 308); // [1073,308] Total Innings
-    ctx.fillText(matchData.totalInnings.toString(), 2533, 333); // [2533,333] Total Innings (second location)
+    ctx.fillText(matchData.totalInnings.toString(), 2533, 348); // [2533,348] Total Innings (second location)
     ctx.fillText(matchData.totalDeadBalls.toString(), 1073, 382); // [1073,382] Total dead balls
     ctx.fillText(matchData.player1Safeties.toString(), 2727, 244); // [2727,244] Player1 safeties
     ctx.fillText(matchData.player2Safeties.toString(), 2733, 435); // [2733,435] Player2 safeties
