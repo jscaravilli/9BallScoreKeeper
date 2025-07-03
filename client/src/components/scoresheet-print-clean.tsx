@@ -417,9 +417,9 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     // Coordinate definitions for precise positioning
     // Note: coordinates represent bottom-left anchor point of text
     const coordinates = {
-      // Player names - using display coordinates (different from PDF), non-bold, smaller font
-      player1Name: { x: 492, y: 320, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
-      player2Name: { x: 492, y: 450, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
+      // Player names - using same coordinates as PDF, non-bold, smaller font
+      player1Name: { x: 488, y: 326, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
+      player2Name: { x: 488, y: 456, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
       
       // Skill levels  
       player1SkillLevel: { x: 841, y: 228, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
