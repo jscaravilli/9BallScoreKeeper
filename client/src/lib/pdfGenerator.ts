@@ -111,8 +111,8 @@ export async function renderScoresheetToCanvas(
     ctx.fillText(matchData.player2SkillLevel.toString(), 841, 370); // [841,370] Player2 SL
     
     // Handicaps (targets)
-    ctx.fillText(matchData.player1Target.toString(), 890, 307); // [890,307] Player1 Handicap
-    ctx.fillText(matchData.player2Target.toString(), 890, 442); // [890,442] Player2 Handicap
+    ctx.fillText(matchData.player1Target.toString(), 887, 317); // [887,317] Player1 Handicap
+    ctx.fillText(matchData.player2Target.toString(), 887, 452); // [887,452] Player2 Handicap
     
     // Final scores
     ctx.fillText(matchData.player1FinalScore.toString(), 1073, 246); // [1073,246] Player1 final score

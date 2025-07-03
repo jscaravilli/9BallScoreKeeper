@@ -307,7 +307,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - July 2, 2025: CORRECTED all scoresheet markup coordinates to match final specifications:
   - Player names: [488,326] (Player1), [488,462] (Player2) - limited to 18 characters, non-bold, 32px font
   - Skill levels: [841,228] (Player1), [841,370] (Player2)
-  - Handicaps/Targets: [890,307] (Player1), [890,442] (Player2)
+  - Handicaps/Targets: [887,317] (Player1), [887,452] (Player2)
   - Final scores: [1073,246] (Player1), [1077,466] (Player2) - should equal tallies
   - Total innings: [1075,308] (primary), [2533,333] (secondary)
   - Total dead balls: [1073,382]

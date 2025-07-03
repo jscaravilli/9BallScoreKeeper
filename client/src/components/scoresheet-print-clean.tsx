@@ -426,8 +426,8 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       player2SkillLevel: { x: 841, y: 370, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Handicaps (targets)
-      player1Target: { x: 890, y: 307, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
-      player2Target: { x: 890, y: 442, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      player1Target: { x: 887, y: 317, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      player2Target: { x: 887, y: 452, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Final scores
       player1Score: { x: 1073, y: 246, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
