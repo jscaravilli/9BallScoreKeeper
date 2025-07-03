@@ -100,8 +100,8 @@ export async function renderScoresheetToCanvas(
     
     // Set smaller, non-bold font for player names
     ctx.font = '32px Arial';
-    ctx.fillText(player1Text, 492, 320); // Player 1: [492,320]
-    ctx.fillText(player2Text, 492, 450); // Player 2: [492,450]
+    ctx.fillText(player1Text, 488, 326); // Player 1: [488,326]
+    ctx.fillText(player2Text, 488, 456); // Player 2: [488,456]
     
     // Reset to standard font for other elements
     ctx.font = 'bold 36px Arial';
