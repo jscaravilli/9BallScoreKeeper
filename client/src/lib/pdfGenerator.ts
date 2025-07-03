@@ -118,15 +118,15 @@ export async function renderScoresheetToCanvas(
     ctx.fillText(matchData.player1FinalScore.toString(), 1073, 246); // [1073,246] Player1 final score
     ctx.fillText(matchData.player2FinalScore.toString(), 1077, 466); // [1077,466] Player2 final score
     
-    // Match statistics
-    ctx.fillText(matchData.totalInnings.toString(), 1075, 308); // [1075,308] Total Innings
+    // Match statistics - aligned x coordinates
+    ctx.fillText(matchData.totalInnings.toString(), 1073, 308); // [1073,308] Total Innings
     ctx.fillText(matchData.totalInnings.toString(), 2533, 333); // [2533,333] Total Innings (second location)
     ctx.fillText(matchData.totalDeadBalls.toString(), 1073, 382); // [1073,382] Total dead balls
     ctx.fillText(matchData.player1Safeties.toString(), 2727, 244); // [2727,244] Player1 safeties
     ctx.fillText(matchData.player2Safeties.toString(), 2733, 435); // [2733,435] Player2 safeties
     
-    // Timestamps - using correct coordinates
-    ctx.font = 'bold 24px Arial';
+    // Timestamps - larger font size
+    ctx.font = 'bold 28px Arial';
     ctx.fillText(matchData.matchStartTime, 2465, 76); // [2465,76] Match start time (MM/dd/YYYY, HH:MM AM/PM)
     ctx.fillText(matchData.matchEndTime, 2941, 76); // [2941,76] Match end time (HH:MM AM/PM)
   }

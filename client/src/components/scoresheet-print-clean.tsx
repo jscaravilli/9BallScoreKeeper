@@ -433,8 +433,8 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       player1Score: { x: 1073, y: 246, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       player2Score: { x: 1077, y: 466, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
-      // Innings
-      innings: { x: 1075, y: 308, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      // Innings - aligned x coordinates
+      innings: { x: 1073, y: 308, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       innings2: { x: 2533, y: 333, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Dead balls
@@ -444,9 +444,9 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       player1Safeties: { x: 2200, y: 50, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       player2Safeties: { x: 2200, y: 100, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
-      // Timestamps - using correct coordinates
-      startTime: { x: 2465, y: 76, fontSize: '24px', fontWeight: 'bold', color: 'blue' },
-      endTime: { x: 2941, y: 76, fontSize: '24px', fontWeight: 'bold', color: 'blue' }
+      // Timestamps - larger font size
+      startTime: { x: 2465, y: 76, fontSize: '28px', fontWeight: 'bold', color: 'blue' },
+      endTime: { x: 2941, y: 76, fontSize: '28px', fontWeight: 'bold', color: 'blue' }
     };
 
     // Create text overlays for each data point
