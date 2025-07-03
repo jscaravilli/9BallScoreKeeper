@@ -304,6 +304,12 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Added duplicate total innings display for additional scoresheet field
   - Both PDF generation and scoresheet display now show innings count at two locations
   - Reuses same calculated totalInnings value for consistency
+- July 2, 2025: CORRECTED all scoresheet markup coordinates to match specifications:
+  - Player names: [492,315] (Player1), [492,460] (Player2) - limited to 10 characters, non-bold, 32px font
+  - Skill levels: [841,228] (Player1), [841,370] (Player2)
+  - Handicaps/Targets: [898,462] (Player1), [898,320] (Player2)
+  - Timestamps: [2465,76] (start time), [2941,76] (end time)
+  - Updated both PDF generation and scoresheet display components with correct positioning
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
 - January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
 - January 2, 2025: RESOLVED "431 Request Header Fields Too Large" service worker error:

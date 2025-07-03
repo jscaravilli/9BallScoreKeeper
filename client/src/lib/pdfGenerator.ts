@@ -108,12 +108,12 @@ export async function renderScoresheetToCanvas(
     ctx.font = 'bold 36px Arial';
     
     // Skill levels
-    ctx.fillText(matchData.player1SkillLevel.toString(), 841, 224); // [841,224] Player1 SL
-    ctx.fillText(matchData.player2SkillLevel.toString(), 1073, 446); // [1073,446] Player2 SL - updated coordinate
+    ctx.fillText(matchData.player1SkillLevel.toString(), 841, 228); // [841,228] Player1 SL
+    ctx.fillText(matchData.player2SkillLevel.toString(), 841, 370); // [841,370] Player2 SL
     
     // Handicaps (targets)
-    ctx.fillText(matchData.player1Target.toString(), 898, 307); // [898,307] Player1 Handicap
-    ctx.fillText(matchData.player2Target.toString(), 898, 442); // [898,442] Player2 Handicap
+    ctx.fillText(matchData.player1Target.toString(), 898, 462); // [898,462] Player1 Handicap
+    ctx.fillText(matchData.player2Target.toString(), 898, 320); // [898,320] Player2 Handicap
     
     // Final scores
     ctx.fillText(matchData.player1FinalScore.toString(), 1073, 230); // [1073,230] Player1 final score
@@ -126,10 +126,10 @@ export async function renderScoresheetToCanvas(
     ctx.fillText(matchData.player1Safeties.toString(), 2727, 244); // [2727,244] Player1 safeties
     ctx.fillText(matchData.player2Safeties.toString(), 2733, 435); // [2733,435] Player2 safeties
     
-    // Timestamps - using points 0 and 1 as bottom-left anchors
-    ctx.font = 'bold 32px Arial';
-    ctx.fillText(`Start: ${matchData.matchStartTime}`, 0, 1); // Point 0 - Match start time
-    ctx.fillText(`End: ${matchData.matchEndTime}`, 1, 1); // Point 1 - Match end time
+    // Timestamps - using correct coordinates
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText(matchData.matchStartTime, 2465, 76); // [2465,76] Match start time (MM/dd/YYYY, HH:MM AM/PM)
+    ctx.fillText(matchData.matchEndTime, 2941, 76); // [2941,76] Match end time (HH:MM AM/PM)
   }
   
   return canvas;

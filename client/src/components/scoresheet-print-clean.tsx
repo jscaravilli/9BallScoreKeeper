@@ -422,12 +422,12 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       player2Name: { x: 492, y: 460, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
       
       // Skill levels  
-      player1SkillLevel: { x: 1200, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
-      player2SkillLevel: { x: 1073, y: 446, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      player1SkillLevel: { x: 841, y: 228, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      player2SkillLevel: { x: 841, y: 370, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Handicaps (targets)
-      player1Target: { x: 1400, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
-      player2Target: { x: 1400, y: 100, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      player1Target: { x: 898, y: 462, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      player2Target: { x: 898, y: 320, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Final scores
       player1Score: { x: 1600, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
@@ -444,9 +444,9 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       player1Safeties: { x: 2200, y: 50, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       player2Safeties: { x: 2200, y: 100, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
-      // Timestamps - bottom-left anchored
-      startTime: { x: 0, y: 1, fontSize: '24px', fontWeight: 'normal', color: 'blue' },
-      endTime: { x: 1, y: 1, fontSize: '24px', fontWeight: 'normal', color: 'blue' }
+      // Timestamps - using correct coordinates
+      startTime: { x: 2465, y: 76, fontSize: '24px', fontWeight: 'bold', color: 'blue' },
+      endTime: { x: 2941, y: 76, fontSize: '24px', fontWeight: 'bold', color: 'blue' }
     };
 
     // Create text overlays for each data point
