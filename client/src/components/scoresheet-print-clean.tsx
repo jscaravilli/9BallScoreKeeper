@@ -410,7 +410,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     };
 
     // Player names with correct markup coordinates - limit to 10 characters
-    // Note: LAG tag is visual-only, not part of underlying name data
+    // LAG tag appears on scoresheet display but not in PDF output
     const player1Text = `${match.player1Name.slice(0, 10)} (LAG)`;
     const player2Text = match.player2Name.slice(0, 10);
 

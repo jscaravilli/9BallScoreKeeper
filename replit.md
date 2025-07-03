@@ -310,6 +310,11 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Handicaps/Targets: [898,462] (Player1), [898,320] (Player2)
   - Timestamps: [2465,76] (start time), [2941,76] (end time)
   - Updated both PDF generation and scoresheet display components with correct positioning
+- July 2, 2025: SEPARATED LAG tag display between scoresheet and PDF output:
+  - LAG tag appears on scoresheet display for visual reference but NOT in PDF generation
+  - PDF output shows clean player names without LAG designation for official APA submission
+  - Scoresheet display retains LAG tag for user interface clarity
+  - Maintains separation between visual preview and official printed documentation
 - January 2, 2025: Enhanced target scoring with smart circling only on skill level positions (1,5,10,14,19,25,31,35,38,46,50,55,60,65,70,75)
 - January 2, 2025: Fixed port configuration - reverted to port 5000 for Replit preview console compatibility
 - January 2, 2025: RESOLVED "431 Request Header Fields Too Large" service worker error:

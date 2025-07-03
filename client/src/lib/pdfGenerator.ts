@@ -95,8 +95,7 @@ export async function renderScoresheetToCanvas(
     };
     
     // Player names - limit to 10 characters, non-bold, smaller font
-    // LAG tag is added for display only, not part of the actual name data
-    const player1Text = `${matchData.player1Name.slice(0, 10)} (LAG)`;
+    const player1Text = matchData.player1Name.slice(0, 10);
     const player2Text = matchData.player2Name.slice(0, 10);
     
     // Set smaller, non-bold font for player names
