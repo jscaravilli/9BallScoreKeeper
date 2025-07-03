@@ -419,7 +419,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     const coordinates = {
       // Player names - using same coordinates as PDF, non-bold, smaller font
       player1Name: { x: 488, y: 326, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
-      player2Name: { x: 488, y: 456, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
+      player2Name: { x: 488, y: 462, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
       
       // Skill levels  
       player1SkillLevel: { x: 841, y: 228, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
@@ -430,15 +430,15 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       player2Target: { x: 892, y: 326, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Final scores
-      player1Score: { x: 1073, y: 236, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
-      player2Score: { x: 1077, y: 446, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      player1Score: { x: 1073, y: 246, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      player2Score: { x: 1077, y: 466, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Innings
       innings: { x: 1075, y: 308, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       innings2: { x: 2533, y: 333, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Dead balls
-      deadBalls: { x: 1075, y: 382, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      deadBalls: { x: 1073, y: 382, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Safeties
       player1Safeties: { x: 2200, y: 50, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
