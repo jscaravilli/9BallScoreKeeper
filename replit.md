@@ -304,10 +304,13 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Added duplicate total innings display for additional scoresheet field
   - Both PDF generation and scoresheet display now show innings count at two locations
   - Reuses same calculated totalInnings value for consistency
-- July 2, 2025: CORRECTED all scoresheet markup coordinates to match specifications:
-  - Player names: [492,315] (Player1), [492,460] (Player2) - limited to 10 characters, non-bold, 32px font
+- July 2, 2025: CORRECTED all scoresheet markup coordinates to match final specifications:
+  - Player names: [492,320] (Player1), [492,450] (Player2) - limited to 18 characters, non-bold, 32px font
   - Skill levels: [841,228] (Player1), [841,370] (Player2)
-  - Handicaps/Targets: [892,468] (Player1), [892,326] (Player2) - updated coordinates
+  - Handicaps/Targets: [892,468] (Player1), [892,326] (Player2)
+  - Final scores: [1073,236] (Player1), [1077,446] (Player2) - should equal tallies
+  - Total innings: [1075,308] (primary), [2533,333] (secondary)
+  - Total dead balls: [1075,382]
   - Timestamps: [2465,76] (start time), [2941,76] (end time)
   - Updated both PDF generation and scoresheet display components with correct positioning
 - July 2, 2025: SEPARATED LAG tag display between scoresheet and PDF output:

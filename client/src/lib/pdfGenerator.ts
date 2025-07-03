@@ -94,14 +94,14 @@ export async function renderScoresheetToCanvas(
       ctx.fillText(text, x, y);
     };
     
-    // Player names - limit to 10 characters, non-bold, smaller font
-    const player1Text = matchData.player1Name.slice(0, 10);
-    const player2Text = matchData.player2Name.slice(0, 10);
+    // Player names - limit to 18 characters, non-bold, smaller font
+    const player1Text = matchData.player1Name.slice(0, 18);
+    const player2Text = matchData.player2Name.slice(0, 18);
     
     // Set smaller, non-bold font for player names
     ctx.font = '32px Arial';
-    ctx.fillText(player1Text, 492, 315); // Player 1: [492,315]
-    ctx.fillText(player2Text, 492, 460); // Player 2: [492,460]
+    ctx.fillText(player1Text, 492, 320); // Player 1: [492,320]
+    ctx.fillText(player2Text, 492, 450); // Player 2: [492,450]
     
     // Reset to standard font for other elements
     ctx.font = 'bold 36px Arial';
@@ -115,13 +115,13 @@ export async function renderScoresheetToCanvas(
     ctx.fillText(matchData.player2Target.toString(), 892, 326); // [892,326] Player2 Handicap
     
     // Final scores
-    ctx.fillText(matchData.player1FinalScore.toString(), 1073, 230); // [1073,230] Player1 final score
-    ctx.fillText(matchData.player2FinalScore.toString(), 1073, 446); // [1073,446] Player2 final score - updated coordinate
+    ctx.fillText(matchData.player1FinalScore.toString(), 1073, 236); // [1073,236] Player1 final score
+    ctx.fillText(matchData.player2FinalScore.toString(), 1077, 446); // [1077,446] Player2 final score
     
     // Match statistics
-    ctx.fillText(matchData.totalInnings.toString(), 1075, 302); // [1075,302] Total Innings
+    ctx.fillText(matchData.totalInnings.toString(), 1075, 308); // [1075,308] Total Innings
     ctx.fillText(matchData.totalInnings.toString(), 2533, 333); // [2533,333] Total Innings (second location)
-    ctx.fillText(matchData.totalDeadBalls.toString(), 1075, 378); // [1075,378] Total dead balls
+    ctx.fillText(matchData.totalDeadBalls.toString(), 1075, 382); // [1075,382] Total dead balls
     ctx.fillText(matchData.player1Safeties.toString(), 2727, 244); // [2727,244] Player1 safeties
     ctx.fillText(matchData.player2Safeties.toString(), 2733, 435); // [2733,435] Player2 safeties
     

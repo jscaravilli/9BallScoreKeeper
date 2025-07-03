@@ -409,17 +409,17 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       return fontSize;
     };
 
-    // Player names with correct markup coordinates - limit to 10 characters
+    // Player names with correct markup coordinates - limit to 18 characters
     // LAG tag appears on scoresheet display but not in PDF output
-    const player1Text = `${match.player1Name.slice(0, 10)} (LAG)`;
-    const player2Text = match.player2Name.slice(0, 10);
+    const player1Text = `${match.player1Name.slice(0, 18)} (LAG)`;
+    const player2Text = match.player2Name.slice(0, 18);
 
     // Coordinate definitions for precise positioning
     // Note: coordinates represent bottom-left anchor point of text
     const coordinates = {
       // Player names - using correct markup coordinates, non-bold, smaller font
-      player1Name: { x: 492, y: 315, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
-      player2Name: { x: 492, y: 460, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
+      player1Name: { x: 492, y: 320, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
+      player2Name: { x: 492, y: 450, fontSize: '32px', fontWeight: 'normal', color: 'blue' },
       
       // Skill levels  
       player1SkillLevel: { x: 841, y: 228, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
@@ -430,15 +430,15 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
       player2Target: { x: 892, y: 326, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Final scores
-      player1Score: { x: 1600, y: 50, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
-      player2Score: { x: 1600, y: 100, fontSize: '48px', fontWeight: 'bold', color: 'blue' },
+      player1Score: { x: 1073, y: 236, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      player2Score: { x: 1077, y: 446, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Innings
-      innings: { x: 1800, y: 75, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      innings: { x: 1075, y: 308, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       innings2: { x: 2533, y: 333, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Dead balls
-      deadBalls: { x: 2000, y: 75, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
+      deadBalls: { x: 1075, y: 382, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
       
       // Safeties
       player1Safeties: { x: 2200, y: 50, fontSize: '36px', fontWeight: 'bold', color: 'blue' },
