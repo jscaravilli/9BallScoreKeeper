@@ -70,6 +70,13 @@ export default function TallyView() {
   const events = EventDeduplicator.deduplicateEvents(rawEvents);
   
   console.log(`Raw events: ${rawEvents.length}, Deduplicated: ${events.length}`);
+  console.log('All events for debugging:', events.map(e => ({
+    type: e.type,
+    ballNumber: e.ballNumber,
+    player: e.player,
+    details: e.details,
+    timestamp: e.timestamp
+  })));
   
   // Calculate accurate scores from events
   const scores = EventDeduplicator.calculateScoresFromEvents(
@@ -78,7 +85,7 @@ export default function TallyView() {
     currentMatch.player2Name
   );
   
-  // Build tally data from deduplicated events
+  // Build tally data from deduplicated events using same logic as PDF generator
   const tallyData: Array<{
     playerName: string;
     player: number;
@@ -89,29 +96,40 @@ export default function TallyView() {
     isValid: boolean;
   }> = [];
 
-  // Track dead balls to filter them out of tallies
-  const deadBalls = new Map<string, boolean>();
-  let currentGame = 1;
+  // Use the same ball state tracking as PDF generator to ensure consistency
+  const ballStates = new Map();
   
-  // First pass: identify dead balls
   events.forEach((event: any) => {
-    if (event.details && event.details.includes('Game ')) {
-      const gameMatch = event.details.match(/Game (\d+):/);
-      if (gameMatch) {
-        currentGame = parseInt(gameMatch[1]);
+    if (event.type === 'ball_scored' || event.type === 'ball_dead') {
+      const key = `${event.ballNumber}-${event.player}`;
+      if (!ballStates.has(key)) {
+        ballStates.set(key, []);
       }
-    }
-    
-    if (event.type === 'ball_dead' && event.ballNumber && event.player) {
-      const key = `${currentGame}-${event.player}-${event.ballNumber}`;
-      deadBalls.set(key, true);
-      console.log(`Marked dead: Game ${currentGame}, Player ${event.player}, Ball ${event.ballNumber}`);
+      ballStates.get(key).push(event);
     }
   });
   
-  // Second pass: build tally data, excluding dead balls
-  currentGame = 1;
-  events.forEach((event: any) => {
+  // Only include ball_scored events where the ball's final state is scored (not dead)
+  const validScoredEvents = events.filter((event: any) => {
+    if (event.type !== 'ball_scored') return false; // Only process scoring events for tallies
+    
+    const key = `${event.ballNumber}-${event.player}`;
+    const ballEvents = ballStates.get(key) || [];
+    
+    // Get the most recent event for this ball/player combination
+    const lastEvent = ballEvents[ballEvents.length - 1];
+    const isValidScore = lastEvent && lastEvent.type === 'ball_scored';
+    
+    console.log(`Ball ${event.ballNumber} by player ${event.player}: ${isValidScore ? 'VALID TALLY' : 'DEAD - NO TALLY'}`);
+    return isValidScore;
+  });
+
+  console.log(`Filtered tally events: ${events.length} total -> ${validScoredEvents.length} valid events`);
+  
+  // Build tally data from valid scored events
+  let currentGame = 1;
+  validScoredEvents.forEach((event: any) => {
+    // Track game number changes from event details
     if (event.details && event.details.includes('Game ')) {
       const gameMatch = event.details.match(/Game (\d+):/);
       if (gameMatch) {
@@ -119,57 +137,47 @@ export default function TallyView() {
       }
     }
     
-    if (event.type === 'ball_scored' && event.ballNumber && event.player) {
-      const key = `${currentGame}-${event.player}-${event.ballNumber}`;
+    const pointsAwarded = event.ballNumber === 9 ? 2 : 1;
+    const playerName = event.player === 1 ? currentMatch.player1Name : currentMatch.player2Name;
+    
+    // For 9-ball, add 2 separate tally marks
+    if (event.ballNumber === 9) {
+      // First tally mark for 9-ball
+      tallyData.push({
+        playerName,
+        player: event.player,
+        gameNumber: currentGame,
+        ballNumber: event.ballNumber,
+        pointsAwarded: 1, // Each tally is worth 1, but we'll have 2 of them
+        timestamp: event.timestamp,
+        isValid: true
+      });
       
-      // Skip if this ball was later marked dead
-      if (deadBalls.has(key)) {
-        console.log(`Skipping dead ball: Game ${currentGame}, Player ${event.player}, Ball ${event.ballNumber}`);
-        return;
-      }
+      // Second tally mark for 9-ball
+      tallyData.push({
+        playerName,
+        player: event.player,
+        gameNumber: currentGame,
+        ballNumber: event.ballNumber,
+        pointsAwarded: 1, // Each tally is worth 1, but we'll have 2 of them
+        timestamp: event.timestamp,
+        isValid: true
+      });
       
-      const pointsAwarded = event.ballNumber === 9 ? 2 : 1;
-      const playerName = event.player === 1 ? currentMatch.player1Name : currentMatch.player2Name;
+      console.log(`Valid 9-ball tallies (2 marks): ${playerName} (Player ${event.player}), Ball ${event.ballNumber}, Game ${currentGame}`);
+    } else {
+      // Regular balls get 1 tally mark
+      tallyData.push({
+        playerName,
+        player: event.player,
+        gameNumber: currentGame,
+        ballNumber: event.ballNumber,
+        pointsAwarded: 1,
+        timestamp: event.timestamp,
+        isValid: true
+      });
       
-      // For 9-ball, add 2 separate tally marks
-      if (event.ballNumber === 9) {
-        // First tally mark for 9-ball
-        tallyData.push({
-          playerName,
-          player: event.player,
-          gameNumber: currentGame,
-          ballNumber: event.ballNumber,
-          pointsAwarded: 1, // Each tally is worth 1, but we'll have 2 of them
-          timestamp: event.timestamp,
-          isValid: true
-        });
-        
-        // Second tally mark for 9-ball
-        tallyData.push({
-          playerName,
-          player: event.player,
-          gameNumber: currentGame,
-          ballNumber: event.ballNumber,
-          pointsAwarded: 1, // Each tally is worth 1, but we'll have 2 of them
-          timestamp: event.timestamp,
-          isValid: true
-        });
-        
-        console.log(`Valid 9-ball tallies (2 marks): ${playerName} (Player ${event.player}), Ball ${event.ballNumber}, Game ${currentGame}`);
-      } else {
-        // Regular balls get 1 tally mark
-        tallyData.push({
-          playerName,
-          player: event.player,
-          gameNumber: currentGame,
-          ballNumber: event.ballNumber,
-          pointsAwarded: 1,
-          timestamp: event.timestamp,
-          isValid: true
-        });
-        
-        console.log(`Valid tally: ${playerName} (Player ${event.player}), Ball ${event.ballNumber}, Game ${currentGame}`);
-      }
+      console.log(`Valid tally: ${playerName} (Player ${event.player}), Ball ${event.ballNumber}, Game ${currentGame}`);
     }
   });
 
