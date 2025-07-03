@@ -31,7 +31,16 @@ export default function TallyView() {
     const player1Tallies = validTallies.filter(t => t.player === 1).length;
     const player2Tallies = validTallies.filter(t => t.player === 2).length;
     
-    const summary = `\n\nSUMMARY:\n${currentMatch.player1Name}: ${scores.player1Score} points (${player1Tallies} tallies)\n${currentMatch.player2Name}: ${scores.player2Score} points (${player2Tallies} tallies)`;
+    // Get handicap targets for summary
+    const getPointsToWin = (skillLevel: number): number => {
+      const targets = [14, 19, 25, 31, 38, 46, 55, 65, 75];
+      return targets[skillLevel - 1] || 75;
+    };
+    
+    const player1Target = getPointsToWin(currentMatch.player1SkillLevel);
+    const player2Target = getPointsToWin(currentMatch.player2SkillLevel);
+    
+    const summary = `\n\nSUMMARY:\n${currentMatch.player1Name}: ${scores.player1Score} of ${player1Target} points (${player1Tallies} tallies)\n${currentMatch.player2Name}: ${scores.player2Score} of ${player2Target} points (${player2Tallies} tallies)`;
     
     const fullData = tableData + summary;
     
@@ -253,11 +262,11 @@ export default function TallyView() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p><strong>{currentMatch.player1Name}</strong> (SL {currentMatch.player1SkillLevel})</p>
-                <p>Tallies: {player1Tallies.length} ({totalPlayer1Points} points)</p>
+                <p>Total: {totalPlayer1Points} of {player1Target} points ({player1Tallies.length} tallies)</p>
               </div>
               <div>
                 <p><strong>{currentMatch.player2Name}</strong> (SL {currentMatch.player2SkillLevel})</p>
-                <p>Tallies: {player2Tallies.length} ({totalPlayer2Points} points)</p>
+                <p>Total: {totalPlayer2Points} of {player2Target} points ({player2Tallies.length} tallies)</p>
               </div>
             </div>
           </CardContent>
@@ -329,10 +338,10 @@ export default function TallyView() {
             <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#f3f4f6', borderRadius: '6px', userSelect: 'text' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', fontFamily: 'monospace' }}>
                 <div>
-                  <strong>{currentMatch.player1Name} Total:</strong> {totalPlayer1Points} points ({player1Tallies.length} tallies)
+                  <strong>{currentMatch.player1Name} Total:</strong> {totalPlayer1Points} of {player1Target} points ({player1Tallies.length} tallies)
                 </div>
                 <div>
-                  <strong>{currentMatch.player2Name} Total:</strong> {totalPlayer2Points} points ({player2Tallies.length} tallies)
+                  <strong>{currentMatch.player2Name} Total:</strong> {totalPlayer2Points} of {player2Target} points ({player2Tallies.length} tallies)
                 </div>
               </div>
             </div>
