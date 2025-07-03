@@ -1432,7 +1432,7 @@ export default function Game() {
           {/* End Turn Button */}
           <Button 
             variant="outline" 
-            className="py-2.5 px-2 bg-red-50 border-red-200 text-red-700 hover:bg-red-100 text-xs"
+            className="py-2.5 px-2 bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
             onClick={handleEndTurn}
           >
             End Turn
@@ -1442,7 +1442,7 @@ export default function Game() {
           <div className="relative">
             <Button 
               variant="outline" 
-              className="w-full py-2.5 px-2 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 text-xs"
+              className="w-full py-2.5 px-2 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
               onClick={handleSafety}
             >
               <Shield className="h-3 w-3 mr-1" />
@@ -1478,7 +1478,7 @@ export default function Game() {
                   variant="outline"
                   onClick={handleTakeTimeout}
                   disabled={remainingTimeouts === 0}
-                  className="w-full py-2.5 px-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                  className="w-full py-2.5 px-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Clock className="h-3 w-3 mr-1" />
                   Timeout ({currentPlayerTimeoutsUsed}/{maxTimeouts})

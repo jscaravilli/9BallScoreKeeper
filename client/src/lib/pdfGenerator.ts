@@ -373,6 +373,10 @@ export async function printMatchScoresheet(match: any): Promise<void> {
 
     console.log('Processing match events for PDF:', events.length, 'events');
 
+    // Calculate target scores first (needed for handicap limits)
+    const player1Target = getPointsToWin(match.player1SkillLevel);
+    const player2Target = getPointsToWin(match.player2SkillLevel);
+
     // Fix tally marks: Only process events where balls remain scored (not dead)
     // Group events by ball and player to track final state
     const ballStates = new Map();
@@ -545,7 +549,6 @@ export async function printMatchScoresheet(match: any): Promise<void> {
     const SL_TARGET_POSITIONS = [14, 19, 25, 31, 38, 46, 55, 65, 75];
     
     // Player 1 target circle
-    const player1Target = getPointsToWin(match.player1SkillLevel);
     if (SL_TARGET_POSITIONS.includes(player1Target)) {
       const coordIndex = player1Target - 1;
       if (coordIndex < PLAYER1_COORDINATES.length) {
@@ -556,7 +559,6 @@ export async function printMatchScoresheet(match: any): Promise<void> {
     }
     
     // Player 2 target circle
-    const player2Target = getPointsToWin(match.player2SkillLevel);
     if (SL_TARGET_POSITIONS.includes(player2Target)) {
       const coordIndex = player2Target - 1;
       if (coordIndex < PLAYER2_COORDINATES.length) {
