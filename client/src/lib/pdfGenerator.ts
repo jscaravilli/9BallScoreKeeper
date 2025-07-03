@@ -404,14 +404,26 @@ export async function printMatchScoresheet(match: any): Promise<void> {
 
     console.log(`Filtered events: ${events.length} total -> ${validScoredEvents.length} valid events`);
 
+    // Add handicap limits for tally marks
+    let player1RunningScore = 0;
+    let player2RunningScore = 0;
+
     validScoredEvents.forEach((event: any, eventIndex: number) => {
       if (event.type === 'ball_scored') {
         const player = event.player;
         const isPlayer1 = player === 1;
         const coordinates = isPlayer1 ? PLAYER1_COORDINATES : PLAYER2_COORDINATES;
         const markIndex = isPlayer1 ? player1MarkIndex : player2MarkIndex;
+        const playerTarget = isPlayer1 ? player1Target : player2Target;
+        const currentPlayerScore = isPlayer1 ? player1RunningScore : player2RunningScore;
         
-        console.log(`Event ${eventIndex}: Ball ${event.ballNumber} scored by player ${player}, markIndex: ${markIndex}, event:`, event);
+        // Check if player has reached handicap limit
+        if (currentPlayerScore >= playerTarget) {
+          console.log(`Skipping tally for Player ${player} - already at handicap limit (${currentPlayerScore}/${playerTarget})`);
+          return;
+        }
+        
+        console.log(`Event ${eventIndex}: Ball ${event.ballNumber} scored by player ${player}, markIndex: ${markIndex}, score: ${currentPlayerScore}/${playerTarget}`);
         
         const coord = coordinates[markIndex];
         if (coord && markIndex < coordinates.length) {
@@ -419,26 +431,46 @@ export async function printMatchScoresheet(match: any): Promise<void> {
           const slashDirection = getSlashDirection(gameNumber);
           
           if (event.ballNumber === 9) {
-            // 9-ball gets 2 tally marks in consecutive positions
-            const xOffset = slashDirection === '╲' ? 0 : 3; // Shift backslash left by 3 pixels
-            tallies.push({ x: x + xOffset, y: y, symbol: slashDirection, game: gameNumber });
-            
-            // Get the next coordinate for the second tally mark
-            const nextCoord = coordinates[markIndex + 1];
-            if (nextCoord) {
-              const [nextX, nextY] = nextCoord;
-              tallies.push({ x: nextX + xOffset, y: nextY, symbol: slashDirection, game: gameNumber });
-              console.log(`Added 2 tallies for 9-ball by player ${player} at positions ${markIndex} and ${markIndex + 1}`);
-            } else {
-              console.warn(`No next coordinate available for second 9-ball tally by player ${player}`);
+            // First 9-ball tally mark (check handicap limit)
+            let tallyCount = 0;
+            if (currentPlayerScore < playerTarget) {
+              const xOffset = slashDirection === '╲' ? 0 : 3; // Shift backslash left by 3 pixels
+              tallies.push({ x: x + xOffset, y: y, symbol: slashDirection, game: gameNumber });
+              tallyCount++;
+              
+              // Update running score and mark index
+              if (isPlayer1) {
+                player1RunningScore++;
+                player1MarkIndex++;
+              } else {
+                player2RunningScore++;
+                player2MarkIndex++;
+              }
             }
             
-            // Update mark index for ONLY the scoring player
-            if (isPlayer1) {
-              player1MarkIndex += 2; // 9-ball takes 2 positions
-            } else {
-              player2MarkIndex += 2;
+            // Second 9-ball tally mark (check handicap limit again)
+            const newCurrentScore = isPlayer1 ? player1RunningScore : player2RunningScore;
+            if (newCurrentScore < playerTarget) {
+              const nextMarkIndex = isPlayer1 ? player1MarkIndex : player2MarkIndex;
+              const nextCoord = coordinates[nextMarkIndex];
+              if (nextCoord) {
+                const [nextX, nextY] = nextCoord;
+                const xOffset = slashDirection === '╲' ? 0 : 3;
+                tallies.push({ x: nextX + xOffset, y: nextY, symbol: slashDirection, game: gameNumber });
+                tallyCount++;
+                
+                // Update running score and mark index for second tally
+                if (isPlayer1) {
+                  player1RunningScore++;
+                  player1MarkIndex++;
+                } else {
+                  player2RunningScore++;
+                  player2MarkIndex++;
+                }
+              }
             }
+            
+            console.log(`Added ${tallyCount} tallies for 9-ball by player ${player} (handicap limit: ${playerTarget})`)
             
             // Add vertical lines to separate games (when slash direction will change)
             // Place lines between the last tally of this game and first tally of next game
@@ -483,16 +515,22 @@ export async function printMatchScoresheet(match: any): Promise<void> {
             
             gameNumber++;
           } else {
-            // Regular balls get 1 tally mark
-            const xOffset = slashDirection === '╲' ? 0 : 3; // Shift backslash left by 3 pixels
-            tallies.push({ x: x + xOffset, y: y, symbol: slashDirection, game: gameNumber });
-            console.log(`Added 1 tally for ball ${event.ballNumber} by player ${player} at position ${markIndex}, coords: ${x}, ${y}`);
-            
-            // Update mark index for ONLY the scoring player
-            if (isPlayer1) {
-              player1MarkIndex += 1; // Regular ball takes 1 position
+            // Regular balls get 1 tally mark (check handicap limit)
+            if (currentPlayerScore < playerTarget) {
+              const xOffset = slashDirection === '╲' ? 0 : 3; // Shift backslash left by 3 pixels
+              tallies.push({ x: x + xOffset, y: y, symbol: slashDirection, game: gameNumber });
+              console.log(`Added 1 tally for ball ${event.ballNumber} by player ${player} at position ${markIndex}, score: ${currentPlayerScore + 1}/${playerTarget}`);
+              
+              // Update running score and mark index
+              if (isPlayer1) {
+                player1RunningScore++;
+                player1MarkIndex++;
+              } else {
+                player2RunningScore++;
+                player2MarkIndex++;
+              }
             } else {
-              player2MarkIndex += 1;
+              console.log(`Skipping tally for ball ${event.ballNumber} by player ${player} - handicap limit reached (${currentPlayerScore}/${playerTarget})`);
             }
           }
         } else {
@@ -540,7 +578,7 @@ export async function printMatchScoresheet(match: any): Promise<void> {
     const startTime = `${(matchStart.getMonth() + 1).toString().padStart(2, '0')}/${matchStart.getDate().toString().padStart(2, '0')}/${matchStart.getFullYear()}, ${matchStart.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
     const endTime = matchEnd.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     
-    // Create match data object for coordinate markups
+    // Create match data object for coordinate markups with handicap-capped final scores
     const matchData = {
       player1Name: match.player1Name,
       player2Name: match.player2Name,
@@ -548,8 +586,8 @@ export async function printMatchScoresheet(match: any): Promise<void> {
       player2SkillLevel: match.player2SkillLevel,
       player1Target: player1Target,
       player2Target: player2Target,
-      player1FinalScore: match.player1Score,
-      player2FinalScore: match.player2Score,
+      player1FinalScore: Math.min(match.player1Score, player1Target), // Cap at handicap
+      player2FinalScore: Math.min(match.player2Score, player2Target), // Cap at handicap
       totalInnings: totalInnings,
       totalDeadBalls: totalDeadBalls,
       player1Safeties: player1Safeties,

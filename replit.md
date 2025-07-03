@@ -393,6 +393,18 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Fixed vertical bar placement to appear between games without covering tallies
   - Corrected tally tracking so inactive players don't get spaces added when games end
   - Enhanced game separator positioning to halfway point between tally positions
+- January 3, 2025: FIXED handicap limit enforcement across all components:
+  - Implemented proper handicap limits for tally marks - no tallies generated beyond player's target score
+  - Enhanced both tally view and PDF generator to cap tally marks at each player's APA handicap target
+  - Added running score tracking during tally generation to enforce real-time handicap limits
+  - Updated final score display to cap at handicap targets in both tally view and scoresheet PDF
+  - Applied handicap limits to both regular balls (1 point) and 9-ball scoring (2 points) with proper tracking
+  - Enhanced 9-ball handling to respect handicap for both first and second tally marks independently
+  - Ensured consistent handicap enforcement between visual display and printed scoresheet output
+- January 3, 2025: FIXED player setup modal auto-refresh issue:
+  - Removed automatic form field updates that were interfering with user input during typing
+  - Updated useEffect dependency to only populate form on fresh modal open, not on every currentMatch change
+  - Prevents form fields from auto-refreshing while user is actively entering player names and skill levels
 
 ## User Preferences
 

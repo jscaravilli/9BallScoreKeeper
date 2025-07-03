@@ -23,13 +23,15 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch, 
   const [player2SkillLevel, setPlayer2SkillLevel] = useState(5);
 
   useEffect(() => {
-    if (currentMatch) {
+    // Only populate form if it's a fresh modal open with existing match data
+    // This prevents auto-refreshing during user input
+    if (currentMatch && open && !player1Name && !player2Name) {
       setPlayer1Name(currentMatch.player1Name.slice(0, 20));
       setPlayer1SkillLevel(currentMatch.player1SkillLevel);
       setPlayer2Name(currentMatch.player2Name.slice(0, 20));
       setPlayer2SkillLevel(currentMatch.player2SkillLevel);
     }
-  }, [currentMatch]);
+  }, [currentMatch, open]); // Only trigger on modal open, not on every currentMatch change
 
   const handleSave = () => {
     if (player1Name.trim() && player2Name.trim()) {

@@ -70,13 +70,6 @@ export default function TallyView() {
   const events = EventDeduplicator.deduplicateEvents(rawEvents);
   
   console.log(`Raw events: ${rawEvents.length}, Deduplicated: ${events.length}`);
-  console.log('All events for debugging:', events.map(e => ({
-    type: e.type,
-    ballNumber: e.ballNumber,
-    player: e.player,
-    details: e.details,
-    timestamp: e.timestamp
-  })));
   
   // Calculate accurate scores from events
   const scores = EventDeduplicator.calculateScoresFromEvents(
@@ -126,8 +119,20 @@ export default function TallyView() {
 
   console.log(`Filtered tally events: ${events.length} total -> ${validScoredEvents.length} valid events`);
   
-  // Build tally data from valid scored events
+  // Get handicap targets for both players
+  const getPointsToWin = (skillLevel: number): number => {
+    const targets = [14, 19, 25, 31, 38, 46, 55, 65, 75];
+    return targets[skillLevel - 1] || 75;
+  };
+  
+  const player1Target = getPointsToWin(currentMatch.player1SkillLevel);
+  const player2Target = getPointsToWin(currentMatch.player2SkillLevel);
+  
+  // Build tally data from valid scored events with handicap limits
   let currentGame = 1;
+  let player1RunningScore = 0;
+  let player2RunningScore = 0;
+  
   validScoredEvents.forEach((event: any) => {
     // Track game number changes from event details
     if (event.details && event.details.includes('Game ')) {
@@ -139,32 +144,58 @@ export default function TallyView() {
     
     const pointsAwarded = event.ballNumber === 9 ? 2 : 1;
     const playerName = event.player === 1 ? currentMatch.player1Name : currentMatch.player2Name;
+    const playerTarget = event.player === 1 ? player1Target : player2Target;
+    const currentPlayerScore = event.player === 1 ? player1RunningScore : player2RunningScore;
     
-    // For 9-ball, add 2 separate tally marks
+    // Check if adding these points would exceed the handicap
+    if (currentPlayerScore >= playerTarget) {
+      console.log(`Skipping tally - Player ${event.player} already at handicap limit (${currentPlayerScore}/${playerTarget})`);
+      return;
+    }
+    
+    // For 9-ball, add 2 separate tally marks (but respect handicap limit)
     if (event.ballNumber === 9) {
       // First tally mark for 9-ball
-      tallyData.push({
-        playerName,
-        player: event.player,
-        gameNumber: currentGame,
-        ballNumber: event.ballNumber,
-        pointsAwarded: 1, // Each tally is worth 1, but we'll have 2 of them
-        timestamp: event.timestamp,
-        isValid: true
-      });
+      if (currentPlayerScore < playerTarget) {
+        tallyData.push({
+          playerName,
+          player: event.player,
+          gameNumber: currentGame,
+          ballNumber: event.ballNumber,
+          pointsAwarded: 1, // Each tally is worth 1, but we'll have 2 of them
+          timestamp: event.timestamp,
+          isValid: true
+        });
+        
+        // Update running score
+        if (event.player === 1) {
+          player1RunningScore += 1;
+        } else {
+          player2RunningScore += 1;
+        }
+      }
       
-      // Second tally mark for 9-ball
-      tallyData.push({
-        playerName,
-        player: event.player,
-        gameNumber: currentGame,
-        ballNumber: event.ballNumber,
-        pointsAwarded: 1, // Each tally is worth 1, but we'll have 2 of them
-        timestamp: event.timestamp,
-        isValid: true
-      });
+      // Second tally mark for 9-ball (check limit again)
+      if ((event.player === 1 ? player1RunningScore : player2RunningScore) < playerTarget) {
+        tallyData.push({
+          playerName,
+          player: event.player,
+          gameNumber: currentGame,
+          ballNumber: event.ballNumber,
+          pointsAwarded: 1, // Each tally is worth 1, but we'll have 2 of them
+          timestamp: event.timestamp,
+          isValid: true
+        });
+        
+        // Update running score
+        if (event.player === 1) {
+          player1RunningScore += 1;
+        } else {
+          player2RunningScore += 1;
+        }
+      }
       
-      console.log(`Valid 9-ball tallies (2 marks): ${playerName} (Player ${event.player}), Ball ${event.ballNumber}, Game ${currentGame}`);
+      console.log(`9-ball tallies for Player ${event.player}: added up to handicap limit (${event.player === 1 ? player1RunningScore : player2RunningScore}/${playerTarget})`);
     } else {
       // Regular balls get 1 tally mark
       tallyData.push({
@@ -177,18 +208,25 @@ export default function TallyView() {
         isValid: true
       });
       
-      console.log(`Valid tally: ${playerName} (Player ${event.player}), Ball ${event.ballNumber}, Game ${currentGame}`);
+      // Update running score
+      if (event.player === 1) {
+        player1RunningScore += 1;
+      } else {
+        player2RunningScore += 1;
+      }
+      
+      console.log(`Valid tally: ${playerName} (Player ${event.player}), Ball ${event.ballNumber}, Game ${currentGame}, Score: ${event.player === 1 ? player1RunningScore : player2RunningScore}/${playerTarget}`);
     }
   });
 
-  // Use the scores calculated by the deduplicator for accuracy
+  // Use the scores calculated by the deduplicator for accuracy, but cap at handicap
   const validTallies = tallyData;
   const player1Tallies = validTallies.filter(t => t.player === 1);
   const player2Tallies = validTallies.filter(t => t.player === 2);
   
-  // Use calculated scores instead of summing from tallies
-  const totalPlayer1Points = scores.player1Score;
-  const totalPlayer2Points = scores.player2Score;
+  // Cap final scores at handicap limits
+  const totalPlayer1Points = Math.min(scores.player1Score, player1Target);
+  const totalPlayer2Points = Math.min(scores.player2Score, player2Target);
   
   console.log(`Final scores - P1: ${totalPlayer1Points} (${player1Tallies.length} tallies), P2: ${totalPlayer2Points} (${player2Tallies.length} tallies)`);
 
