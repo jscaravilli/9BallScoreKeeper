@@ -556,6 +556,8 @@ export default function Game() {
     // Capture original ball state before any modifications
     const originalBallState = ball.state;
     
+    console.log(`Ball ${ballNumber} tap - Current state: ${ball.state}, scoredBy: ${ball.scoredBy}, inning: ${ball.inning}`);
+    
     if (ball.state === 'active') {
       // Store current state for undo functionality BEFORE modifying the ball
       // Deep clone the ball states to prevent any reference issues
