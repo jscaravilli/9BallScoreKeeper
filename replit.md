@@ -307,7 +307,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - July 2, 2025: CORRECTED all scoresheet markup coordinates to match specifications:
   - Player names: [492,315] (Player1), [492,460] (Player2) - limited to 10 characters, non-bold, 32px font
   - Skill levels: [841,228] (Player1), [841,370] (Player2)
-  - Handicaps/Targets: [898,462] (Player1), [898,320] (Player2)
+  - Handicaps/Targets: [892,468] (Player1), [892,326] (Player2) - updated coordinates
   - Timestamps: [2465,76] (start time), [2941,76] (end time)
   - Updated both PDF generation and scoresheet display components with correct positioning
 - July 2, 2025: SEPARATED LAG tag display between scoresheet and PDF output:
