@@ -420,6 +420,9 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Fixed vertical bar positioning to account for handicap limits in game separation markers
   - Ensures visual consistency between scoresheet display, PDF generation, and tally view components
   - Resolved issue where visual scoresheet was showing unlimited tallies while PDF was correctly capped
+- January 3, 2025: Updated version number to 2.0.1 in About menu:
+  - Version 2.0.1 reflects comprehensive APA compliance improvements and scoresheet fixes
+  - Maintains cache clearing functionality (tap version 5 times quickly)
 
 ## User Preferences
 
