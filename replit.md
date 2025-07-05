@@ -405,6 +405,11 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Removed automatic form field updates that were interfering with user input during typing
   - Updated useEffect dependency to only populate form on fresh modal open, not on every currentMatch change
   - Prevents form fields from auto-refreshing while user is actively entering player names and skill levels
+- January 3, 2025: FIXED safety tracking to accumulate across entire match per APA requirements:
+  - Safeties (defensive shots) now properly accumulate throughout the entire match instead of resetting each game
+  - Updated rerack function to preserve safety counters while resetting timeouts for new games
+  - Final scoresheet now correctly shows total safeties for the complete match, not just the current game
+  - Maintains APA compliance where defensive shots are tracked for the entire match duration
 
 ## User Preferences
 

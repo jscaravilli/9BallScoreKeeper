@@ -1271,14 +1271,14 @@ export default function Game() {
       return;
     }
 
-    // Start new game: increment game number, reset balls to rack, reset timeouts and safeties
+    // Start new game: increment game number, reset balls to rack, reset timeouts (but NOT safeties - they accumulate across the entire match)
     const updatedMatch = cookieStorageAPI.updateMatch(actualCurrentMatch.id, {
       currentGame: actualCurrentMatch.currentGame + 1,
       ballStates: initialBallStates,
       player1TimeoutsUsed: 0, // Reset timeouts for new game
       player2TimeoutsUsed: 0, // Reset timeouts for new game
-      player1SafetiesUsed: 0, // Reset safeties for new game
-      player2SafetiesUsed: 0  // Reset safeties for new game
+      // NOTE: Do NOT reset safeties - they should accumulate for the entire match per APA rules
+      // player1SafetiesUsed and player2SafetiesUsed are preserved from previous games
     });
 
     console.log('Rerack - BEFORE UPDATE:');
