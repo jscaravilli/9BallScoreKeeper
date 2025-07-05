@@ -414,6 +414,12 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Game win modal now prevents ESC key, outside clicks, and any form of dismissal except the "Rerack" button
   - Forces players to acknowledge game completion and explicitly continue to next game
   - Prevents accidental modal dismissal that could confuse game state or scoring
+- January 3, 2025: FIXED scoresheet display handicap limit enforcement:
+  - Scoresheet visual display now properly caps tally marks at each player's APA handicap target
+  - Added running score tracking to prevent tallies beyond skill level targets (SL1=14, SL2=19, SL3=25, SL4=31, SL5=38, SL6=46, SL7=55, SL8=65, SL9=75)
+  - Fixed vertical bar positioning to account for handicap limits in game separation markers
+  - Ensures visual consistency between scoresheet display, PDF generation, and tally view components
+  - Resolved issue where visual scoresheet was showing unlimited tallies while PDF was correctly capped
 
 ## User Preferences
 

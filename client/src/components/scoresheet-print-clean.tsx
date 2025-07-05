@@ -103,6 +103,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     const marks: JSX.Element[] = [];
     const gameMap = buildGameMap(match.events);
     let scorePosition = 0;
+    let runningScore = 0;
     
     // Draw slash marks for each scored point using your provided coordinates
     match.events.forEach((event, eventIndex) => {
@@ -110,10 +111,15 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
         const currentGame = gameMap.get(eventIndex) || 1;
         const slashDirection = getSlashDirection(currentGame);
         
-        // Each ball scored gets appropriate number of tally marks
+        // Each ball scored gets appropriate number of tally marks (with handicap limit)
         const pointsWorth = event.ballNumber === 9 ? 2 : 1;
         
         for (let i = 0; i < pointsWorth; i++) {
+          // Check handicap limit before adding tally mark
+          if (runningScore >= player1Target) {
+            break; // Stop adding tallies if handicap target reached
+          }
+          
           if (scorePosition < PLAYER1_COORDINATES.length) {
             const [x, y] = PLAYER1_COORDINATES[scorePosition];
             const xOffset = slashDirection === '╲' ? -3 : 0; // Shift backslash left by 3 pixels
@@ -136,6 +142,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
             );
             
             scorePosition++;
+            runningScore++;
           }
         }
         
@@ -146,11 +153,20 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     // Add vertical bars for game separations - track where Player 1's games end
     const player1GameEndPositions: number[] = [];
     let tempScorePosition = 0;
+    let tempRunningScore = 0;
     
     match.events.forEach(event => {
       if (event.type === 'ball_scored' && event.player === 1) {
         const pointsWorth = event.ballNumber === 9 ? 2 : 1;
-        tempScorePosition += pointsWorth;
+        
+        // Apply handicap limit to bar positioning
+        for (let i = 0; i < pointsWorth; i++) {
+          if (tempRunningScore >= player1Target) {
+            break; // Stop counting if handicap target reached
+          }
+          tempScorePosition++;
+          tempRunningScore++;
+        }
         
         // When a 9-ball is scored by this player, record the position for vertical bar
         if (event.ballNumber === 9) {
@@ -231,6 +247,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     const marks: JSX.Element[] = [];
     const gameMap = buildGameMap(match.events);
     let scorePosition = 0;
+    let runningScore = 0;
     
     // Draw slash marks for each scored point using Player 2 coordinates
     match.events.forEach((event, eventIndex) => {
@@ -238,10 +255,15 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
         const currentGame = gameMap.get(eventIndex) || 1;
         const slashDirection = getSlashDirection(currentGame);
         
-        // Each ball scored gets appropriate number of tally marks
+        // Each ball scored gets appropriate number of tally marks (with handicap limit)
         const pointsWorth = event.ballNumber === 9 ? 2 : 1;
         
         for (let i = 0; i < pointsWorth; i++) {
+          // Check handicap limit before adding tally mark
+          if (runningScore >= player2Target) {
+            break; // Stop adding tallies if handicap target reached
+          }
+          
           if (scorePosition < PLAYER2_COORDINATES.length) {
             const [x, y] = PLAYER2_COORDINATES[scorePosition];
             const xOffset = slashDirection === '╲' ? -3 : 0; // Shift backslash left by 3 pixels
@@ -264,6 +286,7 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
             );
             
             scorePosition++;
+            runningScore++;
           }
         }
         
@@ -274,11 +297,20 @@ export default function ScoresheetPrint({ match }: ScoresheetPrintProps) {
     // Add vertical bars for game separations - track where Player 2's games end
     const player2GameEndPositions: number[] = [];
     let tempP2ScorePosition = 0;
+    let tempP2RunningScore = 0;
     
     match.events.forEach(event => {
       if (event.type === 'ball_scored' && event.player === 2) {
         const pointsWorth = event.ballNumber === 9 ? 2 : 1;
-        tempP2ScorePosition += pointsWorth;
+        
+        // Apply handicap limit to bar positioning
+        for (let i = 0; i < pointsWorth; i++) {
+          if (tempP2RunningScore >= player2Target) {
+            break; // Stop counting if handicap target reached
+          }
+          tempP2ScorePosition++;
+          tempP2RunningScore++;
+        }
         
         // When a 9-ball is scored by this player, record the position for vertical bar
         if (event.ballNumber === 9) {
