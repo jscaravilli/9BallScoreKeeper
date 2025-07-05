@@ -35,8 +35,8 @@ export default function GameWinModal({
                          currentMatch.player2Score >= player2Target;
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm mx-auto">
+    <Dialog open={open} onOpenChange={() => {}}>
+      <DialogContent className="max-w-sm mx-auto" onEscapeKeyDown={(e) => e.preventDefault()} onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogTitle className="sr-only">Game Over</DialogTitle>
         <DialogDescription className="sr-only">
           {winnerName} wins this game by pocketing the 9-ball for 2 points

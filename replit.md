@@ -410,6 +410,10 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
   - Updated rerack function to preserve safety counters while resetting timeouts for new games
   - Final scoresheet now correctly shows total safeties for the complete match, not just the current game
   - Maintains APA compliance where defensive shots are tracked for the entire match duration
+- January 3, 2025: ENHANCED rerack modal to be non-escapable until rerack is selected:
+  - Game win modal now prevents ESC key, outside clicks, and any form of dismissal except the "Rerack" button
+  - Forces players to acknowledge game completion and explicitly continue to next game
+  - Prevents accidental modal dismissal that could confuse game state or scoring
 
 ## User Preferences
 
