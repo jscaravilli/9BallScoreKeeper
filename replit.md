@@ -130,3 +130,21 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - Drizzle migrations stored in `./migrations` directory
 - Schema defined in shared TypeScript files
 - Push-based deployment with `db:push` command
+
+## Recent Changes (January 6, 2025)
+
+### Color Selection UI Redesign
+- **Changed**: Moved color selection from full-width dropdowns to compact square dropdowns
+- **Location**: Right-aligned next to player name headers in setup modal
+- **Files Modified**: `client/src/components/player-setup-modal.tsx`
+- **Impact**: More streamlined, less intrusive interface while preserving all functionality
+
+### Enhanced Match History Storage  
+- **Enhanced**: IndexedDB storage now preserves 20 completed matches (previously 1)
+- **Files Modified**: `client/src/lib/indexedDBStorage.ts`, `client/src/lib/adaptiveStorage.ts`
+- **Impact**: Better match tracking and history retention for users
+
+### Server Connection Fixes
+- **Fixed**: Simplified port binding logic to resolve connection issues
+- **Files Modified**: `server/index.ts`
+- **Impact**: More reliable development server startup
