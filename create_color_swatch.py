@@ -5,10 +5,10 @@ import os
 colors = [
     {"name": "Championship Green", "hex": "#0F4A3C", "desc": "Classic tournament green", "default": "Player 1 Default"},
     {"name": "Tournament Blue", "hex": "#1E3A8A", "desc": "Professional tournament blue", "default": "Player 2 Default"},
-    {"name": "Burgundy Red", "hex": "#7C2D12", "desc": "Rich burgundy cloth", "default": ""},
-    {"name": "Camel Tan", "hex": "#A16207", "desc": "Vintage camel brown", "default": ""},
+    {"name": "Deep Burgundy", "hex": "#5B1A1A", "desc": "Rich deep burgundy cloth", "default": ""},
+    {"name": "Championship Black", "hex": "#1F1F1F", "desc": "Premium black cloth", "default": ""},
     {"name": "Electric Blue", "hex": "#1D4ED8", "desc": "Modern electric blue", "default": ""},
-    {"name": "Championship Purple", "hex": "#6B21A8", "desc": "Premium purple cloth", "default": ""}
+    {"name": "Charcoal Gray", "hex": "#374151", "desc": "Professional charcoal gray", "default": ""}
 ]
 
 # Image dimensions
