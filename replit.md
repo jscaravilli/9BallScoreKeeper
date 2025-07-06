@@ -46,11 +46,18 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - Points awarded based on ball pocketed (1 point for balls 1-8, 2 points for the 9-ball)
 - Progressive scoring system where higher skill levels need more points to win
 
+### Player Color Customization
+- **Billiards Cloth Colors**: 6 authentic options (Championship Green, Electric Blue, Wine Red, Championship Black, Tournament Blue, Charcoal Gray)
+- **Dynamic Backgrounds**: Scoring area and ball rack change to active player's color
+- **Cloth Texture**: 45-degree diagonal weave pattern with fiber noise for realistic felt appearance
+- **Simple Selection**: Streamlined dropdown interface with color preview dots
+- **Default Colors**: Player 1 = Championship Green, Player 2 = Electric Blue
+
 ### UI Components
-- **Ball Rack**: Interactive display of all 9 balls with visual state indicators
-- **Player Scores**: Real-time score tracking with progress bars toward handicap targets
+- **Ball Rack**: Interactive display of all 9 balls with visual state indicators and dynamic player-colored background
+- **Player Scores**: Real-time score tracking with progress bars and dynamic player-colored backgrounds
 - **Game Modals**: Win notifications and match completion dialogs
-- **Player Setup**: Configuration for new matches with skill level selection
+- **Player Setup**: Configuration for new matches with skill level and color selection (streamlined dropdown)
 
 ## Data Flow
 

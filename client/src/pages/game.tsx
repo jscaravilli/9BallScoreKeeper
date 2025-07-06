@@ -1427,6 +1427,8 @@ export default function Game() {
         turnHistory={turnHistory}
         currentInning={currentInning}
         currentPlayer={currentMatch.currentPlayer as 1 | 2}
+        player1Color={currentMatch.player1Color}
+        player2Color={currentMatch.player2Color}
       />
 
       {/* Game Actions */}

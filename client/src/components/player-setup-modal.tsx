@@ -81,14 +81,37 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch, 
         <div className="space-y-4">
           {/* Player 1 Setup */}
           <div>
-            <Label htmlFor="player1Name">Player 1 Name (Lag Winner)</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label htmlFor="player1Name">Player 1 Name (Lag Winner)</Label>
+              <Select value={player1Color} onValueChange={setPlayer1Color}>
+                <SelectTrigger className="w-10 h-8 p-1">
+                  <div 
+                    className="w-6 h-6 rounded border border-gray-300"
+                    style={{ backgroundColor: player1Color }}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {BILLIARDS_COLORS.map((color) => (
+                    <SelectItem key={color.value} value={color.value}>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-4 h-4 rounded border border-gray-300"
+                          style={{ backgroundColor: color.value }}
+                        />
+                        {color.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Input
               id="player1Name"
               value={player1Name}
               onChange={(e) => setPlayer1Name(e.target.value.slice(0, 20))}
               placeholder="Enter name"
               maxLength={20}
-              className={`mt-1 ${!player1Name.trim() ? 'border-orange-300 focus:border-orange-500' : 'border-green-300 focus:border-green-500'}`}
+              className={`${!player1Name.trim() ? 'border-orange-300 focus:border-orange-500' : 'border-green-300 focus:border-green-500'}`}
             />
           </div>
           
@@ -108,51 +131,41 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch, 
             </Select>
           </div>
 
-          {/* Player 1 Color Selection */}
-          <div>
-            <Label className="flex items-center gap-2">
-              <Palette className="h-4 w-4" />
-              Player 1 Background Color
-            </Label>
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              {BILLIARDS_COLORS.map((color) => (
-                <button
-                  key={color.value}
-                  type="button"
-                  onClick={() => setPlayer1Color(color.value)}
-                  className={`relative h-12 rounded-lg border-2 transition-all ${
-                    player1Color === color.value 
-                      ? 'border-white ring-2 ring-blue-500 ring-offset-2' 
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                  style={{ backgroundColor: color.value }}
-                  title={color.name}
-                >
-                  {player1Color === color.value && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-white rounded-full p-1">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      </div>
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {BILLIARDS_COLORS.find(c => c.value === player1Color)?.name}
-            </p>
-          </div>
+
 
           {/* Player 2 Setup */}
           <div>
-            <Label htmlFor="player2Name">Player 2 Name</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label htmlFor="player2Name">Player 2 Name</Label>
+              <Select value={player2Color} onValueChange={setPlayer2Color}>
+                <SelectTrigger className="w-10 h-8 p-1">
+                  <div 
+                    className="w-6 h-6 rounded border border-gray-300"
+                    style={{ backgroundColor: player2Color }}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {BILLIARDS_COLORS.map((color) => (
+                    <SelectItem key={color.value} value={color.value}>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-4 h-4 rounded border border-gray-300"
+                          style={{ backgroundColor: color.value }}
+                        />
+                        {color.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Input
               id="player2Name"
               value={player2Name}
               onChange={(e) => setPlayer2Name(e.target.value.slice(0, 20))}
               placeholder="Enter name"
               maxLength={20}
-              className={`mt-1 ${!player2Name.trim() ? 'border-orange-300 focus:border-orange-500' : 'border-green-300 focus:border-green-500'}`}
+              className={`${!player2Name.trim() ? 'border-orange-300 focus:border-orange-500' : 'border-green-300 focus:border-green-500'}`}
             />
           </div>
           
@@ -172,40 +185,7 @@ export default function PlayerSetupModal({ open, onClose, onSave, currentMatch, 
             </Select>
           </div>
 
-          {/* Player 2 Color Selection */}
-          <div>
-            <Label className="flex items-center gap-2">
-              <Palette className="h-4 w-4" />
-              Player 2 Background Color
-            </Label>
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              {BILLIARDS_COLORS.map((color) => (
-                <button
-                  key={color.value}
-                  type="button"
-                  onClick={() => setPlayer2Color(color.value)}
-                  className={`relative h-12 rounded-lg border-2 transition-all ${
-                    player2Color === color.value 
-                      ? 'border-white ring-2 ring-blue-500 ring-offset-2' 
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                  style={{ backgroundColor: color.value }}
-                  title={color.name}
-                >
-                  {player2Color === color.value && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-white rounded-full p-1">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      </div>
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {BILLIARDS_COLORS.find(c => c.value === player2Color)?.name}
-            </p>
-          </div>
+
 
           <div className="grid grid-cols-2 gap-3 pt-4">
             <Button variant="outline" onClick={handleReset}>

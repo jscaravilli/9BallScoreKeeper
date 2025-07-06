@@ -9,6 +9,8 @@ interface BallRackProps {
   turnHistory?: any[]; // Turn history to check if 9-ball can be undone
   currentInning: number; // Current inning number for visibility decisions
   currentPlayer: 1 | 2; // Current player to determine turn-based visibility
+  player1Color?: string;
+  player2Color?: string;
 }
 
 const BALL_COLORS = {
@@ -23,7 +25,7 @@ const BALL_COLORS = {
   9: "", // Yellow with stripe (handled separately)
 };
 
-export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(), turnHistory = [], currentInning, currentPlayer }: BallRackProps) {
+export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(), turnHistory = [], currentInning, currentPlayer, player1Color, player2Color }: BallRackProps) {
   const getBallState = (ballNumber: number): BallInfo => {
     return ballStates.find(b => b.number === ballNumber) || {
       number: ballNumber as BallInfo['number'],
@@ -102,9 +104,17 @@ export default function BallRack({ ballStates, onBallTap, lockedBalls = new Set(
     }
   };
 
+  // Get player colors with fallbacks
+  const activePlayerColor = currentPlayer === 1 
+    ? (player1Color || "#0F4A3C") 
+    : (player2Color || "#3B82F6");
+
   return (
-    <section className="p-4">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">Rack</h2>
+    <section 
+      className="p-4 cloth-texture player-background transition-all duration-300"
+      style={{ backgroundColor: activePlayerColor }}
+    >
+      <h2 className="text-lg font-semibold text-white mb-4 text-center">Rack</h2>
       
       {/* Balls Grid */}
       <div className="grid grid-cols-3 gap-4 justify-items-center max-w-xs mx-auto">
