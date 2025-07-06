@@ -25,6 +25,7 @@ This is a full-stack web application for tracking 9-ball pool matches using the 
 - **ORM**: Drizzle ORM for type-safe database operations
 - **Database**: PostgreSQL (configured via Neon serverless)
 - **Development Storage**: In-memory storage implementation for development/testing
+- **Client Storage**: IndexedDB with adaptive fallback to cookies, stores up to 20 match history entries
 - **Schema**: Shared TypeScript schemas between client and server
 
 ## Key Components

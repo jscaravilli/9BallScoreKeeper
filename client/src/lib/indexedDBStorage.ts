@@ -299,9 +299,8 @@ class IndexedDBStorageAPI {
     const existingHistory = this.getMatchHistory();
     existingHistory.unshift(historyEntry); // Add to beginning (most recent first)
     
-    // With IndexedDB, we can store unlimited history
-    // Optional: Add a reasonable limit to prevent storage bloat (e.g., 1000 matches)
-    const maxHistoryEntries = 1000;
+    // Limit history to 20 matches for optimal performance
+    const maxHistoryEntries = 20;
     if (existingHistory.length > maxHistoryEntries) {
       existingHistory.splice(maxHistoryEntries);
     }
