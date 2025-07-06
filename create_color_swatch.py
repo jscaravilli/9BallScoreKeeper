@@ -5,7 +5,7 @@ import os
 colors = [
     {"name": "Championship Green", "hex": "#0F4A3C", "desc": "Classic tournament green", "default": "Player 1 Default"},
     {"name": "Tournament Blue", "hex": "#1E3A8A", "desc": "Professional tournament blue", "default": "Player 2 Default"},
-    {"name": "Deep Burgundy", "hex": "#5B1A1A", "desc": "Rich deep burgundy cloth", "default": ""},
+    {"name": "Wine Red", "hex": "#722F37", "desc": "Rich wine red cloth", "default": ""},
     {"name": "Championship Black", "hex": "#1F1F1F", "desc": "Premium black cloth", "default": ""},
     {"name": "Electric Blue", "hex": "#1D4ED8", "desc": "Modern electric blue", "default": ""},
     {"name": "Charcoal Gray", "hex": "#374151", "desc": "Professional charcoal gray", "default": ""}
