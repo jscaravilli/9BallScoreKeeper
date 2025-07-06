@@ -7,9 +7,11 @@ export const matches = pgTable("matches", {
   player1Name: text("player1_name").notNull(),
   player1SkillLevel: integer("player1_skill_level").notNull(),
   player1Score: integer("player1_score").notNull().default(0),
+  player1Color: text("player1_color").notNull().default("#0F4A3C"), // Championship Green
   player2Name: text("player2_name").notNull(),
   player2SkillLevel: integer("player2_skill_level").notNull(),
   player2Score: integer("player2_score").notNull().default(0),
+  player2Color: text("player2_color").notNull().default("#3B82F6"), // Electric Blue
   player1TimeoutsUsed: integer("player1_timeouts_used").notNull().default(0),
   player2TimeoutsUsed: integer("player2_timeouts_used").notNull().default(0),
   player1SafetiesUsed: integer("player1_safeties_used").notNull().default(0),

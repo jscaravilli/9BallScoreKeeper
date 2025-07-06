@@ -8,9 +8,9 @@ export const BILLIARDS_COLORS = [
     description: "Classic tournament green"
   },
   {
-    name: "Tournament Blue", 
-    value: "#1E3A8A",
-    description: "Professional tournament blue"
+    name: "Electric Blue",
+    value: "#3B82F6",
+    description: "Modern electric blue"
   },
   {
     name: "Wine Red",
@@ -23,9 +23,9 @@ export const BILLIARDS_COLORS = [
     description: "Premium black cloth"
   },
   {
-    name: "Electric Blue",
-    value: "#1D4ED8",
-    description: "Modern electric blue"
+    name: "Tournament Blue",
+    value: "#1E3A8A",
+    description: "Professional tournament blue"
   },
   {
     name: "Charcoal Gray",
@@ -33,6 +33,12 @@ export const BILLIARDS_COLORS = [
     description: "Professional charcoal gray"
   }
 ] as const;
+
+// Default colors for players
+export const DEFAULT_PLAYER_COLORS = {
+  player1: "#0F4A3C", // Championship Green
+  player2: "#3B82F6"  // Electric Blue
+} as const;
 
 export type BilliardsColor = typeof BILLIARDS_COLORS[number]['value'];
 

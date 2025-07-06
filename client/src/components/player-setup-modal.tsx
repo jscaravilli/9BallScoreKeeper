@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { APA_HANDICAPS } from "@/lib/apa-handicaps";
-import { History } from "lucide-react";
+import { BILLIARDS_COLORS, DEFAULT_PLAYER_COLORS } from "@/components/billiards-color-swatch";
+import { History, Palette } from "lucide-react";
 import type { Match } from "@shared/schema";
 
 interface PlayerSetupModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (player1Name: string, player1SkillLevel: number, player2Name: string, player2SkillLevel: number) => void;
+  onSave: (player1Name: string, player1SkillLevel: number, player2Name: string, player2SkillLevel: number, player1Color: string, player2Color: string) => void;
   currentMatch?: Match | null;
   onShowHistory?: () => void;
 }
