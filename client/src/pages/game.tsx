@@ -1432,7 +1432,12 @@ export default function Game() {
       />
 
       {/* Game Actions */}
-      <section className="p-4 pb-20">
+      <section 
+        className="p-4 pb-20 cloth-texture transition-all duration-300" 
+        style={{ 
+          backgroundColor: currentMatch.currentPlayer === 1 ? currentMatch.player1Color : currentMatch.player2Color 
+        }}
+      >
         {/* Top row: End Turn, Safety, Timeout */}
         <div className="grid grid-cols-3 gap-3 mb-3">
           {/* End Turn Button */}
