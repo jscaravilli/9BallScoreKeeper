@@ -46,14 +46,20 @@ export default function PlayerScores({ match, overrideScores }: PlayerScoresProp
             <div className="text-xs text-gray-600 mb-2">
               Skill Level {match.player1SkillLevel}
             </div>
-            <div className="text-2xl font-bold text-green-600">{player1Score}</div>
+            <div className={`text-2xl font-bold ${
+              match.currentPlayer === 1 ? 'text-green-600' : 'text-gray-700'
+            }`}>
+              {player1Score}
+            </div>
             <div className="text-xs text-gray-500">
               of {player1Target} points
             </div>
             {/* Progress Bar */}
             <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
               <div 
-                className="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  match.currentPlayer === 1 ? 'bg-green-600' : 'bg-gray-400'
+                }`}
                 style={{ width: `${player1Progress}%` }}
               />
             </div>
