@@ -276,7 +276,12 @@ class IndexedDBStorageAPI {
   // Match history
   getMatchHistory(): (Match & { completedAt: string; events: MatchEvent[]; historyId: string })[] {
     const historyJson = this.getItem('poolscorer_match_history');
-    return historyJson ? JSON.parse(historyJson) : [];
+    const history = historyJson ? JSON.parse(historyJson) : [];
+    
+    // Sort by completion date (most recent first)
+    return history.sort((a: any, b: any) => 
+      new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+    );
   }
 
   addToHistory(match: Match): void {
@@ -290,8 +295,89 @@ class IndexedDBStorageAPI {
       historyId: `match_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     };
 
-    // Single match history - replace existing
-    this.setItem('poolscorer_match_history', JSON.stringify([historyEntry]));
+    // Get existing history and add new match
+    const existingHistory = this.getMatchHistory();
+    existingHistory.unshift(historyEntry); // Add to beginning (most recent first)
+    
+    // With IndexedDB, we can store unlimited history
+    // Optional: Add a reasonable limit to prevent storage bloat (e.g., 1000 matches)
+    const maxHistoryEntries = 1000;
+    if (existingHistory.length > maxHistoryEntries) {
+      existingHistory.splice(maxHistoryEntries);
+    }
+    
+    this.setItem('poolscorer_match_history', JSON.stringify(existingHistory));
+    console.log(`Added match to history. Total matches: ${existingHistory.length}`);
+  }
+
+  // Enhanced history management methods
+  deleteMatchFromHistory(historyId: string): boolean {
+    const history = this.getMatchHistory();
+    const initialLength = history.length;
+    const filteredHistory = history.filter(match => match.historyId !== historyId);
+    
+    if (filteredHistory.length < initialLength) {
+      this.setItem('poolscorer_match_history', JSON.stringify(filteredHistory));
+      console.log(`Deleted match ${historyId}. Remaining matches: ${filteredHistory.length}`);
+      return true;
+    }
+    return false;
+  }
+
+  getMatchHistoryStats(): {
+    totalMatches: number;
+    totalGames: number;
+    oldestMatch: string | null;
+    newestMatch: string | null;
+    storageSize: number;
+  } {
+    const history = this.getMatchHistory();
+    
+    const totalGames = history.reduce((sum, match) => sum + match.currentGame, 0);
+    const storageSize = JSON.stringify(history).length;
+    
+    return {
+      totalMatches: history.length,
+      totalGames,
+      oldestMatch: history.length > 0 ? history[history.length - 1].completedAt : null,
+      newestMatch: history.length > 0 ? history[0].completedAt : null,
+      storageSize
+    };
+  }
+
+  getPlayerStats(playerName: string): {
+    matchesPlayed: number;
+    matchesWon: number;
+    gamesPlayed: number;
+    winPercentage: number;
+    averageSkillLevel: number;
+  } {
+    const history = this.getMatchHistory();
+    const playerMatches = history.filter(match => 
+      match.player1Name === playerName || match.player2Name === playerName
+    );
+
+    const matchesWon = playerMatches.filter(match => {
+      const isPlayer1 = match.player1Name === playerName;
+      return (isPlayer1 && match.winnerId === 1) || (!isPlayer1 && match.winnerId === 2);
+    }).length;
+
+    const gamesPlayed = playerMatches.reduce((sum, match) => sum + match.currentGame, 0);
+    
+    const skillLevels = playerMatches.map(match => 
+      match.player1Name === playerName ? match.player1SkillLevel : match.player2SkillLevel
+    );
+    const averageSkillLevel = skillLevels.length > 0 
+      ? skillLevels.reduce((sum, level) => sum + level, 0) / skillLevels.length 
+      : 0;
+
+    return {
+      matchesPlayed: playerMatches.length,
+      matchesWon,
+      gamesPlayed,
+      winPercentage: playerMatches.length > 0 ? (matchesWon / playerMatches.length) * 100 : 0,
+      averageSkillLevel
+    };
   }
 
   clearAllMatchHistory(): void {

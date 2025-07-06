@@ -184,6 +184,77 @@ class AdaptiveStorageAPI {
     this.getActiveStorage().clearAllMatchHistory();
   }
 
+  // Enhanced history management methods (IndexedDB only)
+  deleteMatchFromHistory(historyId: string): boolean {
+    if (this.useIndexedDB) {
+      return this.indexedDBStorage.deleteMatchFromHistory(historyId);
+    }
+    console.warn('Individual match deletion only available with IndexedDB storage');
+    return false;
+  }
+
+  getMatchHistoryStats(): {
+    totalMatches: number;
+    totalGames: number;
+    oldestMatch: string | null;
+    newestMatch: string | null;
+    storageSize: number;
+  } {
+    if (this.useIndexedDB) {
+      return this.indexedDBStorage.getMatchHistoryStats();
+    }
+    
+    // Fallback for cookie storage
+    const history = this.getMatchHistory();
+    return {
+      totalMatches: history.length,
+      totalGames: history.reduce((sum, match) => sum + match.currentGame, 0),
+      oldestMatch: history.length > 0 ? history[history.length - 1].completedAt : null,
+      newestMatch: history.length > 0 ? history[0].completedAt : null,
+      storageSize: JSON.stringify(history).length
+    };
+  }
+
+  getPlayerStats(playerName: string): {
+    matchesPlayed: number;
+    matchesWon: number;
+    gamesPlayed: number;
+    winPercentage: number;
+    averageSkillLevel: number;
+  } {
+    if (this.useIndexedDB) {
+      return this.indexedDBStorage.getPlayerStats(playerName);
+    }
+    
+    // Fallback for cookie storage
+    const history = this.getMatchHistory();
+    const playerMatches = history.filter(match => 
+      match.player1Name === playerName || match.player2Name === playerName
+    );
+
+    const matchesWon = playerMatches.filter(match => {
+      const isPlayer1 = match.player1Name === playerName;
+      return (isPlayer1 && match.winnerId === 1) || (!isPlayer1 && match.winnerId === 2);
+    }).length;
+
+    const gamesPlayed = playerMatches.reduce((sum, match) => sum + match.currentGame, 0);
+    
+    const skillLevels = playerMatches.map(match => 
+      match.player1Name === playerName ? match.player1SkillLevel : match.player2SkillLevel
+    );
+    const averageSkillLevel = skillLevels.length > 0 
+      ? skillLevels.reduce((sum, level) => sum + level, 0) / skillLevels.length 
+      : 0;
+
+    return {
+      matchesPlayed: playerMatches.length,
+      matchesWon,
+      gamesPlayed,
+      winPercentage: playerMatches.length > 0 ? (matchesWon / playerMatches.length) * 100 : 0,
+      averageSkillLevel
+    };
+  }
+
   // Additional methods needed by game.tsx
   clearHistory(): void {
     if (this.useIndexedDB) {
