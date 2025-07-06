@@ -94,19 +94,27 @@ for i, color in enumerate(colors):
     noise = create_noise_texture(area_width, area_height, intensity=0.015)
     color_img.paste(noise, (0, 0), noise)
     
-    # 3. Subtle directional lines for fabric grain
+    # 3. Subtle directional lines for fabric grain (45-degree angle)
     grain = Image.new('RGBA', (area_width, area_height), (0, 0, 0, 0))
     grain_draw = ImageDraw.Draw(grain)
     
-    for line_y in range(0, area_height, 6):
-        # Slight variations in line opacity
+    # Diagonal lines at 45 degrees
+    spacing = 8
+    for i in range(-area_height, area_width + area_height, spacing):
         alpha = random.randint(5, 15)
-        grain_draw.line([(0, line_y), (area_width, line_y)], 
+        # Draw diagonal line from top-left to bottom-right
+        x1, y1 = i, 0
+        x2, y2 = i + area_height, area_height
+        grain_draw.line([(x1, y1), (x2, y2)], 
                        fill=(255, 255, 255, alpha), width=1)
     
-    for line_x in range(0, area_width, 8):
+    # Counter-diagonal lines at -45 degrees
+    for i in range(0, area_width + area_height, spacing + 2):
         alpha = random.randint(3, 12)
-        grain_draw.line([(line_x, 0), (line_x, area_height)], 
+        # Draw diagonal line from top-right to bottom-left
+        x1, y1 = i, 0
+        x2, y2 = i - area_height, area_height
+        grain_draw.line([(x1, y1), (x2, y2)], 
                        fill=(0, 0, 0, alpha), width=1)
     
     color_img.paste(grain, (0, 0), grain)

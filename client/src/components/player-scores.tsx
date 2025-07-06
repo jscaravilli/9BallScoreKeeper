@@ -18,14 +18,23 @@ export default function PlayerScores({ match, overrideScores }: PlayerScoresProp
   const player1Progress = getProgressPercentage(player1Score, match.player1SkillLevel as any);
   const player2Progress = getProgressPercentage(player2Score, match.player2SkillLevel as any);
 
+  // Get player colors with fallbacks
+  const player1Color = match.player1Color || "#0F4A3C";
+  const player2Color = match.player2Color || "#3B82F6";
+
   return (
-    <section className="p-4 bg-gray-100">
+    <section 
+      className="p-4 cloth-texture player-background transition-all duration-300" 
+      style={{ 
+        backgroundColor: match.currentPlayer === 1 ? player1Color : player2Color 
+      }}
+    >
       <div className="grid grid-cols-2 gap-3">
         {/* Player 1 Score Card */}
         <div className={`rounded-lg p-3 shadow-sm transition-all duration-200 ${
           match.currentPlayer === 1 
-            ? 'border-4 border-green-600 bg-white shadow-lg ring-2 ring-green-300/40' 
-            : 'border-2 border-transparent bg-white'
+            ? 'border-4 border-white bg-white/95 shadow-lg ring-2 ring-white/60' 
+            : 'border-2 border-white/50 bg-white/80'
         }`}>
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-1">
@@ -54,8 +63,8 @@ export default function PlayerScores({ match, overrideScores }: PlayerScoresProp
         {/* Player 2 Score Card */}
         <div className={`rounded-lg p-3 shadow-sm transition-all duration-200 ${
           match.currentPlayer === 2 
-            ? 'border-4 border-green-600 bg-white shadow-lg ring-2 ring-green-300/40' 
-            : 'border-2 border-transparent bg-white'
+            ? 'border-4 border-white bg-white/95 shadow-lg ring-2 ring-white/60' 
+            : 'border-2 border-white/50 bg-white/80'
         }`}>
           <div className="text-center">
             <h3 className="font-semibold text-gray-800">{match.player2Name}</h3>

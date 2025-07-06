@@ -42,6 +42,11 @@ export const DEFAULT_PLAYER_COLORS = {
 
 export type BilliardsColor = typeof BILLIARDS_COLORS[number]['value'];
 
+// Helper function to get color name
+export const getColorName = (colorValue: string): string => {
+  return BILLIARDS_COLORS.find(c => c.value === colorValue)?.name || "Unknown Color";
+};
+
 // Color Swatch Preview Component
 export default function BilliardsColorSwatch() {
   return (

@@ -141,6 +141,8 @@ class AdaptiveStorageAPI {
     player1SkillLevel: number;
     player2Name: string;
     player2SkillLevel: number;
+    player1Color?: string;
+    player2Color?: string;
     ballStates?: BallInfo[];
   }): Match {
     return this.getActiveStorage().createMatch(matchData);

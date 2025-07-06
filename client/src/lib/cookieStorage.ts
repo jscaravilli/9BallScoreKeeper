@@ -639,14 +639,18 @@ class CookieStorageAPI {
     player1SkillLevel: number;
     player2Name: string;
     player2SkillLevel: number;
+    player1Color?: string;
+    player2Color?: string;
     ballStates?: BallInfo[];
   }): Match {
     const match: Match = {
       id: nanoid(),
       player1Name: matchData.player1Name,
       player1SkillLevel: matchData.player1SkillLevel,
+      player1Color: matchData.player1Color || "#0F4A3C",
       player2Name: matchData.player2Name,
       player2SkillLevel: matchData.player2SkillLevel,
+      player2Color: matchData.player2Color || "#3B82F6",
       player1Score: 0,
       player2Score: 0,
       currentPlayer: 1,

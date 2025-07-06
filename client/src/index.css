@@ -324,3 +324,67 @@ button {
     overflow: hidden !important;
   }
 }
+
+/* Billiards Cloth Texture CSS */
+.cloth-texture {
+  position: relative;
+  overflow: hidden;
+}
+
+.cloth-texture::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    /* Diagonal weave pattern */
+    linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%), 
+    linear-gradient(-45deg, rgba(0,0,0,0.02) 25%, transparent 25%),
+    /* Subtle noise texture */
+    radial-gradient(circle at 25% 25%, rgba(255,255,255,0.02) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(0,0,0,0.01) 1px, transparent 1px);
+  background-size: 8px 8px, 10px 10px, 4px 4px, 6px 6px;
+  background-position: 0 0, 0 0, 0 0, 3px 3px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cloth-texture::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    /* Fine grain lines at 45 degrees */
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,0.015) 2px,
+      rgba(255,255,255,0.015) 3px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 3px,
+      rgba(0,0,0,0.01) 3px,
+      rgba(0,0,0,0.01) 4px
+    );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Ensure content appears above texture */
+.cloth-texture > * {
+  position: relative;
+  z-index: 3;
+}
+
+/* Player color backgrounds with texture */
+.player-background {
+  transition: background-color 0.3s ease;
+}
