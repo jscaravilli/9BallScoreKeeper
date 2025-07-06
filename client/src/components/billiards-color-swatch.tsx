@@ -13,14 +13,14 @@ export const BILLIARDS_COLORS = [
     description: "Professional tournament blue"
   },
   {
-    name: "Burgundy Red",
-    value: "#7C2D12", 
-    description: "Rich burgundy cloth"
+    name: "Wine Red",
+    value: "#8B1538", 
+    description: "Rich wine red cloth"
   },
   {
-    name: "Camel Tan",
-    value: "#A16207",
-    description: "Vintage camel brown"
+    name: "Championship Black",
+    value: "#1F1F1F",
+    description: "Premium black cloth"
   },
   {
     name: "Electric Blue",
@@ -28,9 +28,9 @@ export const BILLIARDS_COLORS = [
     description: "Modern electric blue"
   },
   {
-    name: "Championship Purple",
-    value: "#6B21A8",
-    description: "Premium purple cloth"
+    name: "Charcoal Gray",
+    value: "#374151",
+    description: "Professional charcoal gray"
   }
 ] as const;
 
