@@ -67,6 +67,12 @@ class AdaptiveStorageAPI {
     return this.useIndexedDB ? this.indexedDBStorage : this.cookieStorage;
   }
 
+  // Fast synchronous check for active match (progressive detection)
+  hasActiveMatch(): boolean {
+    // Always check cookies first (synchronous and fast)
+    return this.cookieStorage.hasActiveMatch();
+  }
+
   // Public interface - route to appropriate storage implementation
   getItem(key: string): string | null {
     if (this.useIndexedDB) {

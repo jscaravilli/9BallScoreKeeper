@@ -617,6 +617,20 @@ class CookieStorageAPI {
     return counter;
   }
 
+  // Fast synchronous check for active match (for progressive detection)
+  hasActiveMatch(): boolean {
+    try {
+      const matchData = this.getCookie(COOKIE_KEYS.CURRENT_MATCH);
+      if (!matchData) return false;
+      
+      const match = JSON.parse(matchData);
+      return match && !match.isComplete;
+    } catch (error) {
+      console.warn('Error checking for active match:', error);
+      return false;
+    }
+  }
+
   getCurrentMatch(): Match | null {
     try {
       const matchData = this.getCookie(COOKIE_KEYS.CURRENT_MATCH);

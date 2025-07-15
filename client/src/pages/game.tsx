@@ -322,20 +322,59 @@ export default function Game() {
   // Check online/offline status
   const isOnline = useOnlineStatus();
 
-  // Get current match directly from storage instead of React Query cache
+  // Progressive match detection state
   const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [matchDetectionPhase, setMatchDetectionPhase] = useState<'checking-cookies' | 'checking-indexeddb' | 'complete'>('checking-cookies');
   
-  // Load current match from storage on component mount and when needed
+  // Progressive match detection: cookies first (fast) → IndexedDB (comprehensive)
   useEffect(() => {
-    const loadCurrentMatch = () => {
-      const match = cookieStorageAPI.getCurrentMatch();
-      console.log('Loading current match from storage:', match?.id);
-      setCurrentMatch(match);
+    const progressiveMatchDetection = async () => {
+      console.log('🔍 Starting progressive match detection...');
+      
+      // Phase 1: Immediate active match check (synchronous, ultra-fast)
+      setMatchDetectionPhase('checking-cookies');
+      
+      // Use fast hasActiveMatch for immediate detection
+      const hasActiveMatch = cookieStorageAPI.hasActiveMatch();
+      
+      if (hasActiveMatch) {
+        const cookieMatch = cookieStorageAPI.getCurrentMatch();
+        console.log('✅ Active match found immediately:', cookieMatch?.id);
+        setCurrentMatch(cookieMatch);
+        setIsLoading(false);
+        setMatchDetectionPhase('complete');
+        return;
+      }
+      
+      // Phase 2: Check adaptive storage for comprehensive match data
+      setMatchDetectionPhase('checking-indexeddb');
+      try {
+        // Small delay to allow adaptive storage initialization
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Get match from adaptive storage (may find data in IndexedDB)
+        const adaptiveMatch = cookieStorageAPI.getCurrentMatch();
+        
+        if (adaptiveMatch && !adaptiveMatch.isComplete) {
+          console.log('✅ Active match found via adaptive storage:', adaptiveMatch.id);
+          setCurrentMatch(adaptiveMatch);
+        } else {
+          console.log('❌ No active match found in any storage');
+          setCurrentMatch(null);
+        }
+        
+      } catch (error) {
+        console.warn('Adaptive storage detection failed:', error);
+        setCurrentMatch(null);
+      }
+      
       setIsLoading(false);
+      setMatchDetectionPhase('complete');
+      console.log('🔍 Match detection complete');
     };
     
-    loadCurrentMatch();
+    progressiveMatchDetection();
   }, []);
 
   // Manual refresh function for when storage changes
@@ -1325,11 +1364,23 @@ export default function Game() {
     // Note: Innings continue across games within same match
   };
 
-  // Show loading state
+  // Show progressive loading state with informative messages
   if (isLoading) {
+    const loadingMessage = {
+      'checking-cookies': 'Checking for active match...',
+      'checking-indexeddb': 'Verifying match data...',
+      'complete': 'Loading...'
+    }[matchDetectionPhase];
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="text-center">
+          <div className="text-white text-xl mb-2">{loadingMessage}</div>
+          <div className="text-green-300 text-sm">
+            {matchDetectionPhase === 'checking-cookies' && '🔍 Quick check...'}
+            {matchDetectionPhase === 'checking-indexeddb' && '📊 Deep check...'}
+          </div>
+        </div>
       </div>
     );
   }
